@@ -3,7 +3,6 @@ import numpy as np
 from collections import Counter
 
 class Species():
-    
     def __init__( self, label, mass, charge, core_shell=False, shell_mass=None ):
         self.label = label
         self.mass = mass
@@ -19,9 +18,12 @@ class Species():
                            AtomType( mass=self.shell_mass, core_shell='shell', charge=charge['shell'] ) ]
         else:
             self.types = [ AtomType( mass=self.mass, charge=charge ) ]
+    
+    @classmethod
+    def initialise(cls):
+        Species.core_shell_index = 0
 
 class AtomType():
-    
     def __init__( self, mass, charge, core_shell=None ):
         self.mass = mass
         self.charge = charge
@@ -34,6 +36,11 @@ class AtomType():
         if self.core_shell is None:
             return ''
         return self.core_shell
+
+    @classmethod
+    def initialise(cls):
+        AtomType.atom_type_index = 0
+    
 
 # print functions
 def print_header( p, species ):
@@ -49,7 +56,7 @@ def print_header( p, species ):
     print( '{}   bonds'.format( n_bonds ) )
     print()
     print( '{}   atom types'.format( n_atom_types ) )
-    print( '{}   bond types'.format( n_bond_types ))
+    print( '{}   bond types'.format( n_bond_types ) )
     print()
     
 def print_masses( species ):
@@ -92,8 +99,8 @@ def print_bonds( poscar, species ):
     print()
 
 def poscar_to_lammps( poscar, core_shell, charges ):
-    Species.core_shell_index = 0
-    AtomType.atom_type_index = 0
+    Species.initialise()
+    AtomType.initialise()
     elements =list(Counter(poscar.structure.species).keys())
     species = { e.name: Species( label=e.name,
                              mass=e.atomic_mass,
@@ -104,4 +111,4 @@ def poscar_to_lammps( poscar, core_shell, charges ):
     print_cell_dimensions( poscar )
     print_masses( species )
     print_atoms( poscar, species )
-    print_bonds( poscar, species ) 
+    print_bonds( poscar, species )
