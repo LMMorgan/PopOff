@@ -37,11 +37,14 @@ class AtomType():
 
 # print functions
 def print_header( p, species ):
-    n_atoms = len(p.structure)
+    title = p.comment
+    n_atoms = len(p.structure) #INCORRECT AS LENGTH INCREASES WITH CORESHELL ADDITION, NEED TO UPDATE
     syms = [site.specie.symbol for site in p.structure]
     n_bonds = len([1.0 for s in syms if species[s].core_shell])
     n_atom_types = len([item for sublist in species.values() for item in sublist.types]) 
-    n_bond_types = len([ 1.0 for s in species.values() if s.core_shell ])
+    n_bond_types = len([ 1.0 for s in species.values() if s.core_shell ]) #HOW DOES THIS WORK WITH 1.0????
+    print( '{}'.format( title ) )
+    print()
     print( '{}   atoms'.format( n_atoms ) )
     print( '{}   bonds'.format( n_bonds ) )
     print()
