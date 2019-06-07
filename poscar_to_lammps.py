@@ -4,7 +4,8 @@ from collections import Counter
 from itertools import count
 
 class Species():
-#     _core_shell_index = count(1)
+    #Initiates count when initialise() isn't called
+    _core_shell_count = count(1)
     
     def __init__( self, label, mass, charge, core_shell=False, shell_mass=None ):
         self.label = label
@@ -12,7 +13,7 @@ class Species():
         self.core_shell = core_shell
         if core_shell:
 #             Species.core_shell_index += 1
-            self.core_shell_index = next(self._core_shell_index)
+            self.core_shell_index = next(self._core_shell_count)
             if not shell_mass:
                 shell_mass = self.mass * 0.1
             self.core_mass = self.mass - shell_mass
@@ -24,15 +25,16 @@ class Species():
     
     @classmethod
     def initialise(cls):
-        Species._core_shell_index = count(1)
+        Species._core_shell_count = count(1)
 
 class AtomType():
-#     _atom_type_index = count(1)
+    #Initiates count when initialise() isn't called
+    _atom_type_count = count(1)
     
     def __init__( self, mass, charge, core_shell=None ):
         self.mass = mass
         self.charge = charge
-        self.index = next(self._atom_type_index)
+        self.index = next(self._atom_type_count)
         self.core_shell = core_shell
 
     @property
@@ -43,16 +45,15 @@ class AtomType():
 
     @classmethod
     def initialise(cls):
-        AtomType._atom_type_index = count(1)
+        AtomType._atom_type_count = count(1)
     
 
 # print functions
 def print_header( p, species ):
     title = p.comment
+    n_atoms = sum( [ n * ( 2 if species[symbol].core_shell else 1 )
+                    for symbol, n in zip( p.site_symbols, p.natoms ) ] )
     syms = [site.specie.symbol for site in p.structure]
-    cs_species = [key for key, value in species.items() if value.core_shell == True]
-    num_cs_species = len( [1.0 for element in syms for cs in cs_species if element == cs ])
-    n_atoms = len(p.structure) + num_cs_species
     n_bonds = len([1.0 for s in syms if species[s].core_shell])
     n_atom_types = len([item for sublist in species.values() for item in sublist.types]) 
     n_bond_types = len([ 1.0 for s in species.values() if s.core_shell ])
