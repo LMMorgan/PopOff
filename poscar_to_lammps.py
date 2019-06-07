@@ -1,15 +1,18 @@
 from pymatgen.io.vasp import Poscar
 import numpy as np
 from collections import Counter
+from itertools import count
 
 class Species():
+#     _core_shell_index = count(1)
+    
     def __init__( self, label, mass, charge, core_shell=False, shell_mass=None ):
         self.label = label
         self.mass = mass
         self.core_shell = core_shell
         if core_shell:
-            Species.core_shell_index += 1
-            self.core_shell_index = Species.core_shell_index
+#             Species.core_shell_index += 1
+            self.core_shell_index = next(self._core_shell_index)
             if not shell_mass:
                 shell_mass = self.mass * 0.1
             self.core_mass = self.mass - shell_mass
@@ -21,14 +24,15 @@ class Species():
     
     @classmethod
     def initialise(cls):
-        Species.core_shell_index = 0
+        Species._core_shell_index = count(1)
 
 class AtomType():
+#     _atom_type_index = count(1)
+    
     def __init__( self, mass, charge, core_shell=None ):
         self.mass = mass
         self.charge = charge
-        AtomType.atom_type_index += 1
-        self.index = AtomType.atom_type_index
+        self.index = next(self._atom_type_index)
         self.core_shell = core_shell
 
     @property
@@ -39,7 +43,7 @@ class AtomType():
 
     @classmethod
     def initialise(cls):
-        AtomType.atom_type_index = 0
+        AtomType._atom_type_index = count(1)
     
 
 # print functions
@@ -101,6 +105,11 @@ def print_bonds( poscar, species ):
     print()
 
 def poscar_to_lammps( poscar, core_shell, charges ):
+    #The two .initialise() commands are used to reset the index countes back to 1.
+    #If called from the commandline this is redundant but if you are calling this script
+    #from a notebook, to reset the index without them you would need to restart the kernal
+    #which is not practical when calling in multiple POSCARS. If the index isn't reset, it can
+    #also cause clashes with the parameters indexing as they must be consistent.
     Species.initialise()
     AtomType.initialise()
     elements =list(Counter(poscar.structure.species).keys())
