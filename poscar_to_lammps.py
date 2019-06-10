@@ -20,7 +20,8 @@ class Species():
             mass (float): Mass of the species.
             charge(float): Charge of the species.
             core_shell (optional:bool): True if core_shell, False if no core_shell. Default = False.
-            shell_mass (optional:float): A string of characters, either 'nvt' or 'npt' to enter into the CONTROL file. Default = None.
+            shell_mass (optional:float): A string of characters, either 'nvt' or 'npt' to enter into
+                                         the CONTROL file. Default = None.
                 
         Returns:
             None
