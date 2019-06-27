@@ -20,8 +20,7 @@ class Species():
             mass (float): Mass of the species.
             charge(float): Charge of the species.
             core_shell (optional:bool): True if core_shell, False if no core_shell. Default = False.
-            shell_mass (optional:float): A string of characters, either 'nvt' or 'npt' to enter into
-                                         the CONTROL file. Default = None.
+            shell_mass (optional:float): Mass of the shell if core_shell = True. Default = False.
                 
         Returns:
             None
@@ -233,7 +232,7 @@ def poscar_to_lammps( poscar, core_shell, charges ):
     """
     Species.initialise() #Required when using a notebook, not if command line called.
     AtomType.initialise() #Required when using a notebook, not if command line called.
-    elements =list(Counter(poscar.structure.species).keys())
+    elements = poscar.structure.types_of_specie   #list(Counter(poscar.structure.species).keys())
     species = { e.name: Species( label=e.name,
                              mass=e.atomic_mass,
                              charge=charges[e.name],
