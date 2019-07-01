@@ -1,9 +1,26 @@
 from collections import Counter
-from itertools import count
+import numpy as np
 
 class Atom():
+    """
+    Class for each atom.
+    """
     
     def __init__(self, atom_index, molecule, atom_type_id, charge, coords):
+        """
+        Initialise an instance for each atom in the structure.
+
+        Args:
+            atom_index (int): Individual atom number.
+            molecule (int): Index of the molecule the atom belongs to i.e. core and shell will be the
+                            same molecule, but indivdual atoms will be separate.
+            atom_type_id (int): Integer value given for the atom type.
+            charge(float): Charge on the atom.
+            coords (float): x, y, and z positions of the atom.
+                
+        Returns:
+            None
+        """
         self.atom_index = atom_index
         self.molecule = molecule
         self.atom_type_id = atom_type_id
@@ -11,22 +28,69 @@ class Atom():
         self.coords = coords
         
     def input_string(self):
+        """
+        Defines a string format in lammps output file for the atom data.
+
+        Args:
+            None
+                
+        Returns:
+            (str): contains atom_index (int), molecule (int), atom_type_id (int), charge(float),
+                   and coordinates (list(float)) for lammps file.
+        """
         return '{:<4} {:<4} {:<4} {: 1.4f}  {: 2.6f}  {: 2.6f}  {: 2.6f}'.format( 
             self.atom_index, self.molecule, self.atom_type_id, self.charge, *self.coords )
     
 class Bond():
+    """
+    Class for each bond present between core-shell atoms.
+    """
     
     def __init__(self, bond_index, bond_type_id, atom_indices):
+        """
+        Initialise an instance for each bond in the structure.
+
+        Args:
+            bond_index (int): Individual bond number.
+            bond_type_id (int): Integer value given for the bond type.
+            atom_indices (list(int)): Index numbers of the 2 atoms in the bond.
+                
+        Returns:
+            None
+        """        
         self.bond_index = bond_index
         self.bond_type_id = bond_type_id
         self.atom_indices = atom_indices
         
     def input_string(self):
+        """
+        Defines a string format in lammps output file for the bond data.
+
+        Args:
+            None
+                
+        Returns:
+            (str): containing bond_index (int), bond_type_id (int), and atom_indices (list(int)) for lammps file.
+        """       
         return '{:<4} {:<4} {:<4} {:<4}'.format( self.bond_index, self.bond_type_id, *self.atom_indices )
         
 class BondType():
+    """
+    Class for each bond type.
+    """
     
     def __init__(self, bond_type_index, label):
+        """
+        Initialise an instance for each bond type in the structure.
+
+        Args:
+            bond_type_index (int): Integer value given for the bond type. 
+            label (str): Identity of the bond atoms format "element_1_index-element_2_index spring",
+                         where element_1 is the core, and element_2 is the shell.
+                
+        Returns:
+            None
+        """  
         self.bond_type_index = bond_type_index
         self.label = label
 
@@ -38,15 +102,14 @@ class AtomType():
     def __init__( self, atom_type_index, label, 
                   mass, charge, core_shell=None ):
         """
-        Initialise an AtomType instance.
+        Initialise an instance for each atom type in the structure.
 
         Args:
             atom_type_index (int): Integer index for this atom type.
             label (str): Label used to identify this atom type.
             mass (float): Mass of the atom type.
             charge(float): Charge of the atom type.
-            core_shell (optional:str):  'core' or 'shell'. 
-                Default is None.
+            core_shell (optional:str):  'core' or 'shell'. Default is None.
                 
         Returns:
             None
@@ -68,18 +131,37 @@ class AtomType():
             None
                 
         Returns:
-            core_shell(str): Either 'core', 'shell', or '' if core_shell is None. 
+            core_shell (str): Either 'core', 'shell', or '' if core_shell is None. 
         """  
         if self.core_shell is None:
             return ''
         return self.core_shell
     
 def types_from_structure( structure, core_shell, charges, masses, verbose=True ):
+    """
+    Defines the atom and bond types from the structure and given information.
+    
+    Args:
+        structure (obj): A pymatgen structural object created from a POSCAR.
+        core_shell (dict): A dictionary of booleans stating if any atoms should be made core-shell.
+        charges (dict): A dictionary of charges for each atom type. Key = atom label(str),
+                        value = charge(float)/sub_dict(dict). If atom is core-shell a sub dictionary
+                        will be the value, where sub_key = 'core' or 'shell' and sub_value = charge(float).
+        masses (dict): A dictionary of masses for each atom type. Key = atom label (str),
+                       value = mass(float)/sub_dict(dict). If atom is core-shell a sub dictionary
+                       will be the value, where sub_key = 'core' or 'shell' and sub_value = mass(float).
+        verbose (optional:bool): Print verbose output. Default = True.
+
+    Returns:
+        atom_types (list(obj)): AtomType objects including atom_type_index (int), label (str), mass (float),
+                                charge (float), and core_shell (str).
+        bond_types (list(obj)): BondType objects including bond_type_index (int) and label (str).
+    """
     atom_types = []
     bond_types = []
     atom_type_index = 0
     bond_type_index = 0
-    elements =list(Counter(structure.species).keys())
+    elements = Counter(structure.species)
     if verbose:
         print( "Found elements: {}".format( [e.name for e in elements]))
     for e in elements:
@@ -115,6 +197,19 @@ def types_from_structure( structure, core_shell, charges, masses, verbose=True )
     return atom_types, bond_types
 
 def atoms_and_bonds_from_structure( structure, atom_types, bond_types ):
+    """
+    Defines the atoms and bonds from the structure and given information.
+    
+    Args:
+        atom_types (list(obj)): AtomType objects including atom_type_index (int), label (str), mass (float),
+                                charge (float), and core_shell (str).
+        bond_types (list(obj)): BondType objects including bond_type_index (int) and label (str).
+
+    Returns:
+        atoms (list(obj)): Atoms objects including atom_index (int), molecule (int), atom_type_id (int),
+                           charge (float), and coordinates (list(float)).
+        bonds (list(obj)): Bonds objects including bond_index (int), bond_type_id (int), and atom_indices (list(int)).
+    """
     atoms = []
     bonds = []
     atom_types_dict = {}
@@ -158,31 +253,92 @@ def atoms_and_bonds_from_structure( structure, atom_types, bond_types ):
                                atom_indices = [atom_index-1, atom_index]))
     return atoms, bonds
 
-class LammpsData():
+def lammps_matrix(structure):
+    """
+    Defines the atoms and bonds from the structure and given information.
     
-    def __init__(self, atom_types, bond_types, atoms, bonds, cell_matrix):
+    Args:
+        structure (obj): A pymatgen structural object created from a POSCAR.
+    
+    Returns:
+        cell_lengths (list(floats)): Lengths of each cell direction.
+        tilt_factor (list(floats)): tilt factors of the cell.
+        
+    """
+    a, b, c = structure.lattice.lengths
+    alpha, beta, gamma = np.deg2rad(structure.lattice.angles)
+    ax = a
+    bx = b*np.cos(gamma)
+    by = b*np.sin(gamma)
+    cx = c*np.cos(beta)
+    cy = ( np.dot(b,c) - (bx*cx) )/by
+    cz = np.sqrt(c**2-cx**2-cy**2)
+    cell_lengths = [ax, by, cy]
+    tilt_factor = [bx, cx, cz]
+    return cell_lengths, tilt_factor
+
+
+class LammpsData():
+    """
+    Class that collates all structural information for outputing a Lammps format.
+    """
+    def __init__(self, atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor):
+        """
+        Initialise a Lammps instance.
+
+        Args:
+            atom_types (list(obj)): AtomType objects including atom_type_index (int), label (str), mass (float),
+                                    charge (float), and core_shell (str).
+            bond_types (list(obj)): BondType objects including bond_type_index (int) and label (str).
+            atoms (list(obj)): Atoms objects including atom_index (int), molecule (int), atom_type_id (int),
+                               charge (float), and coordinates (list(float)).
+            bonds (list(obj)): Bonds objects including bond_index (int), bond_type_id (int), and atom_indices (list(int)).
+            cell_lengths (list(floats)): Lengths of each cell direction.
+            tilt_factor (list(floats)): tilt factors of the cell.
+                
+        Returns:
+            None
+        """  
         self.atom_types = atom_types
         self.bond_types = bond_types
         self.atoms = atoms
         self.bonds = bonds
-        self.cell_matrix = cell_matrix
+        self.cell_lengths = cell_lengths
+        self.tilt_factor = tilt_factor
         
     @classmethod
     def from_structure(cls, structure, params):
+        """
+        Collects information from initial structure and parameters.
+
+        Args:
+            structure (obj): A pymatgen structural object created from a POSCAR.
+            params (dict(dict)): Contains core_shell(bool), charges(float), and masses(float) dictionaries
+                                 where the keys are atom label (str).
+                
+        Returns:
+            (LammpsData):             
+        """  
         atom_types, bond_types = types_from_structure( structure=structure, 
                                        core_shell=params['core_shell'], 
                                        charges=params['charges'], 
                                        masses=params['masses'], verbose=True )
         atoms, bonds = atoms_and_bonds_from_structure( structure, atom_types, bond_types )
-        cell_matrix = structure.lattice.matrix
-        return cls( atom_types, bond_types, atoms, bonds, cell_matrix )
+        cell_lengths, tilt_factor = lammps_matrix(structure)
+        return cls( atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor )
     
     def header_string( self, title='title' ):
         """
         Information for the top part of a LAMMPS file.
-        """
+
+        Args:
+            title (optional:str): Title for lammps file, default = 'title'.
+                
+        Returns:
+            return_str (str): title, atoms, bonds, atom types, and bond types information for lammps format.
+        """  
         return_str = ''
-        return_str+='{}\n\n'.format( title )
+        return_str += '{}\n\n'.format( title )
         return_str += '{}   atoms\n'.format( len(self.atoms) )
         return_str += '{}   bonds\n\n'.format( len(self.bonds) )
         return_str += '{}   atom types\n'.format( len(self.atom_types ) )
@@ -193,22 +349,44 @@ class LammpsData():
         """
         Prints the cell dimensions for the lammps file.
         
-        !! Orthorhombic cells only !!
-        """    
-        return '0.0 {:2.6f} xlo xhi\n0.0 {:2.6f} ylo yhi\n0.0 {:2.6f} zlo zhi\n\n'.format(*self.cell_matrix.diagonal())
+        Args:
+            None
+        
+        Returns:
+            return_str (str): cell dimensions, tilt factors, and related labels for lammps file.
+        """
+        return_str = ''
+        return_str += '0.0 {:2.6f} xlo xhi\n0.0 {:2.6f} ylo yhi\n0.0 {:2.6f} zlo zhi\n\n'.format(*self.cell_lengths)
+        return_str += '{:2.5f} {:2.5f} {:2.5f} xy xz yz \n\n'.format(*self.tilt_factor)
+        
+        return return_str
         
     def masses_string(self):
         """
         Prints the mass information for each species for the lammps file.
+        
+        Args:
+            None
+            
+        Returns:
+            return_str (str): atom types, masses, and commented atom type label for lammps file.
         """
         return_str = 'Masses\n\n'
         for at in self.atom_types:
-            return_str += '{} {:9.5f} # {} {}\n'.format( at.atom_type_index, 
-                                                        float(at.mass), at.label, at.core_shell_string)
+            return_str += '{} {:9.5f} # {}\n'.format( at.atom_type_index, float(at.mass), at.label)
         return_str += '\n'
         return return_str
     
     def atoms_string(self):
+        """
+        Prints the atoms information for the lammps file.
+        
+        Args:
+            None
+            
+        Returns:
+            return_str (str): atom information for lammps file as defined by Atoms class.
+        """
         return_str = 'Atoms\n\n'
         for atom in self.atoms:
             return_str += '{}\n'.format(atom.input_string())
@@ -216,6 +394,15 @@ class LammpsData():
         return return_str
     
     def bonds_string(self):
+        """
+        Prints the bonds information for the lammps file.
+        
+        Args:
+            None
+            
+        Returns:
+            return_str (str): bond information for lammps file as defined by Bonds class.
+        """
         return_str = 'Bonds\n\n'
         for bond in self.bonds:
             return_str += '{}\n'.format(bond.input_string())
@@ -223,6 +410,15 @@ class LammpsData():
         return return_str
         
     def input_string(self, title='title'):
+        """
+        Prints all information for the lammps file.
+        
+        Args:
+            title (optional:str): Title for lammps file, default = 'title'.
+            
+        Returns:
+            return_str (str): all information for lammps file as defined by class methods above.
+        """
         return_str = ''
         return_str += self.header_string(title)
         return_str += self.cell_dimensions_string()
