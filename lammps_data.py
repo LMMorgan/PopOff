@@ -6,7 +6,7 @@ class Atom():
     Class for each atom.
     """
     
-    def __init__(self, atom_index, molecule, atom_type_id, charge, coords):
+    def __init__(self, atom_index, molecule, atom_type_id, charge, coords, atom_type):
         """
         Initialise an instance for each atom in the structure.
 
@@ -17,6 +17,8 @@ class Atom():
             atom_type_id (int): Integer value given for the atom type.
             charge(float): Charge on the atom.
             coords (float): x, y, and z positions of the atom.
+            atom_type (obj): AtomType object including atom_type_index (int), label (str), mass (float),
+                             charge (float), and core_shell (str).
                 
         Returns:
             None
@@ -26,6 +28,7 @@ class Atom():
         self.atom_type_id = atom_type_id
         self.charge = charge
         self.coords = coords
+        self.atom_type = atom_type
         
     def input_string(self):
         """
@@ -207,8 +210,8 @@ def atoms_and_bonds_from_structure( structure, atom_types, bond_types ):
 
     Returns:
         atoms (list(obj)): Atoms objects including atom_index (int), molecule (int), atom_type_id (int),
-                           charge (float), and coordinates (list(float)).
-        bonds (list(obj)): Bonds objects including bond_index (int), bond_type_id (int), and atom_indices (list(int)).
+                           charge (float), coordinates (list(float)), and atom_type (obj).
+        bonds (list(obj)): Bonds objects including bond_index (int), bond_type_id (int), atom_indices (list(int)).
     """
     atoms = []
     bonds = []
@@ -230,7 +233,8 @@ def atoms_and_bonds_from_structure( structure, atom_types, bond_types ):
                                molecule=molecule_index,
                                atom_type_id=atom_type.atom_type_index,
                                charge=atom_type.charge,
-                               coords=site.coords ) )
+                               coords=site.coords,
+                               atom_type = atom_type) )
         else: # need to handle core + shell
             atom_index += 1
             atom_type = atom_types_dict[site.species_string + ' core']
@@ -238,14 +242,16 @@ def atoms_and_bonds_from_structure( structure, atom_types, bond_types ):
                                molecule=molecule_index,
                                atom_type_id=atom_type.atom_type_index,
                                charge=atom_type.charge,
-                               coords=site.coords ) )
+                               coords=site.coords,
+                               atom_type = atom_type) )
             atom_index += 1
             atom_type = atom_types_dict[site.species_string + ' shell']
             atoms.append( Atom(atom_index=atom_index,
                                molecule=molecule_index,
                                atom_type_id=atom_type.atom_type_index,
                                charge=atom_type.charge,
-                               coords=site.coords ) )
+                               coords=site.coords,
+                               atom_type = atom_type) )
             bond_index += 1
             bond_type = bond_types_dict['{}-{} spring'.format( site.species_string, site.species_string )]
             bonds.append( Bond(bond_index=bond_index,
@@ -291,7 +297,7 @@ class LammpsData():
                                     charge (float), and core_shell (str).
             bond_types (list(obj)): BondType objects including bond_type_index (int) and label (str).
             atoms (list(obj)): Atoms objects including atom_index (int), molecule (int), atom_type_id (int),
-                               charge (float), and coordinates (list(float)).
+                               charge (float), coordinates (list(float)), and atom_type (obj).
             bonds (list(obj)): Bonds objects including bond_index (int), bond_type_id (int), and atom_indices (list(int)).
             cell_lengths (list(floats)): Lengths of each cell direction.
             tilt_factor (list(floats)): tilt factors of the cell.
@@ -426,3 +432,49 @@ class LammpsData():
         return_str += self.atoms_string()
         return_str += self.bonds_string()
         return return_str
+
+    def core_mask(self):
+        """
+        Creates a boolean mask, returing True for all but shell atoms.
+        
+        Args:
+            None
+            
+        Returns:
+            mask (list(bool)): returns False for shell atoms and True for all others.
+        """
+        mask = []
+        for atom in self.atoms:
+            if "shell" not in atom.atom_type.label:
+                mask.append(True)
+            else:
+                mask.append(False)
+        return mask
+    
+    def type_core(self):
+        """
+        Returns a string containing the atom index of all non-shell atoms.
+        
+        Args:
+            None
+            
+        Returns:
+            type_core (str): atom index of all non-shell atoms as string separated by a single space.
+        """
+        type_core = ' '.join(['{}'.format(atom.atom_type_index) for atom in self.atom_types
+                              if 'shell' not in atom.label])
+        return type_core
+    
+    def type_shell(self):
+        """
+        Returns a string containing the atom index of all shell atoms.
+        
+        Args:
+            None
+            
+        Returns:
+            type_shell (str): atom index of all shell atoms as string separated by a single space.
+        """
+        type_shell = ' '.join(['{}'.format(atom.atom_type_index) for atom in self.atom_types
+                               if 'shell' in atom.label])
+        return type_shell
