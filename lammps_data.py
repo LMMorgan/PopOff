@@ -6,7 +6,7 @@ class Atom():
     Class for each atom.
     """
     
-    def __init__(self, atom_index, molecule, atom_type_id, charge, coords, atom_type):
+    def __init__(self, atom_index, molecule, coords, atom_type):
         """
         Initialise an instance for each atom in the structure.
 
@@ -15,7 +15,6 @@ class Atom():
             molecule (int): Index of the molecule the atom belongs to i.e. core and shell will be the
                             same molecule, but indivdual atoms will be separate.
             atom_type_id (int): Integer value given for the atom type.
-            charge(float): Charge on the atom.
             coords (float): x, y, and z positions of the atom.
             atom_type (obj): AtomType object including atom_type_index (int), label (str), mass (float),
                              charge (float), and core_shell (str).
@@ -25,8 +24,6 @@ class Atom():
         """
         self.atom_index = atom_index
         self.molecule = molecule
-        self.atom_type_id = atom_type_id
-        self.charge = charge
         self.coords = coords
         self.atom_type = atom_type
         
@@ -42,7 +39,7 @@ class Atom():
                    and coordinates (list(float)) for lammps file.
         """
         return '{:<4} {:<4} {:<4} {: 1.4f}  {: 2.6f}  {: 2.6f}  {: 2.6f}'.format( 
-            self.atom_index, self.molecule, self.atom_type_id, self.charge, *self.coords )
+            self.atom_index, self.molecule, self.atom_type.atom_type_index, self.atom_type.charge, *self.coords )
     
 class Bond():
     """
@@ -231,8 +228,6 @@ def atoms_and_bonds_from_structure( structure, atom_types, bond_types ):
             atom_type = atom_types_dict[site.species_string]
             atoms.append( Atom(atom_index=atom_index,
                                molecule=molecule_index,
-                               atom_type_id=atom_type.atom_type_index,
-                               charge=atom_type.charge,
                                coords=site.coords,
                                atom_type = atom_type) )
         else: # need to handle core + shell
@@ -240,16 +235,12 @@ def atoms_and_bonds_from_structure( structure, atom_types, bond_types ):
             atom_type = atom_types_dict[site.species_string + ' core']
             atoms.append( Atom(atom_index=atom_index,
                                molecule=molecule_index,
-                               atom_type_id=atom_type.atom_type_index,
-                               charge=atom_type.charge,
                                coords=site.coords,
                                atom_type = atom_type) )
             atom_index += 1
             atom_type = atom_types_dict[site.species_string + ' shell']
             atoms.append( Atom(atom_index=atom_index,
                                molecule=molecule_index,
-                               atom_type_id=atom_type.atom_type_index,
-                               charge=atom_type.charge,
                                coords=site.coords,
                                atom_type = atom_type) )
             bond_index += 1
