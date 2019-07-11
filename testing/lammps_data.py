@@ -482,7 +482,7 @@ class BuckinghamParameter():
     """
     Class that contains the information for each parameter in the buckingham potential.
     """
-    def __init__(self, parameter_type, parameter_string, value):
+    def __init__(self, parameter_type, parameter_string, value, sd):
         """
         Initialise each parameter in all buckingham potentials.
 
@@ -491,6 +491,7 @@ class BuckinghamParameter():
             parameter_string (str): The label defining the two atoms and parameter in the form
                                     'atomtype1_atomtype2_parameter'. Example: 'Li_O_rho'
             value (float): Value of the parameter.
+            sd (float): Standard deviation used in pymc3
                 
         Returns:
             None
@@ -498,22 +499,23 @@ class BuckinghamParameter():
         self.type = parameter_type
         self.label_string = parameter_string
         self.value = value
+        self.sd = sd
         
-    def distribution(self, stand_dev=None):
+    def distribution(self):
         """
         Creates pymc3.model.FreeRV for each parameter. This function must be called within pm.Model.
         Where pm is from `import pymc3 as pm`.
 
         Args:
-            stand_dev (float): Value for the standard deviation in the parameter distribution. Default=None.
+            None
                 
         Returns:
             distribution (obj): pymc3.model.FreeRV object for the parameter.
         """
-        if stand_dev is None:
+        if self.sd is None:
             raise ValueError('No value given for the standard deviation')
         else:
-            distribution = pm.Normal('{}'.format(self.label_string), mu = self.value, sd = stand_dev)
+            distribution = pm.Normal('{}'.format(self.label_string), mu = self.value, sd = self.sd)
             
         return distribution
             
@@ -524,26 +526,31 @@ def buckingham_parameters(params):
     
     Args:
         params (dict(dict)): Contains core_shell(bool), charges(float), and masses(float) dictionaries
-                             where the keys are atom label (str). Also contains bpp(list(float))
-                             dictionary where the keys are atom label pairs (str), example: 'Li-O'.
+                             where the keys are atom label (str). Also contains bpp(list(float)) and 
+                             sd(list(float)) dictionaries where the keys are atom label pairs (str),
+                             example: 'Li-O'.
     
     Returns:
         parameters (list(obj)): BuckinghamParameter objects including parameter_type (str),
-                                parameter_string (str), and value (float).
+                                parameter_string (str), value (float), and sd (float).
         
     """
     parameters = []
-    for key, item in params['bpp'].items():
-        atom_name_1, atom_name_2 = key.split('-')                
+    for (key1,value1), (key2,value2) in zip(params['bpp'].items(), params['sd'].items()):
+        atom_name_1, atom_name_2 = key1.split('-')
+        
         parameters.append(BuckinghamParameter(parameter_type = 'a',
                                               parameter_string = "{}_{}_{}".format(atom_name_1, atom_name_2, 'a'),
-                                              value = item[0]))
+                                              value = value1[0],
+                                              sd = value2[0]))
         parameters.append(BuckinghamParameter(parameter_type = 'rho',
                                               parameter_string = "{}_{}_{}".format(atom_name_1, atom_name_2, 'rho'),
-                                              value = item[1]))
+                                              value = value1[1],
+                                              sd = value2[1]))
         parameters.append(BuckinghamParameter(parameter_type = 'c',
                                               parameter_string = "{}_{}_{}".format(atom_name_1, atom_name_2, 'c'),
-                                              value = item[2]))
+                                              value = value1[2],
+                                              sd = value2[2]))
     return parameters     
 
 
@@ -560,11 +567,11 @@ class BuckinghamPotential():
             labels (list(str)):
             atom_type_index (list(int)):
             a (obj): BuckinghamParameter objects including parameter_type (str), parameter_string (str),
-                     and value (float).
+                     value (float), and sd (float).
             rho (obj): BuckinghamParameter objects including parameter_type (str), parameter_string (str),
-                       and value (float).
+                       value (float), and sd (float).
             c (obj): BuckinghamParameter objects including parameter_type (str), parameter_string (str),
-                     and value (float).
+                     value (float), and sd (float).
                 
         Returns:
             None
@@ -583,7 +590,7 @@ class BuckinghamPotential():
             None
             
         Returns:
-            return_str (str): atype_index for atom pairs, and buchingham potential parameter values
+            return_str (str): atype_index for atom pairs, and buckingham potential parameter values
                               formatted for lammps command.
         """
         return_str = 'pair_coeff {} {} {} {} {}'.format(self.atype_index[0],
@@ -605,7 +612,7 @@ def buckingham_potentials(params, atom_types, parameters):
         atom_types (list(obj)): AtomType objects including atom_type_index (int), label (str), mass (float),
                                 charge (float), and core_shell (str).                     
         parameters (list(obj)): BuckinghamParameter objects including parameter_type (str),
-                                parameter_string (str), and value (float).                     
+                                parameter_string (str), value (float), and sd (float).                    
     
     Returns:
         potentials (list(obj)): BuckinghamPotential objects including labels (list(str)), atom_type_index (list(int)),

@@ -1,5 +1,6 @@
 from collections import Counter
 import numpy as np
+import pymc3 as pm
 
 class Atom():
     """
@@ -15,7 +16,7 @@ class Atom():
             molecule (int): Index of the molecule the atom belongs to i.e. core and shell will be the
                             same molecule, but indivdual atoms will be separate.
             atom_type_id (int): Integer value given for the atom type.
-            coords (float): x, y, and z positions of the atom.
+            coords (list(float)): x, y, and z positions of the atom.
             atom_type (obj): AtomType object including atom_type_index (int), label (str), mass (float),
                              charge (float), and core_shell (str).
                 
@@ -46,21 +47,21 @@ class Bond():
     Class for each bond present between core-shell atoms.
     """
     
-    def __init__(self, bond_index, bond_type_id, atom_indices):
+    def __init__(self, bond_index, atom_indices, bond_type):
         """
         Initialise an instance for each bond in the structure.
 
         Args:
             bond_index (int): Individual bond number.
-            bond_type_id (int): Integer value given for the bond type.
             atom_indices (list(int)): Index numbers of the 2 atoms in the bond.
+            bond_type (obj): BondType object including bond_type_index (int) and label (str).
                 
         Returns:
             None
         """        
         self.bond_index = bond_index
-        self.bond_type_id = bond_type_id
         self.atom_indices = atom_indices
+        self.bond_type = bond_type
         
     def input_string(self):
         """
@@ -70,9 +71,10 @@ class Bond():
             None
                 
         Returns:
-            (str): containing bond_index (int), bond_type_id (int), and atom_indices (list(int)) for lammps file.
+            (str): Containing bond_index (int), bond_type.bond_type_index (int), and
+                   atom_indices (list(int)) for lammps file.
         """       
-        return '{:<4} {:<4} {:<4} {:<4}'.format( self.bond_index, self.bond_type_id, *self.atom_indices )
+        return '{:<4} {:<4} {:<4} {:<4}'.format( self.bond_index, self.bond_type.bond_type_index, *self.atom_indices )
         
 class BondType():
     """
@@ -109,7 +111,7 @@ class AtomType():
             label (str): Label used to identify this atom type.
             mass (float): Mass of the atom type.
             charge(float): Charge of the atom type.
-            core_shell (optional:str):  'core' or 'shell'. Default is None.
+            core_shell (optional:str): 'core' or 'shell'. Default is None.
                 
         Returns:
             None
@@ -208,7 +210,7 @@ def atoms_and_bonds_from_structure( structure, atom_types, bond_types ):
     Returns:
         atoms (list(obj)): Atoms objects including atom_index (int), molecule (int), atom_type_id (int),
                            charge (float), coordinates (list(float)), and atom_type (obj).
-        bonds (list(obj)): Bonds objects including bond_index (int), bond_type_id (int), atom_indices (list(int)).
+        bonds (list(obj)): Bonds objects including bond_index (int), bond_type (obj), atom_indices (list(int)).
     """
     atoms = []
     bonds = []
@@ -246,8 +248,8 @@ def atoms_and_bonds_from_structure( structure, atom_types, bond_types ):
             bond_index += 1
             bond_type = bond_types_dict['{}-{} spring'.format( site.species_string, site.species_string )]
             bonds.append( Bond(bond_index=bond_index,
-                               bond_type_id=bond_type.bond_type_index,
-                               atom_indices = [atom_index-1, atom_index]))
+                               atom_indices = [atom_index-1, atom_index],
+                               bond_type=bond_type))
     return atoms, bonds
 
 def lammps_matrix(structure):
@@ -259,7 +261,7 @@ def lammps_matrix(structure):
     
     Returns:
         cell_lengths (list(floats)): Lengths of each cell direction.
-        tilt_factor (list(floats)): tilt factors of the cell.
+        tilt_factor (list(floats)): Tilt factors of the cell.
         
     """
     a, b, c = structure.lattice.lengths
@@ -279,19 +281,19 @@ class LammpsData():
     """
     Class that collates all structural information for outputing a Lammps format.
     """
-    def __init__(self, atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor):
+    def __init__(self, atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor, potentials):
         """
         Initialise a Lammps instance.
 
         Args:
             atom_types (list(obj)): AtomType objects including atom_type_index (int), label (str), mass (float),
                                     charge (float), and core_shell (str).
-            bond_types (list(obj)): BondType objects including bond_type_index (int) and label (str).
+            bond_types (list(obj)): BondType objects including bond_type (int) and label (str).
             atoms (list(obj)): Atoms objects including atom_index (int), molecule (int), atom_type_id (int),
                                charge (float), coordinates (list(float)), and atom_type (obj).
-            bonds (list(obj)): Bonds objects including bond_index (int), bond_type_id (int), and atom_indices (list(int)).
+            bonds (list(obj)): Bonds objects including bond_index (int), bond_type (obj), and atom_indices (list(int)).
             cell_lengths (list(floats)): Lengths of each cell direction.
-            tilt_factor (list(floats)): tilt factors of the cell.
+            tilt_factor (list(floats)): Tilt factors of the cell.
                 
         Returns:
             None
@@ -302,6 +304,7 @@ class LammpsData():
         self.bonds = bonds
         self.cell_lengths = cell_lengths
         self.tilt_factor = tilt_factor
+        self.potentials = potentials
         
     @classmethod
     def from_structure(cls, structure, params):
@@ -311,7 +314,8 @@ class LammpsData():
         Args:
             structure (obj): A pymatgen structural object created from a POSCAR.
             params (dict(dict)): Contains core_shell(bool), charges(float), and masses(float) dictionaries
-                                 where the keys are atom label (str).
+                                 where the keys are atom label (str). Also contains bpp(list(float))
+                                 dictionary where the keys are atom label pairs (str), example: 'Li-O'.
                 
         Returns:
             (LammpsData):             
@@ -321,8 +325,11 @@ class LammpsData():
                                        charges=params['charges'], 
                                        masses=params['masses'], verbose=True )
         atoms, bonds = atoms_and_bonds_from_structure( structure, atom_types, bond_types )
+        parameters = buckingham_parameters(params)
+        potentials = buckingham_potentials(params, atom_types, parameters)
         cell_lengths, tilt_factor = lammps_matrix(structure)
-        return cls( atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor )
+        
+        return cls( atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor, potentials)
     
     def header_string( self, title='title' ):
         """
@@ -468,4 +475,167 @@ class LammpsData():
         """
         type_shell = ' '.join(['{}'.format(atom.atom_type_index) for atom in self.atom_types
                                if 'shell' in atom.label])
-        return type_shell
+        return type_shell 
+    
+    
+class BuckinghamParameter():
+    """
+    Class that contains the information for each parameter in the buckingham potential.
+    """
+    def __init__(self, parameter_type, parameter_string, value, sd):
+        """
+        Initialise each parameter in all buckingham potentials.
+
+        Args:
+            parameter_type (str): The label for the specific parameter type i.e. a, rho, or c.
+            parameter_string (str): The label defining the two atoms and parameter in the form
+                                    'atomtype1_atomtype2_parameter'. Example: 'Li_O_rho'
+            value (float): Value of the parameter.
+            sd (float): Standard deviation used in pymc3
+                
+        Returns:
+            None
+        """  
+        self.type = parameter_type
+        self.label_string = parameter_string
+        self.value = value
+        self.sd = sd
+        
+    def distribution(self):
+        """
+        Creates pymc3.model.FreeRV for each parameter. This function must be called within pm.Model.
+        Where pm is from `import pymc3 as pm`.
+
+        Args:
+            None
+                
+        Returns:
+            distribution (obj): pymc3.model.FreeRV object for the parameter.
+        """
+        if self.sd is None:
+            raise ValueError('No value given for the standard deviation')
+        else:
+            distribution = pm.Normal('{}'.format(self.label_string), mu = self.value, sd = self.sd)
+            
+        return distribution
+            
+    
+def buckingham_parameters(params):
+    """
+    Defines each buckingham parameter.
+    
+    Args:
+        params (dict(dict)): Contains core_shell(bool), charges(float), and masses(float) dictionaries
+                             where the keys are atom label (str). Also contains bpp(list(float)) and 
+                             sd(list(float)) dictionaries where the keys are atom label pairs (str),
+                             example: 'Li-O'.
+    
+    Returns:
+        parameters (list(obj)): BuckinghamParameter objects including parameter_type (str),
+                                parameter_string (str), value (float), and sd (float).
+        
+    """
+    parameters = []
+    for (key1,value1), (key2,value2) in zip(params['bpp'].items(), params['sd'].items()):
+        atom_name_1, atom_name_2 = key1.split('-')
+        
+        parameters.append(BuckinghamParameter(parameter_type = 'a',
+                                              parameter_string = "{}_{}_{}".format(atom_name_1, atom_name_2, 'a'),
+                                              value = value1[0],
+                                              sd = value2[0]))
+        parameters.append(BuckinghamParameter(parameter_type = 'rho',
+                                              parameter_string = "{}_{}_{}".format(atom_name_1, atom_name_2, 'rho'),
+                                              value = value1[1],
+                                              sd = value2[1]))
+        parameters.append(BuckinghamParameter(parameter_type = 'c',
+                                              parameter_string = "{}_{}_{}".format(atom_name_1, atom_name_2, 'c'),
+                                              value = value1[2],
+                                              sd = value2[2]))
+    return parameters     
+
+
+class BuckinghamPotential():
+    """
+    Class that contains the information for each buckingham potential, where parameters are
+    BuckinghamParameter(obj).
+    """
+    def __init__(self, labels, atom_type_index, a, rho, c):
+        """
+        Initialise each parameter in all buckingham potentials.
+
+        Args:
+            labels (list(str)):
+            atom_type_index (list(int)):
+            a (obj): BuckinghamParameter objects including parameter_type (str), parameter_string (str),
+                     value (float), and sd (float).
+            rho (obj): BuckinghamParameter objects including parameter_type (str), parameter_string (str),
+                       value (float), and sd (float).
+            c (obj): BuckinghamParameter objects including parameter_type (str), parameter_string (str),
+                     value (float), and sd (float).
+                
+        Returns:
+            None
+        """ 
+        self.labels = labels
+        self.atype_index = atom_type_index
+        self.a = a
+        self.rho = rho
+        self.c = c
+        
+    def potential_string(self):
+        """
+        Prints potential string for lammps pair_coeff command.
+        
+        Args:
+            None
+            
+        Returns:
+            return_str (str): atype_index for atom pairs, and buckingham potential parameter values
+                              formatted for lammps command.
+        """
+        return_str = 'pair_coeff {} {} {} {} {}'.format(self.atype_index[0],
+                                                        self.atype_index[1],
+                                                        self.a.value,
+                                                        self.rho.value,
+                                                        self.c.value)
+        return return_str
+    
+
+def buckingham_potentials(params, atom_types, parameters):
+    """
+    Defines the buckingham potential for each given atom pair.
+    
+    Args:
+        params (dict(dict)): Contains core_shell(bool), charges(float), and masses(float) dictionaries
+                             where the keys are atom label (str). Also contains bpp(list(float))
+                             dictionary where the keys are atom label pairs (str), example: 'Li-O'.
+        atom_types (list(obj)): AtomType objects including atom_type_index (int), label (str), mass (float),
+                                charge (float), and core_shell (str).                     
+        parameters (list(obj)): BuckinghamParameter objects including parameter_type (str),
+                                parameter_string (str), value (float), and sd (float).                    
+    
+    Returns:
+        potentials (list(obj)): BuckinghamPotential objects including labels (list(str)), atom_type_index (list(int)),
+                                a (obj), rho (obj), and c (obj). Each object is a BuckinghamParameter object.
+        
+    """
+    i = 0 #parameter_conter
+    potentials = []
+    for key, item in params['bpp'].items():
+        atom_name_1, atom_name_2 = key.split('-')
+        for atom in atom_types:
+            if atom_name_1 in atom.label and 'core' not in atom.label:
+                atom_type_index_1 = atom.atom_type_index
+            if atom_name_2 in atom.label and 'core' not in atom.label:
+                atom_type_index_2 = atom.atom_type_index
+                
+        potentials.append(BuckinghamPotential(labels = [atom_name_1,atom_name_2],
+                                               atom_type_index = [atom_type_index_1, atom_type_index_2],
+                                               a = parameters[i],
+                                               rho=parameters[i+1],
+                                               c=parameters[i+2]))
+        i+=3
+        
+    return potentials 
+
+
