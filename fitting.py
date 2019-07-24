@@ -94,7 +94,28 @@ class FitModel():
             #setup for minimization
             lmp.command('min_style cg')
             lmp_list.append(lmp)
-        return lmp_list       
+        return lmp_list
+    
+    def expected_forces(self):
+        """
+        Collates the expected forces on all atoms, in all structures to a flattened 2D array, where axis 0 is the list of atoms and axis 1 is the x,y,z forces.
+
+        Args:
+            None
+                
+        Returns:
+            expected_forces (np.array): 2D array of all atoms forces in all structures.
+        """
+        forces_data = []
+        for structure in self.lammps_data:
+            atom_forces = []
+            for atoms in structure.atoms:
+                atom_forces.append(atoms.forces)
+            forces = np.stack(atom_forces, axis=0)
+            core_mask = structure.core_mask()
+            forces_data.append(forces[core_mask])
+        expected_forces = np.concatenate(forces_data, axis=0)
+        return expected_forces
     
     def update_potentials(self, **kwargs):
         """
@@ -138,22 +159,24 @@ class FitModel():
         Returns:
             out (np.array): x,y,z forces on each atom.
         """
-        core_mask = self.lammps_data[0].core_mask()
         instances = self.initiate_lammps_instance()
         
         if min(kwargs.values()) > 0:
             self.update_potentials(**kwargs)
-            out = np.zeros([sum(core_mask), 3, len(instances)])
-
-            for instance in instances:
+            out = np.zeros(self.expected_forces().shape)
+            
+            structure_forces = []
+            for i, instance in enumerate(instances):
                 self.set_potentials(instance)
                 instance.command('fix 1 cores setforce 0.0 0.0 0.0')
                 instance.command('minimize 1e-25 1e-25 5000 10000')
                 instance.command('unfix 1')
                 instance.run(0)
-                out[:,:,instances.index(instance)] = instance.system.forces[core_mask]
+                structure_forces.append(instance.system.forces[self.lammps_data[i].core_mask()])
+                
+            out = np.concatenate(structure_forces, axis=0)
 
-        else: out = np.ones([sum(core_mask),3, len(instances)])*999999999 # ThisAlgorithmBecomingSkynetCost
+        else: out = np.ones(self.expected_forces().shape)*999999999 # ThisAlgorithmBecomingSkynetCost
 
         return out
 
@@ -167,8 +190,6 @@ class FitModel():
         Returns:
             trace (obj): A pymc3.backends.base.MultiTrace object containing a multitrace with information on the number of chains, iterations, and variables output from PyMC3. This can be read by arviz to be plotted.
         """
-        core_mask = self.lammps_data[0].core_mask()
-        expected = np.zeros([sum(core_mask), 3, len(self.lammps_data)])
         
         with pm.Model() as model:
             my_dict = {}
@@ -183,7 +204,7 @@ class FitModel():
                 if name not in excude_from_fit:
                     my_dict[name] = pot.c.distribution()
 
-            simulator = pm.Simulator('simulator', self.simfunc, observed=expected)
+            simulator = pm.Simulator('simulator', self.simfunc, observed=self.expected_forces())
             trace = pm.sample(step=pm.SMC(ABC=True, epsilon=0.1), draws=1000)
             #trace = pm.sample(step=pm.SMC(ABC=True, epsilon=1000, dist_func="sum_of_squared_distance"), draws=1000)
         return trace    
