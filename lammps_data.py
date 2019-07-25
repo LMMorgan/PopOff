@@ -6,7 +6,7 @@ class LammpsData():
     """
     Class that collates all structural information for outputing a Lammps format.
     """
-    def __init__(self, atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor, file_name, cs_springs):
+    def __init__(self, atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor, file_name):
         """
         Initialise an instance for all information relating to the pysical and electronic structure needed for the Lammps input.
 
@@ -18,7 +18,6 @@ class LammpsData():
             cell_lengths (list(float)): Lengths of each cell direction.
             tilt_factor (list(float)): Tilt factors of the cell.
             file_name (str): Name of lammps formatted file to be written.
-            cs_springs (dict): The key is the atom label (str) and the value the spring values (list(float)).
                 
         Returns:
             None
@@ -31,7 +30,6 @@ class LammpsData():
         self.tilt_factor = tilt_factor
         self.file_name = file_name
         self.write_lammps_files()
-        self.lmp = self.initiate_lmp(cs_springs)
         
     @classmethod
     def from_structure(cls, structure, params, forces, i):
@@ -53,11 +51,10 @@ class LammpsData():
         atoms, bonds = atoms_and_bonds_from_structure( structure, forces, atom_types, bond_types )
         cell_lengths, tilt_factor = lammps_matrix(structure)
         file_name = 'lammps/coords{}.lmp'.format(i+1)
-        cs_springs =  params['cs_springs']
 
-        return cls( atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor, file_name, cs_springs)
+        return cls( atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor, file_name)
     
-    def header_string( self, title='title' ):
+    def _header_string( self, title='title' ):
         """
         Prints the top part for the lammps input file.
 
@@ -75,7 +72,7 @@ class LammpsData():
         return_str += '{}   bond types\n\n'.format( len(self.bond_types ) )
         return return_str
         
-    def cell_dimensions_string(self):
+    def _cell_dimensions_string(self):
         """
         Prints the cell dimensions for the lammps file.
         
@@ -91,7 +88,7 @@ class LammpsData():
         
         return return_str
         
-    def masses_string(self):
+    def _masses_string(self):
         """
         Prints the mass information for each species for the lammps file.
         
@@ -107,7 +104,7 @@ class LammpsData():
         return_str += '\n'
         return return_str
     
-    def atoms_string(self):
+    def _atoms_string(self):
         """
         Prints the atoms information for the lammps file.
         
@@ -123,7 +120,7 @@ class LammpsData():
         return_str += '\n'
         return return_str
     
-    def bonds_string(self):
+    def _bonds_string(self):
         """
         Prints the bonds information for the lammps file.
         
@@ -150,11 +147,11 @@ class LammpsData():
             return_str (str): Contains all information for the lammps input file as defined by the class methods above.
         """
         return_str = ''
-        return_str += self.header_string(title)
-        return_str += self.cell_dimensions_string()
-        return_str += self.masses_string()
-        return_str += self.atoms_string()
-        return_str += self.bonds_string()
+        return_str += self._header_string(title)
+        return_str += self._cell_dimensions_string()
+        return_str += self._masses_string()
+        return_str += self._atoms_string()
+        return_str += self._bonds_string()
         return return_str
 
     def core_mask(self):
