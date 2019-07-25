@@ -11,20 +11,18 @@ class FitModel():
     """
     Class that collates all fitting information and runs the fitting process using PyMC3 and LAMMPS.
     """
-    def __init__(self, potentials, lammps_data, cs_springs):
+    def __init__(self, potentials, lammps_data):
         """
         Initialise an instance for all information relating to the pysical and electronic structure needed for the Lammps input.
 
         Args:
             potentials (list(obj)): BuckinghamPotential objects including labels (list(str)), atom_type_index (list(int)), a (obj), rho (obj), and c (obj). Each object is a BuckinghamParameter object.
             lammps_data (list(obj)):  LammpsData objects containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factor (list(float)), and file_name (str).
-            cs_springs (dict): The key is the atom label (str) and the value the spring values (list(float)).
         Returns:
             None
         """  
         self.potentials = potentials
         self.lammps_data = lammps_data
-        self.cs_springs = cs_springs
 
     @classmethod
     def collect_info(cls, params):
@@ -39,62 +37,7 @@ class FitModel():
         lammps_data = get_lammps_data(params)
         parameters = pot.buckingham_parameters(params)
         potentials = pot.buckingham_potentials(params, lammps_data[0].atom_types, parameters) #REWRITE TO READ ATOM_TYPES WITHOUT [0] 
-        cs_springs =  params['cs_springs']
-        return cls(potentials, lammps_data, cs_springs)
-    
-    def write_lammps_files(self):
-        """
-        Writes the lammps_data to a lammps input file, which name is designated/identified by the numerical value in the related POSCAR and OUTCAR files i.e. if input files are 'POSCAR1' and 'OUTCAR1', the written lammps file will be 'coords1.lmp'.
-
-        Args:
-            None
-                
-        Returns:
-            None
-        """  
-        for structure in self.lammps_data:
-            lammps_file = structure.file_name
-            with open( lammps_file, 'w' ) as f:
-                f.write(structure.input_string())
-
-    def initiate_lammps_instance(self):
-        """
-        Initialises the system from each structure (read in from a lammps input file) with non-changing parameters implemented.
-
-        Args:
-            None
-                
-        Returns:
-            lmp_list (list(obj)): List of Lammps system objects with structure and specified commands implemented.
-        """
- 
-        lmp_list = []
-        for instance in self.lammps_data:
-            lmp = lammps.Lammps(units='metal', style = 'full', args=['-log', 'none', '-screen', 'none'])
-            lmp.command('read_data {}'.format(instance.file_name))
-
-            lmp.command('group cores type {}'.format(instance.type_core()))
-            lmp.command('group shells type {}'.format(instance.type_shell()))
-
-            if self.cs_springs:
-                lmp.command('pair_style buck/coul/long/cs 10.0')
-                lmp.command('pair_coeff * * 0 1 0')
-
-                lmp.command('bond_style harmonic')
-                for i, spring in enumerate(self.cs_springs):
-                    lmp.command('bond_coeff {} {} {}'.format(i+1,
-                                                             self.cs_springs[spring][0],
-                                                             self.cs_springs[spring][1]))
-            else:
-                lmp.command('pair_style buck/coul/long 10.0')
-                lmp.command('pair_coeff * * 0 1 0')
-
-            lmp.command('kspace_style ewald 1e-6')
-
-            #setup for minimization
-            lmp.command('min_style cg')
-            lmp_list.append(lmp)
-        return lmp_list
+        return cls(potentials, lammps_data)
     
     def expected_forces(self):
         """
@@ -148,18 +91,16 @@ class FitModel():
         """
         for pot in self.potentials:
             lmp.command('{}'.format(pot.potential_string()))
-            
+        
     def simfunc(self, **kwargs):
         """
         Runs a minimization and zero step run for the instance and returns the forces.
-
         Args:
             **kwargs: Contain data for type of fitting and to what parameters as set with pm.Model.
-
         Returns:
             out (np.array): x,y,z forces on each atom.
         """
-        instances = self.initiate_lammps_instance()
+        instances = [instance.lmp for instance in self.lammps_data]
         
         if min(kwargs.values()) > 0:
             self.update_potentials(**kwargs)

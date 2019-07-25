@@ -1,12 +1,12 @@
 import numpy as np
 from from_structure import types_from_structure, atoms_and_bonds_from_structure
-
+import lammps
 
 class LammpsData():
     """
     Class that collates all structural information for outputing a Lammps format.
     """
-    def __init__(self, atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor, file_name):
+    def __init__(self, atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor, file_name, cs_springs):
         """
         Initialise an instance for all information relating to the pysical and electronic structure needed for the Lammps input.
 
@@ -18,6 +18,7 @@ class LammpsData():
             cell_lengths (list(float)): Lengths of each cell direction.
             tilt_factor (list(float)): Tilt factors of the cell.
             file_name (str): Name of lammps formatted file to be written.
+            cs_springs (dict): The key is the atom label (str) and the value the spring values (list(float)).
                 
         Returns:
             None
@@ -29,6 +30,8 @@ class LammpsData():
         self.cell_lengths = cell_lengths
         self.tilt_factor = tilt_factor
         self.file_name = file_name
+        self.write_lammps_files()
+        self.lmp = self.initiate_lmp(cs_springs)
         
     @classmethod
     def from_structure(cls, structure, params, forces, i):
@@ -50,8 +53,9 @@ class LammpsData():
         atoms, bonds = atoms_and_bonds_from_structure( structure, forces, atom_types, bond_types )
         cell_lengths, tilt_factor = lammps_matrix(structure)
         file_name = 'lammps/coords{}.lmp'.format(i+1)
+        cs_springs =  params['cs_springs']
 
-        return cls( atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor, file_name)
+        return cls( atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor, file_name, cs_springs)
     
     def header_string( self, title='title' ):
         """
@@ -198,6 +202,56 @@ class LammpsData():
         type_shell = ' '.join(['{}'.format(atom.atom_type_index) for atom in self.atom_types
                                if 'shell' in atom.label])
         return type_shell
+    
+    def write_lammps_files(self):
+        """
+        Writes the structure information to a lammps input file, which name is designated/identified by the numerical value in the related POSCAR and OUTCAR files i.e. if input files are 'POSCAR1' and 'OUTCAR1', the written lammps file will be 'coords1.lmp'.
+
+        Args:
+            None
+                
+        Returns:
+            None
+        """  
+        lammps_file = self.file_name
+        with open( lammps_file, 'w' ) as f:
+            f.write(self.input_string())
+            
+            
+    def initiate_lmp(self, cs_springs):
+        """
+        Initialises the system for the  structure (read in from a lammps input file) with non-changing parameters implemented.
+
+        Args:
+            cs_springs (dict): The key is the atom label (str) and the value the spring values (list(float)).
+                
+        Returns:
+            lmp (obj): Lammps system object with structure and specified commands implemented.
+        """
+        lmp = lammps.Lammps(units='metal', style = 'full', args=['-log', 'none', '-screen', 'none'])
+        lmp.command('read_data {}'.format(self.file_name))
+
+        lmp.command('group cores type {}'.format(self.type_core()))
+        lmp.command('group shells type {}'.format(self.type_shell()))
+
+        if cs_springs:
+            lmp.command('pair_style buck/coul/long/cs 10.0')
+            lmp.command('pair_coeff * * 0 1 0')
+
+            lmp.command('bond_style harmonic')
+            for i, spring in enumerate(cs_springs):
+                lmp.command('bond_coeff {} {} {}'.format(i+1,
+                                                         cs_springs[spring][0],
+                                                         cs_springs[spring][1]))
+        else:
+            lmp.command('pair_style buck/coul/long 10.0')
+            lmp.command('pair_coeff * * 0 1 0')
+
+        lmp.command('kspace_style ewald 1e-6')
+
+        #setup for minimization
+        lmp.command('min_style cg')
+        return lmp
     
 def lammps_matrix(structure):
     """
