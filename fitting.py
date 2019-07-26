@@ -122,12 +122,14 @@ class FitModel():
 
         return out
 
-    def run_fit(self, excude_from_fit):
+    def run_fit(self, excude_from_fit, epsilon=0.1, draws=1000):
         """
         Runs the PyMC3 fitting process. Initiating a pm.Model, applying the potentials and distributions, and running the simulator that calls Lammps.
 
         Args:
             excude_from_fit (list(str)): Label of the parameters not wishing to fit to. Example 'Li_O_c'.
+            epsilion (float): Designates the value of epsilon. Default=0.1.
+            draws (int): Designates the number of draws per step for the fitting. Default=1000
 
         Returns:
             trace (obj): A pymc3.backends.base.MultiTrace object containing a multitrace with information on the number of chains, iterations, and variables output from PyMC3. This can be read by arviz to be plotted.
@@ -147,8 +149,8 @@ class FitModel():
                     my_dict[name] = pot.c.distribution()
 
             simulator = pm.Simulator('simulator', self._simfunc, observed=self.expected_forces())
-            trace = pm.sample(step=pm.SMC(ABC=True, epsilon=0.1), draws=1000)
-            #trace = pm.sample(step=pm.SMC(ABC=True, epsilon=1000, dist_func="sum_of_squared_distance"), draws=1000)
+            trace = pm.sample(step=pm.SMC(ABC=True, epsilon=epsilon), draws=draws)
+            #trace = pm.sample(step=pm.SMC(ABC=True, epsilon=epsilon, dist_func="sum_of_squared_distance"), draws=draws)
         return trace    
     
 def get_lammps_data(params):
