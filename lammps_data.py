@@ -8,7 +8,7 @@ class LammpsData():
     """
     Class that collates all structural information for outputing a Lammps format.
     """
-    def __init__(self, atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factor, file_name):
+    def __init__(self, atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factors, file_name):
         """
         Initialise an instance for all information relating to the pysical and electronic structure needed for the Lammps input.
 
