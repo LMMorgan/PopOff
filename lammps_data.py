@@ -23,11 +23,11 @@ class LammpsData():
                 
         Returns:
             None
-        """  
-        self.atom_types = atom_types
-        self.bond_types = bond_types
+        """ 
         self.atoms = atoms
         self.bonds = bonds
+        self.atom_types = atom_types
+        self.bond_types = bond_types
         self.cell_lengths = cell_lengths
         self.tilt_factors = tilt_factors
         self.file_name = file_name
@@ -285,10 +285,9 @@ def apply_rotation(rotation_matrix, sites):
         sites (np.array): 2D numpy array of pre-transformed site values.
     
     Returns:
-        new (np.array): 2D numpy array of new site values.
+        (np.array): 2D numpy array of new site values.
     """
-    new = np.vstack([np.dot(rotation_matrix, x) for x in sites])
-    return new
+    return np.vstack([np.dot(rotation_matrix, x) for x in sites])
 
 def lammps_lattice(structure, forces):
     """
