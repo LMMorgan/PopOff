@@ -34,24 +34,23 @@ class LammpsData():
         self.write_lammps_files()
         
     @classmethod
-    def from_structure(cls, structure, params, forces, i):
+    def from_structure(cls, structure, params, i):
         """
-        Collects information from initial structure, params, forces, and an index.
+        Collects information from initial structure, params, and an index.
 
         Args:
-            structure (obj): A pymatgen structural object created from a POSCAR.
+            structure (obj): A pymatgen structural object created from a POSCAR, with forces from an OUTCAR included as site properties.
             params (dict(dict)): Contains core_shell (bool), charges (float), masses (float), and cs_springs (list(float)) dictionaries where the keys are atom label (str). Also contains bpp (list(float)) and sd (list(float)) dictionaries where the keys are atom label pairs (str), example: 'Li-O'.
-            forces (np.array): 2D numpy array containing the x,y,z forces acting on each atom in the given POSCAR (without coreshell).
             i (int): index identifier of the file in the list of files, i.e. 1 for POSCAR1 and OUTCAR1.
         Returns:
             (LammpsData):  LammpsData object containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factors (list(float)), and file_name (str).          
         """
-        cell_lengths, tilt_factors, structure, forces = lammps_lattice(structure, forces)
+        cell_lengths, tilt_factors, structure = lammps_lattice(structure)
         atom_types, bond_types = types_from_structure( structure=structure, 
                                        core_shell=params['core_shell'], 
                                        charges=params['charges'], 
                                        masses=params['masses'], verbose=True )
-        atoms, bonds = atoms_and_bonds_from_structure( structure, forces, atom_types, bond_types )
+        atoms, bonds = atoms_and_bonds_from_structure( structure, atom_types, bond_types )
         
         file_name = 'lammps/coords{}.lmp'.format(i+1)
 
@@ -276,33 +275,34 @@ def abc_matrix(a, b, c):
     cz = np.dot(c, axb_hat)
     return np.array([[ax, bx, cx],[0, by, cy],[0 , 0, cz]])
 
-def apply_rotation(rotation_matrix, sites):
+def apply_rotation(rotation_matrix, vector_array):
     """
     Calculates the cell matrix for transformed non-othorombic LAMMPS input.
     
     Args:
         rotation_matrix (np.array): 2D numpy array of transformation to be applied to the given site values.
-        sites (np.array): 2D numpy array of pre-transformed site values.
+        vector_array (np.array): 2D numpy array of pre-transformed site values.
     
     Returns:
         (np.array): 2D numpy array of new site values.
     """
-    return np.vstack([np.dot(rotation_matrix, x) for x in sites])
+    return np.dot(rotation_matrix,vector_array.T).T
 
-def lammps_lattice(structure, forces):
+def lammps_lattice(structure):
     """
     Imposes transformation for non-orthorobic cell for LAMMPS to read cell_lengths and tilt_factors, creates a new pymatgen structure object with the new transformation and associated forces.
     
     Args:
-        structure (obj): A pymatgen structural object created from a POSCAR.
-        forces (np.array): 2D numpy array containing the x,y,z forces acting on each atom in the given POSCAR (without coreshell).
+        structure (obj): A pymatgen structural object created from a POSCAR, with forces from an OUTCAR included as site properties.
     
     Returns:
         cell_lengths (list(float)): Lengths of each cell direction.
         tilt_factors (list(float)): Tilt factors of the cell.
-        new_structure (obj): A pymatgen structural object created from the transformed structure.
-        new_forces (np.array): 2D numpy array containing the x,y,z forces acting on each atom in the given POSCAR (without coreshell).
+        new_structure (obj): A pymatgen structural object created from the transformed matrix structure, with forces included as site properties.
     """
+    if 'forces' not in structure.site_properties:
+        raise AttributeError("Structure object should have 'forces' site_properties set")
+        
     a, b, c = structure.lattice.matrix
     
     if np.cross(a, b).dot(c) < 0:
@@ -315,8 +315,8 @@ def lammps_lattice(structure, forces):
         rotation_matrix = np.dot(abc, structure.lattice.inv_matrix.T)
 
         new_coords = apply_rotation(rotation_matrix, structure.cart_coords)
-        new_forces = apply_rotation(rotation_matrix, forces)
+        new_forces = apply_rotation(rotation_matrix, np.array(structure.site_properties['forces']))
         
-        new_structure = Structure(new_lattice, structure.species, new_coords, coords_are_cartesian=True)
+        new_structure = Structure(new_lattice, structure.species, new_coords, coords_are_cartesian=True, site_properties={'forces': new_forces})
 
-    return cell_lengths, tilt_factors, new_structure, new_forces
+    return cell_lengths, tilt_factors, new_structure

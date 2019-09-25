@@ -11,7 +11,7 @@ def types_from_structure( structure, core_shell, charges, masses, verbose=True )
     Defines the atom types and bond types from the structure and given information from params.
     
     Args:
-        structure (obj): A pymatgen structural object created from a POSCAR.
+        structure (obj): A pymatgen structural object created from the transformed matrix structure, with forces included as site properties.
         core_shell (dict): A dictionary of booleans stating if any atoms should be made core-shell.
         charges (dict): A dictionary of charges for each atom type. Key = atom label (str), value = charge(float)/sub_dict(dict). If atom is core-shell a sub dictionary will be the value, where sub_key = 'core' or 'shell' (str) and sub_value = charge (float).
         masses (dict): A dictionary of masses for each atom type. Key = atom label (str), value = mass(float)/sub_dict(dict). If atom is core-shell a sub dictionary will be the value, where sub_key = 'core' or 'shell' and sub_value = mass (float).
@@ -60,13 +60,12 @@ def types_from_structure( structure, core_shell, charges, masses, verbose=True )
                             charge=charges[e.name] ) )
     return atom_types, bond_types
 
-def atoms_and_bonds_from_structure( structure, forces, atom_types, bond_types ):
+def atoms_and_bonds_from_structure( structure, atom_types, bond_types ):
     """
     Defines the atoms and bonds from the structure and given information from params.
     
     Args:
-        structure (obj): A pymatgen structural object created from a POSCAR.
-        forces (np.array): A 2D numpy array of x,y,z forces on each atom (without shells).
+        structure (obj): A pymatgen structural object created from the transformed matrix structure, with forces included as site properties.
         atom_types (list(obj)): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), and core_shell (str).
         bond_types (list(obj)): BondType objects including bond_type_index (int) and label (str).
 
@@ -83,7 +82,7 @@ def atoms_and_bonds_from_structure( structure, forces, atom_types, bond_types ):
     atom_index = 0
     bond_index = 0
     molecule_index = 0
-    for site in structure.sites:
+    for site in structure:
         molecule_index += 1
         if site.species_string in atom_types_dict: # not core-shell atom
             atom_index += 1
@@ -91,7 +90,7 @@ def atoms_and_bonds_from_structure( structure, forces, atom_types, bond_types ):
             atoms.append( Atom(atom_index=atom_index,
                                molecule_index=molecule_index,
                                coords=site.coords,
-                               atom_forces=forces[molecule_index-1],
+                               atom_forces=site.properties['forces'],
                                atom_type=atom_type) )
         else: # need to handle core + shell
             atom_index += 1
@@ -99,7 +98,7 @@ def atoms_and_bonds_from_structure( structure, forces, atom_types, bond_types ):
             atoms.append( Atom(atom_index=atom_index,
                                molecule_index=molecule_index,
                                coords=site.coords,
-                               atom_forces=forces[molecule_index-1],
+                               atom_forces=site.properties['forces'],
                                atom_type=atom_type) )
             atom_index += 1
             atom_type = atom_types_dict[site.species_string + ' shell']

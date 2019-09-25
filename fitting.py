@@ -26,17 +26,19 @@ class FitModel():
         self.cs_springs = cs_springs
 
     @classmethod
-    def collect_info(cls, params):
+    def collect_info(cls, params, distribution, supercell=None):
         """
         Collects information from other classes relating to the potentials and lammps_data using params input information.
         Args:
-            params (dict(dict)): Contains core_shell (bool), charges (float), masses (float), and cs_springs (list(float)) dictionaries where the keys are atom label (str). Also contains bpp (list(float)) and sd (list(float)) dictionaries where the keys are atom label pairs (str), example: 'Li-O'.
+            params (dict(dict)): Contains core_shell (bool), charges (float), masses (float), and cs_springs (list(float)) dictionaries where the keys are atom label (str).
+            distribution(dict(dict)): Contains buckingham potential, 'bpp':list(float), and 'sd':list(float) dictionaries where the distribution keys are atom label pairs (str), example: 'Li-O'.
+            supercell (optional:list(int)): 3 integers defining the cell increase in x, y, and z. Default=None.
         Returns:
             (FitModel):  FitModel object containing potentials (list(obj:BuckinghamPotential)), lammps_data (obj:LammpsData), and cs_spring (dict).      
         """  
-        lammps_data = get_lammps_data(params)
-        parameters = pot.buckingham_parameters(params)
-        potentials = pot.buckingham_potentials(params, lammps_data[0].atom_types, parameters) #REWRITE TO READ ATOM_TYPES WITHOUT [0] 
+        lammps_data = get_lammps_data(params, supercell)
+        parameters = pot.buckingham_parameters(distribution)
+        potentials = pot.buckingham_potentials(distribution, lammps_data[0].atom_types, parameters) #REWRITE TO READ ATOM_TYPES WITHOUT [0] 
         cs_springs =  params['cs_springs']
         return cls(potentials, lammps_data, cs_springs)
     
@@ -71,7 +73,9 @@ class FitModel():
         Returns:
             None.
         """
-        for key, value in kwargs.items():    
+        for key, value in kwargs.items():
+            if type(value) is not np.ndarray: #Values stored as np.array not floats(?)
+                value = value.eval() #Used for uniform distribution where value is a theano.tensor.var.TensorVariable and .eval() is needed to extract the float value
             for pot in self.potentials:
                 if key is pot.a.label_string:
                     pot.a.value = value
@@ -102,7 +106,7 @@ class FitModel():
             out (np.array): x,y,z forces on each atom.
         """
         instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]
-        
+
         if min(kwargs.values()) > 0:
             self._update_potentials(**kwargs)
             out = np.zeros(self.expected_forces().shape)
@@ -122,14 +126,16 @@ class FitModel():
 
         return out
 
-    def run_fit(self, excude_from_fit, epsilon=0.1, draws=1000):
+                    
+    def run_fit(self, excude_from_fit=None, epsilon=0.1, draws=1000, dist_func='absolute_error'):
         """
         Runs the PyMC3 fitting process. Initiating a pm.Model, applying the potentials and distributions, and running the simulator that calls Lammps.
 
         Args:
-            excude_from_fit (list(str)): Label of the parameters not wishing to fit to. Example 'Li_O_c'.
+            excude_from_fit (list(str)): Label of the parameters not wishing to fit to. Example 'Li_O_c'. Default=None.
             epsilion (float): Designates the value of epsilon. Default=0.1.
-            draws (int): Designates the number of draws per step for the fitting. Default=1000
+            draws (int): Designates the number of draws per step for the fitting. Default=1000.
+            dist_func (optional:str): Name of distance calculation to perform in pm.SMC. Default='absolute_error'.
 
         Returns:
             trace (obj): A pymc3.backends.base.MultiTrace object containing a multitrace with information on the number of chains, iterations, and variables output from PyMC3. This can be read by arviz to be plotted.
@@ -149,24 +155,30 @@ class FitModel():
                     my_dict[name] = pot.c.distribution()
 
             simulator = pm.Simulator('simulator', self._simfunc, observed=self.expected_forces())
-            trace = pm.sample(step=pm.SMC(ABC=True, epsilon=epsilon), draws=draws)
-            #trace = pm.sample(step=pm.SMC(ABC=True, epsilon=epsilon, dist_func="sum_of_squared_distance"), draws=draws)
+            trace = pm.sample(step=pm.SMC(ABC=True, epsilon=epsilon), dis_func='absolute_error', draws=draws)
         return trace    
     
-def get_lammps_data(params):
+def get_lammps_data(params, supercell=None):
     """
     Collects the information needed for the lammps data inputs from the POSCARs and OUTCARs with additional information provided by params.
 
     Args:
         params (dict(dict)): Contains core_shell (bool), charges (float), masses (float), and cs_springs (list(float)) dictionaries where the keys are atom label (str). Also contains bpp (list(float)) and sd (list(float)) dictionaries where the keys are atom label pairs (str), example: 'Li-O'.
+        supercell (list(int)): 3 integers defining the cell increase in x, y, and z. Default=None if called directly.
 
     Returns:
         lammps_data (list(obj)):  LammpsData objects containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factor (list(float)), and file_name (str).
         """
+    if supercell is not None and len(supercell) is not 3:
+            raise ValueError('Incorrect dimensions for supercell. Requires x,y,z expansion, i.e. list of 3 integers')
+            
     lammps_data = []
     for i, pos in enumerate(glob.glob('poscars/POSCAR*')):
-        poscar = Poscar.from_file(pos)
+        structure = Poscar.from_file(pos).structure
         forces = forces_from_outcar('outcars/OUTCAR{}'.format(i+1))[-1]
-        struct_data = LammpsData.from_structure(poscar.structure, params, forces, i)
+        structure.add_site_property('forces', forces)
+        if supercell is not None:
+            structure = structure*supercell
+        struct_data = LammpsData.from_structure(structure, params, i)
         lammps_data.append(struct_data)  
     return lammps_data
