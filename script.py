@@ -1,9 +1,11 @@
 #! /usr/bin/env python3
 
-import arviz as az
-import matplotlib.pyplot as plt
 from fitting import FitModel
-import pymc3 as pm
+from databases import initiate_dbs, print_summary, print_forces
+from plotters import plotter
+from iteration_functions import iter_fitting, update_potentials
+from convergence_checker import get_modes, converge_check
+from scipy import stats
 
 if __name__ == '__main__':
 
@@ -31,19 +33,39 @@ if __name__ == '__main__':
                            'sd'  : [200, 0.01, 5]}
 
     excude_from_fit = [] # string of atom1_atom2_param. Example of format = 'O_O_rho'
+    
+    def mode_potentials(trace):
+        potential_dic = {}
+        for var in trace.varnames:
+            potential_dic['{}'.format(var)] = float(stats.mode(trace.get_values(var))[0])
+        return potential_di
+    
+    i=1
+    prev_modes = None
+    converge = False
+    summary_filename = 'summary.csv'
+    forces_filename = 'forces.csv'
+    initiate_dbs(summary_filename, forces_filename)
 
-    fit_data = FitModel.collect_info(params, distribution,  supercell=[1,1,1])
+    while converge is False:
 
-    #dist_func must be `sum_of_squared_distance` or `absolute_error`
-    trace = fit_data.run_fit(excude_from_fit=excude_from_fit, epsilon=1.0, draws=500, dist_func='sum_of_squared_distance')
+        #Runs FitModel and trace, finds mode, and updates the potentials in the distribution dictionary with mean values
+        trace, fit_data = iter_fitting(params, distribution, excude_from_fit)
+        modes = get_modes(trace)
+        distribution = update_potentials(trace, modes, distribution)
 
-    az.style.use('arviz-darkgrid')
-    az.plot_trace(trace)
-    plt.savefig('test_trace.png',dpi=500, bbox_inches = "tight")
+        #Runs with mode potential and returns forces
+        kwargs = mode_potentials(trace)
+        mode_forces = fit_data.get_forces(**kwargs)
 
-    az.plot_posterior(trace, round_to = 3, point_estimate = 'mode')
-    plt.savefig('test_mode.png',dpi=500, bbox_inches = "tight")
+        #Fills the databases
+        print_forces(i, mode_forces, forces_filename)
+        print_summary(i, trace, summary_filename)
 
-    filename = 'summary.txt'
-    with open('summary.txt', 'a') as file:
-        pm.summary(trace).to_csv(filename, index=False)
+        #Plots the distributions
+        plotter(trace, i)
+
+        #Checks convergence, sets modes to prev_moves
+        converge = converge_check(modes, distribution, prev_modes)
+        prev_modes = modes
+        i+=1

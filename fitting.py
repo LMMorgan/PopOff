@@ -6,6 +6,7 @@ from pymatgen.io.vasp import Poscar
 import lammps
 import potentials as pot
 from lammps_data import LammpsData
+import pandas as pd
 
 class FitModel():
     """
@@ -74,8 +75,6 @@ class FitModel():
             None.
         """
         for key, value in kwargs.items():
-            if type(value) is not np.ndarray: #Values stored as np.array not floats(?)
-                value = value.eval() #Used for uniform distribution where value is a theano.tensor.var.TensorVariable and .eval() is needed to extract the float value
             for pot in self.potentials:
                 if key is pot.a.label_string:
                     pot.a.value = value
@@ -121,9 +120,11 @@ class FitModel():
                 structure_forces.append(instance.system.forces[ld.core_mask()])
                 
             out = np.concatenate(structure_forces, axis=0)
+            
 
         else: out = np.ones(self.expected_forces().shape)*999999999 # ThisAlgorithmBecomingSkynetCost
 
+            
         return out
 
                     
@@ -156,8 +157,38 @@ class FitModel():
 
             simulator = pm.Simulator('simulator', self._simfunc, observed=self.expected_forces())
             trace = pm.sample(step=pm.SMC(ABC=True, epsilon=epsilon), dis_func='absolute_error', draws=draws)
-        return trace    
+        return trace
     
+    
+    
+    def get_forces(self, **kwargs):
+        """
+        Runs a minimization and zero step run for the instance and returns the forces.
+        Args:
+            **kwargs: Dictionary containing potential paramenters (value) with the parameter label (key).
+        Returns:
+            out (np.array): x,y,z forces on each atom.
+        """
+        instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]
+
+        self._update_potentials(**kwargs)
+        out = np.zeros(self.expected_forces().shape)
+            
+        structure_forces = []
+        for ld, instance in zip(self.lammps_data, instances):
+            self._set_potentials(instance)
+            instance.command('fix 1 cores setforce 0.0 0.0 0.0')
+            instance.command('minimize 1e-25 1e-25 5000 10000')
+            instance.command('unfix 1')
+            instance.run(0)
+            structure_forces.append(instance.system.forces[ld.core_mask()])
+                
+        out = np.concatenate(structure_forces, axis=0)
+                           
+        return out
+    
+    
+          
 def get_lammps_data(params, supercell=None):
     """
     Collects the information needed for the lammps data inputs from the POSCARs and OUTCARs with additional information provided by params.
