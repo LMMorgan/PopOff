@@ -29,7 +29,7 @@ if __name__ == '__main__':
     distribution['Ni-O'] = {'bpp' : [591.665, 0.382, 0.000],
                             'sd'  : [80, 0.01, 0.01]}
 
-    distribution['O-O'] = {'bpp' : [22739.211, 0.146, 67.764],
+    distribution['O-O'] = {'bpp' : [22739.211, 0.146, 20.7],
                            'sd'  : [200, 0.01, 5]}
 
     excude_from_fit = [] # string of atom1_atom2_param. Example of format = 'O_O_rho'

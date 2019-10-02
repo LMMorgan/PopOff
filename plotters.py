@@ -1,6 +1,7 @@
 import arviz as az
 import matplotlib.pyplot as plt
 import pymc3 as pm
+import pandas as pd
 
 def plotter(trace, i):
     """
@@ -18,4 +19,7 @@ def plotter(trace, i):
     plt.savefig('plots/trace_{}.png'.format(i),dpi=500, bbox_inches = "tight")
     pm.plot_posterior(trace, round_to = 3, point_estimate = 'mode')
     plt.savefig('plots/mode_{}.png'.format(i),dpi=500, bbox_inches = "tight")
+
+def forces_plot(forces_filename):
+    forces_data = pd.read_csv(forces_filename)
     
