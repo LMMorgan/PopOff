@@ -55,10 +55,10 @@ def buckingham_parameters(distribution):
     parameters = []
     
     for key, value in distribution.items():
-        try:
-            value['sd']
-        except KeyError:
-            raise ValueError('No value given for the standard deviation. Required for Normal distribution')
+#         try:
+#             value['sd']
+#         except KeyError:
+#             raise ValueError('No value given for the standard deviation. Required for Normal distribution')
         
         at1, at2 = key.split('-') #at is atom_type
         parameters.append(BuckinghamParameter(label_string = "{}_{}_{}".format(at1, at2, 'a'),

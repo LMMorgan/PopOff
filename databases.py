@@ -3,23 +3,19 @@ import pandas as pd
 import numpy as np
 from scipy import stats
 
-def initiate_dbs(summary_filename, forces_filename):
+def initiate_db(summary_filename):
     """
     Initiates empty databases for collecting summart data nad output forces data.
 
     Args:
         summary_filename (str): Name of the summary file.
-        forces_filename (str): Name of the forces file.
 
     Returns:
         None
         """
     summary_labels = ['iteration','parameter','mean', 'std', 'median', 'mode', 'data_points']
-    forces_labels = ['iteration','forces']
     summary_db = pd.DataFrame( columns=summary_labels ).astype('object')
-    forces_db = pd.DataFrame( columns=forces_labels ).astype('object')
     summary_db.to_csv(summary_filename, index=False)
-    forces_db.to_csv(forces_filename, index=False)
 
 def print_summary(i, trace, summary_filename):
     """
@@ -44,22 +40,3 @@ def print_summary(i, trace, summary_filename):
     new_entry['parameter'] = [var for var in trace.varnames]
     database = database.append(new_entry).astype('object')
     database.to_csv(summary_filename, index=False)
-        
-def print_forces(i, mode_forces, forces_filename):
-    """
-    Adds the forces data of the mode values for each iteration of the fit to the forces databasae.
-
-    Args:
-        i (int): Counter for the index/iteration number.
-        mode_forces (np.array): A flatterned array containing the x,z,y forces for each atom in each structure. Array format ((atom*structure),xyz).
-        forces_filename (str): Name of the forces file.
-
-    Returns:
-        None
-        """    
-    database = pd.read_csv(forces_filename)
-    new_entry = pd.DataFrame()
-    new_entry['iteration'] = [i]
-    new_entry['forces'] = [mode_forces]
-    database = database.append(new_entry).astype('object')
-    database.to_csv(forces_filename, index=False)        

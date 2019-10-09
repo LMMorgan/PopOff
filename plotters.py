@@ -7,35 +7,7 @@ import re
 import numpy as np
 from vasppy.outcar import forces_from_outcar
 
-def pymc3_trace_plots(trace, i):
-    """
-    Plots the trace and the posterior distribution (with mode) directly from the trace using aviz.
 
-    Args:
-        trace (obj): A pymc3.backends.base.MultiTrace object containing a multitrace with information on the number of chains, iterations, and variables output from PyMC3.
-        i (int): Counter for the index/iteration number.
-
-    Returns:
-        None
-        """  
-    az.style.use('arviz-darkgrid')
-    pm.plot_trace(trace)
-    plt.savefig('plots/trace_{}.png'.format(i),dpi=500, bbox_inches = "tight")
-    plt.close()
-    
-    pm.plot_posterior(trace, round_to = 3, point_estimate = 'mode')
-    plt.savefig('plots/mode_{}.png'.format(i),dpi=500, bbox_inches = "tight")
-    plt.close()
-    
-
-
-
-    
-    
-
-    
-    
-    
     
     
     
