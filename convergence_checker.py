@@ -31,7 +31,7 @@ def converge_check(modes, distribution, prev_modes=None):
         prev_modes = list(np.concatenate([pot['bpp'] for pot in distribution.values()]))
     for prev,cur in zip(prev_modes,modes):
         try:
-            if (abs(cur - prev) / prev) * 100.0 > 10.0:
+            if (abs(cur - prev) / prev) * 100.0 > 3.0:
                 converged.append(False)
             else:
                 converged.append(True)

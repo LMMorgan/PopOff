@@ -35,10 +35,10 @@ if __name__ == '__main__':
     excude_from_fit = [] # string of atom1_atom2_param. Example of format = 'O_O_rho'
     
     def mode_potentials(trace):
-        potential_dic = {}
+        potential_dict = {}
         for var in trace.varnames:
-            potential_dic['{}'.format(var)] = float(stats.mode(trace.get_values(var))[0])
-        return potential_di
+            potential_dict['{}'.format(var)] = float(stats.mode(trace.get_values(var))[0])
+        return potential_dict
     
     i=1
     prev_modes = None

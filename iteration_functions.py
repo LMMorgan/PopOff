@@ -14,7 +14,7 @@ def iter_fitting(params, distribution, excude_from_fit=None):
         (FitModel):  FitModel object containing potentials (list(obj:BuckinghamPotential)), lammps_data (obj:LammpsData), and cs_spring (dict).      
     """     
     fit_data = FitModel.collect_info(params, distribution, supercell=[1,1,1])
-    trace = fit_data.run_fit(excude_from_fit=excude_from_fit, epsilon=0.1, draws=1000, dist_func='sum_of_squared_distance')
+    trace = fit_data.run_fit(excude_from_fit=excude_from_fit, epsilon=0.5, draws=500, dist_func='sum_of_squared_distance')
     return trace, fit_data
 
 
