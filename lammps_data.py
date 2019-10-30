@@ -69,9 +69,12 @@ class LammpsData():
         return_str = ''
         return_str += '{}\n\n'.format( title )
         return_str += '{}   atoms\n'.format( len(self.atoms) )
-        return_str += '{}   bonds\n\n'.format( len(self.bonds) )
+        if len(self.bonds) != 0:
+            return_str += '{}   bonds\n\n'.format( len(self.bonds) )
         return_str += '{}   atom types\n'.format( len(self.atom_types ) )
-        return_str += '{}   bond types\n\n'.format( len(self.bond_types ) )
+        if len(self.bond_types) != 0:
+            return_str += '{}   bond types\n\n'.format( len(self.bond_types ) )
+        return_str += '\n'
         return return_str
         
     def _cell_dimensions_string(self):
@@ -153,7 +156,8 @@ class LammpsData():
         return_str += self._cell_dimensions_string()
         return_str += self._masses_string()
         return_str += self._atoms_string()
-        return_str += self._bonds_string()
+        if len(self.bonds) != 0:
+            return_str += self._bonds_string()
         return return_str
 
     def core_mask(self):
@@ -231,7 +235,8 @@ class LammpsData():
         lmp.command('read_data {}'.format(self.file_name))
 
         lmp.command('group cores type {}'.format(self.type_core()))
-        lmp.command('group shells type {}'.format(self.type_shell()))
+        if len(self.bond_types) != 0:
+            lmp.command('group shells type {}'.format(self.type_shell()))
 
         if cs_springs:
             lmp.command('pair_style buck/coul/long/cs 10.0')
@@ -268,7 +273,7 @@ def abc_matrix(a, b, c):
     a_hat = a/(np.sqrt(sum(a**2)))
     axb_hat = np.cross(a,b)/(np.sqrt(sum(np.cross(a,b)**2)))
     ax = np.sqrt(sum(a**2))
-    bx = np.dot(b, a/(np.sqrt(sum(a**2))))
+    bx = np.dot(b, a_hat)
     by = np.sqrt(sum(np.cross(a_hat, b)**2))
     cx = np.dot(c,a_hat)
     cy = np.dot(c, np.cross(axb_hat, a_hat))
@@ -303,7 +308,7 @@ def lammps_lattice(structure):
     if 'forces' not in structure.site_properties:
         raise AttributeError("Structure object should have 'forces' site_properties set")
         
-    a, b, c = structure.lattice.matrix
+    a, b, c = structure.lattice.matrix.T  #Previously structure.lattice.matrix which was reading rows not columns
     
     if np.cross(a, b).dot(c) < 0:
         raise ValueError('This is a left-hand coordinate system. Lammps requires a right-hand coordinate system.')

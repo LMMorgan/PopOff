@@ -36,7 +36,7 @@ def types_from_structure( structure, core_shell, charges, masses, verbose=True )
         if e.name not in masses:
             raise ValueError( '{} not in masses dictionary'.format(e.name) )
     for e in elements:
-        if core_shell[e.name]: # Create two atom_tyoes for core + shell
+        if core_shell[e.name]: # Create two atom_types for core + shell
             atom_type_index += 1
             atom_types.append( AtomType(atom_type_index=atom_type_index,
                                         label='{} core'.format(e.name),

@@ -73,14 +73,14 @@ class FitModel():
 
         Returns:
             None.
-        """
+        """          
         for key, value in kwargs.items():
             for pot in self.potentials:
-                if key is pot.a.label_string:
+                if key == pot.a.label_string:
                     pot.a.value = value
-                if key is pot.rho.label_string:
+                if key == pot.rho.label_string:
                     pot.rho.value = value
-                if key is pot.c.label_string:
+                if key == pot.c.label_string:
                     pot.c.value = value
                     
     def _set_potentials(self, lmp):
@@ -94,7 +94,7 @@ class FitModel():
             None
         """
         for pot in self.potentials:
-            lmp.command('{}'.format(pot.potential_string()))
+            lmp.command('{}'.format(pot.potential_string()))    
         
     def _simfunc(self, **kwargs):
         """
@@ -167,27 +167,77 @@ class FitModel():
         Args:
             **kwargs: Dictionary containing potential paramenters (value) with the parameter label (key).
         Returns:
-            out (np.array): x,y,z forces on each atom.
+            ip_forces (np.array): x,y,z forces on each atom.
         """
+        self._update_potentials(**kwargs)
         instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]
 
-        self._update_potentials(**kwargs)
-        out = np.zeros(self.expected_forces().shape)
+        ip_forces = np.zeros(self.expected_forces().shape)
             
         structure_forces = []
         for ld, instance in zip(self.lammps_data, instances):
             self._set_potentials(instance)
+            #If coreshell do the min otherwise do run(0) only
             instance.command('fix 1 cores setforce 0.0 0.0 0.0')
             instance.command('minimize 1e-25 1e-25 5000 10000')
             instance.command('unfix 1')
             instance.run(0)
             structure_forces.append(instance.system.forces[ld.core_mask()])
                 
-        out = np.concatenate(structure_forces, axis=0)
+        ip_forces = np.concatenate(structure_forces, axis=0)
                            
-        return out
-    
-    
+        return ip_forces 
+        
+        
+        
+        
+        
+    def fit_error(self, values, args):
+        potential_params = dict(zip( args, values ))
+        for pot in self.potentials:
+            for param in [ pot.a, pot.rho, pot.c ]:
+                key = param.label_string
+                if key not in potential_params:
+                    potential_params[key] = param.value
+        ip_forces = self.get_forces(**potential_params)
+        error = np.sum((self.expected_forces() - ip_forces)**2)/ ip_forces.size
+#         print('error is:', error)
+#         print('parameters are:{}'.format([potential_params[a] for a in args]))
+        return error
+        
+    def get_lattice_params(self, **kwargs):
+        """
+        Runs a minimization and zero step run for the instance and returns lammps instance.
+        Args:
+            **kwargs: Dictionary containing potential paramenters (value) with the parameter label (key).
+        Returns:
+            lammps instance (np.array): x,y,z forces on each atom.
+        """
+        self._update_potentials(**kwargs)
+        instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]           
+ 
+        for ld, instance in zip(self.lammps_data, instances):
+            self._set_potentials(instance)
+            instance.command('fix 1 cores setforce 0.0 0.0 0.0')
+            instance.command('minimize 1e-25 1e-25 5000 10000')
+            instance.command('unfix 1')
+            instance.command('reset_timestep 0')
+            instance.command('timestep 0.5')
+            instance.command('fix 2 all box/relax aniso 0.0 vmax 0.5')
+            instance.command('min_style cg')
+            instance.command('minimize 1e-25 1e-25 50000 10000')
+            instance.command('unfix 2')
+            instance.run(10)
+            
+                           
+        return instances        
+        
+  
+
+
+
+
+
           
 def get_lammps_data(params, supercell=None):
     """
