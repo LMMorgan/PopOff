@@ -6,7 +6,7 @@ from atom_types import AtomType
 from bond_types import BondType
 
     
-def types_from_structure( structure, core_shell, charges, masses, verbose=True ):
+def types_from_structure( structure, core_shell, charges, masses, cs_spring, verbose=True ):
     """
     Defines the atom types and bond types from the structure and given information from params.
     
@@ -40,24 +40,29 @@ def types_from_structure( structure, core_shell, charges, masses, verbose=True )
             atom_type_index += 1
             atom_types.append( AtomType(atom_type_index=atom_type_index,
                                         label='{} core'.format(e.name),
+                                        element_type = e.name,
                                         mass=masses[e.name]['core'],
                                         charge=charges[e.name]['core'],
                                         core_shell='core') )
             atom_type_index += 1
             atom_types.append( AtomType(atom_type_index=atom_type_index,
-                            label='{} shell'.format(e.name),
-                            mass=masses[e.name]['shell'],
-                            charge=charges[e.name]['shell'],
-                            core_shell='shell') )
+                                        label='{} shell'.format(e.name),
+                                        element_type = e.name,
+                                        mass=masses[e.name]['shell'],
+                                        charge=charges[e.name]['shell'],
+                                        core_shell='shell') )
             bond_type_index += 1
             bond_types.append( BondType(bond_type_index=bond_type_index,
-                                       label='{}-{} spring'.format(e.name, e.name)))
+                                        label='{}-{} spring'.format(e.name, e.name),
+                                        spring_coeff_1=cs_spring['{}-{}'.format(e.name, e.name)][0],
+                                        spring_coeff_2=cs_spring['{}-{}'.format(e.name, e.name)][1]))
         else:
             atom_type_index += 1
             atom_types.append( AtomType(atom_type_index=atom_type_index,
-                            label='{}'.format(e.name),
-                            mass=masses[e.name],
-                            charge=charges[e.name] ) )
+                                        label='{}'.format(e.name),
+                                        element_type = e.name,
+                                        mass=masses[e.name],
+                                        charge=charges[e.name] ) )
     return atom_types, bond_types
 
 def atoms_and_bonds_from_structure( structure, atom_types, bond_types ):

@@ -13,8 +13,7 @@ class Atom():
             atom_type_id (int): Integer value given for the atom type.
             coords (np.array): x, y, and z positions of the atom.
             atom_forces (np.array): x, y, and z forces of the atom.
-            atom_type (obj): AtomType object including atom_type_index (int), label (str), mass (float),
-                             charge (float), and core_shell (str).
+            atom_type (obj): AtomType object including atom_type_index (int), label (str), mass (float), charge (float), formal_charge (float), and core_shell (str).
                 
         Returns:
             None

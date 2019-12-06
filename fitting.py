@@ -33,7 +33,7 @@ class FitModel():
         Args:
             params (dict(dict)): Contains core_shell (bool), charges (float), masses (float), and cs_springs (list(float)) dictionaries where the keys are atom label (str).
             distribution(dict(dict)): Contains buckingham potential, 'bpp':list(float), and 'sd':list(float) dictionaries where the distribution keys are atom label pairs (str), example: 'Li-O'.
-            supercell (optional:list(int)): 3 integers defining the cell increase in x, y, and z. Default=None.
+            supercell (optional:list(int) or list(list(int))): 3 integers defining the cell increase in x, y, and z for all structures, or a list of lists where each list is 3 integers defining the cell increase in x, y, z, for each individual structure in the fitting process. i.e. all increase by the same amount, or each structure increased but different amounts. Default=None.
         Returns:
             (FitModel):  FitModel object containing potentials (list(obj:BuckinghamPotential)), lammps_data (obj:LammpsData), and cs_spring (dict).      
         """  
@@ -63,33 +63,36 @@ class FitModel():
             forces_data.append(forces[core_mask])
         expected_forces = np.concatenate(forces_data, axis=0)
         return expected_forces
-    
-    def _update_potentials(self, **kwargs):
+
+    def _set_charges(self, lmp):
         """
-        Unpdates the potentials set by pymc3 into the dictionary for the fitting process.
-
+        Sets the charge on each atom in the structure by type for the specified Lammps system (changes for each iteration of the potential fit).
         Args:
-            **kwargs: The parameters to be updated in the fitting process as set with pm.Model.
-
+            lmp (obj): Lammps object with structure and specified commands implemented.
         Returns:
-            None.
-        """          
-        for key, value in kwargs.items():
-            for pot in self.potentials:
-                if key == pot.a.label_string:
-                    pot.a.value = value
-                if key == pot.rho.label_string:
-                    pot.rho.value = value
-                if key == pot.c.label_string:
-                    pot.c.value = value
+            None
+        """
+        for data in self.lammps_data:
+            for atom_type in data.atom_types:
+                lmp.command('set type %d charge %f' % (atom_type.atom_type_index, atom_type.charge))
+    
+    def _set_springs(self, lmp):
+        """
+        Sets the spring constant for the core-shell bonds for the specified Lammps system (changes for each iteration of the potential fit).
+        Args:
+            lmp (obj): Lammps object with structure and specified commands implemented.
+        Returns:
+            None
+        """
+        for data in self.lammps_data:
+            for bond_type in data.bond_types:
+                    lmp.command(bond_type.bond_string())            
                     
     def _set_potentials(self, lmp):
         """
-        Sets the potential for the sepecified Lammps system (changes for each iteration of the potential fit).
-
+        Sets the potential for the specified Lammps system (changes for each iteration of the potential fit).
         Args:
             lmp (obj): Lammps object with structure and specified commands implemented.
-
         Returns:
             None
         """
@@ -109,7 +112,6 @@ class FitModel():
         if min(kwargs.values()) > 0:
             self._update_potentials(**kwargs)
             out = np.zeros(self.expected_forces().shape)
-            
             structure_forces = []
             for ld, instance in zip(self.lammps_data, instances):
                 self._set_potentials(instance)
@@ -118,30 +120,22 @@ class FitModel():
                 instance.command('unfix 1')
                 instance.run(0)
                 structure_forces.append(instance.system.forces[ld.core_mask()])
-                
             out = np.concatenate(structure_forces, axis=0)
-            
-
         else: out = np.ones(self.expected_forces().shape)*999999999 # ThisAlgorithmBecomingSkynetCost
-
-            
         return out
 
                     
     def run_fit(self, excude_from_fit=None, epsilon=0.1, draws=1000, dist_func='absolute_error'):
         """
         Runs the PyMC3 fitting process. Initiating a pm.Model, applying the potentials and distributions, and running the simulator that calls Lammps.
-
         Args:
             excude_from_fit (list(str)): Label of the parameters not wishing to fit to. Example 'Li_O_c'. Default=None.
             epsilion (float): Designates the value of epsilon. Default=0.1.
             draws (int): Designates the number of draws per step for the fitting. Default=1000.
             dist_func (optional:str): Name of distance calculation to perform in pm.SMC. Default='absolute_error'.
-
         Returns:
             trace (obj): A pymc3.backends.base.MultiTrace object containing a multitrace with information on the number of chains, iterations, and variables output from PyMC3. This can be read by arviz to be plotted.
         """
-        
         with pm.Model() as model:
             my_dict = {}
             for pot in self.potentials:
@@ -159,77 +153,96 @@ class FitModel():
             trace = pm.sample(step=pm.SMC(ABC=True, epsilon=epsilon), dis_func='absolute_error', draws=draws)
         return trace
     
-    
-    
-    def get_forces(self, **kwargs):
-        """
-        Runs a minimization and zero step run for the instance and returns the forces.
-        Args:
-            **kwargs: Dictionary containing potential paramenters (value) with the parameter label (key).
-        Returns:
-            ip_forces (np.array): x,y,z forces on each atom.
-        """
-        self._update_potentials(**kwargs)
-        instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]
 
+    
+    
+    
+    
+    
+    
+    
+    def get_forces(self):
+        instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]
         ip_forces = np.zeros(self.expected_forces().shape)
-            
         structure_forces = []
         for ld, instance in zip(self.lammps_data, instances):
             self._set_potentials(instance)
-            #If coreshell do the min otherwise do run(0) only
-            instance.command('fix 1 cores setforce 0.0 0.0 0.0')
-            instance.command('minimize 1e-25 1e-25 5000 10000')
-            instance.command('unfix 1')
+            self._set_charges(instance)
+            if self.cs_springs: #If coreshell do the minimisation otherwise do run(0) only
+                self._set_springs(instance)
+                instance.command('fix 1 cores setforce 0.0 0.0 0.0')
+                instance.command('minimize 1e-25 1e-3 3000 10000')
+                instance.command('unfix 1')
             instance.run(0)
             structure_forces.append(instance.system.forces[ld.core_mask()])
-                
         ip_forces = np.concatenate(structure_forces, axis=0)
-                           
         return ip_forces 
         
-        
-        
-        
-        
-    def fit_error(self, values, args):
-        potential_params = dict(zip( args, values ))
+    def _update_charges(self, s):
+        for data in self.lammps_data:
+            for atom_type in data.atom_types:
+                atom_type.charge = atom_type.formal_charge * s
+
+    def _update_springs(self, label, coeff_1):
+        for data in self.lammps_data:
+            for bond_type in data.bond_types:
+                if bond_type.label == label:
+                    bond_type.spring_coeff_1 = coeff_1
+                    
+    def _update_potentials(self, key, value):         
         for pot in self.potentials:
-            for param in [ pot.a, pot.rho, pot.c ]:
-                key = param.label_string
-                if key not in potential_params:
-                    potential_params[key] = param.value
-        ip_forces = self.get_forces(**potential_params)
+            if key == pot.a.label_string:
+                pot.a.value = value
+            if key == pot.rho.label_string:
+                pot.rho.value = value
+            if key == pot.c.label_string:
+                pot.c.value = value           
+                               
+    def fit_error(self, values, args):
+        for arg, value in zip(args, values):
+            if arg == 'q_scaling':
+                self._update_charges(value)
+#             elif arg.startwith('dq_'):
+                
+            elif any(arg in bond_type.label for data in self.lammps_data for bond_type in data.bond_types):
+                self._update_springs(arg, value)
+            elif any(arg in [pot.a.label_string, pot.rho.label_string, pot.c.label_string] for pot in self.potentials):
+                self._update_potentials(arg, value)
+            else:
+                raise ValueError('Argument "{}" is not a valid key argument. Check docstring for acceptable arguments and formats.'.format(arg))
+        ip_forces = self.get_forces()
         error = np.sum((self.expected_forces() - ip_forces)**2)/ ip_forces.size
-#         print('error is:', error)
-#         print('parameters are:{}'.format([potential_params[a] for a in args]))
         return error
-        
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     def get_lattice_params(self, **kwargs):
-        """
-        Runs a minimization and zero step run for the instance and returns lammps instance.
-        Args:
-            **kwargs: Dictionary containing potential paramenters (value) with the parameter label (key).
-        Returns:
-            lammps instance (np.array): x,y,z forces on each atom.
-        """
         self._update_potentials(**kwargs)
         instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]           
  
         for ld, instance in zip(self.lammps_data, instances):
             self._set_potentials(instance)
-            instance.command('fix 1 cores setforce 0.0 0.0 0.0')
-            instance.command('minimize 1e-25 1e-25 5000 10000')
-            instance.command('unfix 1')
             instance.command('reset_timestep 0')
             instance.command('timestep 0.5')
-            instance.command('fix 2 all box/relax aniso 0.0 vmax 0.5')
+            instance.command('min_style fire')
+            #instance.command('fix 1 cores setforce 0.0 0.0 0.0')
+            instance.command('minimize 1e-25 1e-3 5000 10000')
+            #instance.command('unfix 1')
+            
+            instance.command('reset_timestep 0')
+            instance.command('timestep 0.002')
+            instance.command('fix 2 all box/relax aniso 1.0 vmax 0.0005')
             instance.command('min_style cg')
             instance.command('minimize 1e-25 1e-25 50000 10000')
-            instance.command('unfix 2')
-            instance.run(10)
-            
-                           
+            instance.command('unfix 2')        
         return instances        
         
   
@@ -242,24 +255,28 @@ class FitModel():
 def get_lammps_data(params, supercell=None):
     """
     Collects the information needed for the lammps data inputs from the POSCARs and OUTCARs with additional information provided by params.
-
     Args:
         params (dict(dict)): Contains core_shell (bool), charges (float), masses (float), and cs_springs (list(float)) dictionaries where the keys are atom label (str). Also contains bpp (list(float)) and sd (list(float)) dictionaries where the keys are atom label pairs (str), example: 'Li-O'.
         supercell (list(int)): 3 integers defining the cell increase in x, y, and z. Default=None if called directly.
-
     Returns:
         lammps_data (list(obj)):  LammpsData objects containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factor (list(float)), and file_name (str).
         """
-    if supercell is not None and len(supercell) is not 3:
-            raise ValueError('Incorrect dimensions for supercell. Requires x,y,z expansion, i.e. list of 3 integers')
+    if isinstance(supercell, list) is False :
+            raise TypeError('Incorrect type for supercell. Requires integers for x,y,z expansion in a list, e.g. [1,1,1], or list of x,y,z expansions for each structure, e.g. [[1,1,1], [2,2,2], [3,3,3]]')
             
     lammps_data = []
-    for i, pos in enumerate(glob.glob('poscars/POSCAR*')):
+    for i, pos in enumerate(sorted(glob.glob('poscars/POSCAR*'))):
         structure = Poscar.from_file(pos).structure
         forces = forces_from_outcar('outcars/OUTCAR{}'.format(i+1))[-1]
         structure.add_site_property('forces', forces)
         if supercell is not None:
-            structure = structure*supercell
+            if isinstance(supercell[0], int) and len(supercell) == 3:
+                structure = structure*supercell
+            elif isinstance(supercell[i], list) and (all([len(supercell[i]) == 3 for i, x in enumerate(supercell)])):
+                structure = structure*supercell[i]
+            else:
+                raise ValueError('Incorrect dimensions for supercell. Requires x,y,z expansion (i.e. list of 3 integers) or list of x,y,z expansions for each structure (i.e. list of list(x,y,z))')
+ 
         struct_data = LammpsData.from_structure(structure, params, i)
         lammps_data.append(struct_data)  
     return lammps_data

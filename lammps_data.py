@@ -13,7 +13,7 @@ class LammpsData():
         Initialise an instance for all information relating to the pysical and electronic structure needed for the Lammps input.
 
         Args:
-            atom_types (list(obj)): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), and core_shell (str).
+            atom_types (list(obj)): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), formal_charge (float), and core_shell (str).
             bond_types (list(obj)): BondType objects including bond_type_index (int) and label (str).
             atoms (list(obj)): Atom objects including atom_index (int), molecule_index (int), coords (np.array), forces (np.array), and atom_type (obj:AtomType).
             bonds (list(obj)): Bond objects including bond_index (int), atom_indices (list(int)), and bond_type (obj:BondType).
@@ -47,9 +47,11 @@ class LammpsData():
         """
         cell_lengths, tilt_factors, structure = lammps_lattice(structure)
         atom_types, bond_types = types_from_structure( structure=structure, 
-                                       core_shell=params['core_shell'], 
-                                       charges=params['charges'], 
-                                       masses=params['masses'], verbose=True )
+                                                       core_shell=params['core_shell'], 
+                                                       charges=params['charges'], 
+                                                       masses=params['masses'],
+                                                       cs_spring=params['cs_springs'],
+                                                       verbose=True )
         atoms, bonds = atoms_and_bonds_from_structure( structure, atom_types, bond_types )
         
         file_name = 'lammps/coords{}.lmp'.format(i+1)
@@ -242,11 +244,9 @@ class LammpsData():
             lmp.command('pair_style buck/coul/long/cs 10.0')
             lmp.command('pair_coeff * * 0 1 0')
 
-            lmp.command('bond_style harmonic')
-            for i, spring in enumerate(cs_springs):
-                lmp.command('bond_coeff {} {} {}'.format(i+1,
-                                                         cs_springs[spring][0],
-                                                         cs_springs[spring][1]))
+            lmp.command('bond_style harmonic')   
+            for bond in self.bond_types:
+                lmp.command(bond.bond_string())
         else:
             lmp.command('pair_style buck/coul/long 10.0')
             lmp.command('pair_coeff * * 0 1 0')
@@ -270,28 +270,42 @@ def abc_matrix(a, b, c):
     Returns:
         (np.array): 2D numpy array of abc.
     """
-    a_hat = a/(np.sqrt(sum(a**2)))
-    axb_hat = np.cross(a,b)/(np.sqrt(sum(np.cross(a,b)**2)))
-    ax = np.sqrt(sum(a**2))
+    ax = np.linalg.norm(a)
+    a_hat = a/ax
     bx = np.dot(b, a_hat)
-    by = np.sqrt(sum(np.cross(a_hat, b)**2))
-    cx = np.dot(c,a_hat)
+    by = np.linalg.norm(np.cross(a_hat, b))
+    cx = np.dot(c, a_hat)
+    axb = np.cross(a,b)
+    axb_hat = axb / np.linalg.norm(axb)
     cy = np.dot(c, np.cross(axb_hat, a_hat))
     cz = np.dot(c, axb_hat)
     return np.array([[ax, bx, cx],[0, by, cy],[0 , 0, cz]])
 
-def apply_rotation(rotation_matrix, vector_array):
+def new_basis(abc, lattice):
     """
-    Calculates the cell matrix for transformed non-othorombic LAMMPS input.
+    Determines the new basis for the lattice by finding the dot product of the new lattice and old lattice.
     
     Args:
-        rotation_matrix (np.array): 2D numpy array of transformation to be applied to the given site values.
+        abc (np.array): 2D numpy array of new lattice.
+        lattice (np.array): 2D numpy array of original lattice.
+
+    Returns:
+        (np.array): 2D numpy array of the lattice transformation.
+    """
+    return np.dot(abc.T, lattice.inv_matrix.T)
+
+def apply_new_basis(new_base, vector_array):
+    """
+    Calculates the new site vaules for transformed non-othorombic LAMMPS structure using the dot product of the new base lattice and the vector array to be transformed.
+    
+    Args:
+        new_base (np.array): 2D numpy array of transformation to be applied to the given site values.
         vector_array (np.array): 2D numpy array of pre-transformed site values.
     
     Returns:
         (np.array): 2D numpy array of new site values.
     """
-    return np.dot(rotation_matrix,vector_array.T).T
+    return np.dot(new_base, vector_array).T  
 
 def lammps_lattice(structure):
     """
@@ -301,27 +315,24 @@ def lammps_lattice(structure):
         structure (obj): A pymatgen structural object created from a POSCAR, with forces from an OUTCAR included as site properties.
     
     Returns:
-        cell_lengths (list(float)): Lengths of each cell direction.
-        tilt_factors (list(float)): Tilt factors of the cell.
+        cell_lengths (np.array): Lengths of each cell direction.
+        tilt_factors (np.array): Tilt factors of the cell.
         new_structure (obj): A pymatgen structural object created from the transformed matrix structure, with forces included as site properties.
     """
-    if 'forces' not in structure.site_properties:
-        raise AttributeError("Structure object should have 'forces' site_properties set")
-        
-    a, b, c = structure.lattice.matrix.T  #Previously structure.lattice.matrix which was reading rows not columns
-    
+    a, b, c = structure.lattice.matrix
     if np.cross(a, b).dot(c) < 0:
         raise ValueError('This is a left-hand coordinate system. Lammps requires a right-hand coordinate system.')
     else:        
-        abc = abc_matrix(a, b, c)
+        abc = abc_matrix(a,b,c)
+#         abc[0,1] = 0.00
+#         abc[0,2] = 0.00
+#         abc[1,2] = 0.00
         new_lattice = Lattice(abc)
-        cell_lengths = np.array(new_lattice.lengths)
+        cell_lengths = np.array([abc[0,0], abc[1,1], abc[2,2]])
         tilt_factors = np.array([abc[0,1], abc[0,2], abc[1,2]])
-        rotation_matrix = np.dot(abc, structure.lattice.inv_matrix.T)
-
-        new_coords = apply_rotation(rotation_matrix, structure.cart_coords)
-        new_forces = apply_rotation(rotation_matrix, np.array(structure.site_properties['forces']))
+        new_base = new_basis(abc, structure.lattice)
         
+        new_coords = apply_new_basis(new_base, structure.cart_coords.T)
+        new_forces = apply_new_basis(new_base, np.array(structure.site_properties['forces']).T)
         new_structure = Structure(new_lattice, structure.species, new_coords, coords_are_cartesian=True, site_properties={'forces': new_forces})
-
     return cell_lengths, tilt_factors, new_structure
