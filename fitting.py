@@ -176,40 +176,60 @@ class FitModel():
             instance.run(0)
             structure_forces.append(instance.system.forces[ld.core_mask()])
         ip_forces = np.concatenate(structure_forces, axis=0)
-        return ip_forces 
-        
-    def _update_charges(self, s):
-        for data in self.lammps_data:
-            for atom_type in data.atom_types:
-                atom_type.charge = atom_type.formal_charge * s
+        return ip_forces
 
-    def _update_springs(self, label, coeff_1):
+    
+
+    
+    
+    
+    
+    def _charge_reset(self):
         for data in self.lammps_data:
-            for bond_type in data.bond_types:
-                if bond_type.label == label:
-                    bond_type.spring_coeff_1 = coeff_1
-                    
-    def _update_potentials(self, key, value):         
-        for pot in self.potentials:
-            if key == pot.a.label_string:
-                pot.a.value = value
-            if key == pot.rho.label_string:
-                pot.rho.value = value
-            if key == pot.c.label_string:
-                pot.c.value = value           
-                               
-    def fit_error(self, values, args):
-        for arg, value in zip(args, values):
+            for at in data.atom_types:
+                at.charge = at.formal_charge    
+       
+    def _update_q_ratio(self, fitting_parameters):
+        for arg, value in fitting_parameters.items():
+            if arg.startswith('dq_'):
+                for data in self.lammps_data:
+                    for at in data.atom_type:
+                        if arg.endswith(at.element_type) and at.coreshell == 'core':
+                            at.charge += dq
+                        if arg.endswith(at.element_type) and at.coreshell == 'shell':
+                            at.charge += -dq
+       
+    def _update_springs(self, fitting_parameters):
+        for arg, value in fitting_parameters.items():
+            for data in self.lammps_data:
+                for bt in data.bond_types:
+                    if bt.label == arg:
+                        bt.spring_coeff_1 = value                           
+                                             
+    def _update_potentials(self, fitting_parameters):
+        for arg, value in fitting_parameters.items():
+            for pot in self.potentials:
+                if arg == pot.a.label_string:
+                    pot.a.value = value
+                if arg == pot.rho.label_string:
+                    pot.rho.value = value
+                if arg == pot.c.label_string:
+                    pot.c.value = value                                                
+                            
+    def _update_charge_scaling(self, fitting_parameters):
+        for arg, value in fitting_parameters.items():
             if arg == 'q_scaling':
-                self._update_charges(value)
-#             elif arg.startwith('dq_'):
-                
-            elif any(arg in bond_type.label for data in self.lammps_data for bond_type in data.bond_types):
-                self._update_springs(arg, value)
-            elif any(arg in [pot.a.label_string, pot.rho.label_string, pot.c.label_string] for pot in self.potentials):
-                self._update_potentials(arg, value)
-            else:
-                raise ValueError('Argument "{}" is not a valid key argument. Check docstring for acceptable arguments and formats.'.format(arg))
+                for data in self.lammps_data:
+                    for at in data.atom_types:
+                        at.charge *= s            
+                    
+    def fit_error(self, values, args):
+        self._charge_reset()
+        fitting_parameters = dict(zip(args, values))
+        self._update_q_ratio(fitting_parameters)
+        self._update_springs(fitting_parameters)
+        self._update_potentials(fitting_parameters)        
+        self._update_charge_scaling(fitting_parameters)        
         ip_forces = self.get_forces()
         error = np.sum((self.expected_forces() - ip_forces)**2)/ ip_forces.size
         return error
