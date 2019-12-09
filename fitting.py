@@ -182,29 +182,27 @@ class FitModel():
 
     
     
-    
-    
     def _charge_reset(self):
         for data in self.lammps_data:
             for at in data.atom_types:
-                at.charge = at.formal_charge    
+                at.charge = at.formal_charge
        
     def _update_q_ratio(self, fitting_parameters):
         for arg, value in fitting_parameters.items():
             if arg.startswith('dq_'):
                 for data in self.lammps_data:
-                    for at in data.atom_type:
-                        if arg.endswith(at.element_type) and at.coreshell == 'core':
-                            at.charge += dq
-                        if arg.endswith(at.element_type) and at.coreshell == 'shell':
-                            at.charge += -dq
+                    for at in data.atom_types:
+                        if arg.endswith(at.element_type) and at.core_shell == 'core':
+                            at.charge += value
+                        if arg.endswith(at.element_type) and at.core_shell == 'shell':
+                            at.charge -= value    
        
     def _update_springs(self, fitting_parameters):
         for arg, value in fitting_parameters.items():
             for data in self.lammps_data:
                 for bt in data.bond_types:
                     if bt.label == arg:
-                        bt.spring_coeff_1 = value                           
+                        bt.spring_coeff_1 = value
                                              
     def _update_potentials(self, fitting_parameters):
         for arg, value in fitting_parameters.items():
@@ -221,7 +219,7 @@ class FitModel():
             if arg == 'q_scaling':
                 for data in self.lammps_data:
                     for at in data.atom_types:
-                        at.charge *= s            
+                        at.charge *= value
                     
     def fit_error(self, values, args):
         self._charge_reset()
