@@ -176,11 +176,7 @@ class FitModel():
             instance.run(0)
             structure_forces.append(instance.system.forces[ld.core_mask()])
         ip_forces = np.concatenate(structure_forces, axis=0)
-        return ip_forces
-
-    
-
-    
+        return ip_forces  
     
     def _charge_reset(self):
         for data in self.lammps_data:
