@@ -1,71 +1,89 @@
-#! /usr/bin/env python3
-
 from fitting import FitModel
-from databases import initiate_dbs, print_summary, print_forces
-from plotters import plotter
-from iteration_functions import iter_fitting, update_potentials
-from convergence_checker import get_modes, converge_check
-from scipy import stats
+from scipy import optimize
+import numpy as np
+import matplotlib.pyplot as plt
+import input_checker as ic
 
 if __name__ == '__main__':
-
     params = {}
     params['core_shell'] = { 'Li': False, 'Ni': False, 'O': True }
     params['charges'] = {'Li': +1.0,
                          'Ni': +3.0,
-                         'O': {'core':  +0.960,
-                               'shell': -2.960}}
+                         'O': {'core': -2.0,
+                               'shell': 0.0}}
     params['masses'] = {'Li': 6.941,
                         'Ni': 58.6934,
                         'O': {'core': 14.3991,
                               'shell': 1.5999} }
-
-    params['cs_springs'] = {'O' : [100.0, 0.0]}
+    params['cs_springs'] = {'O-O' : [20.0, 0.0]}
 
     distribution = {}
-    distribution['Li-O'] = {'bpp' : [691.229, 0.269, 0.0],
+    distribution['Li-O'] = {'bpp' : [663.111, 0.119, 0.0],
                             'sd' : [80, 0.01, 0.01]}
 
-    distribution['Ni-O'] = {'bpp' : [591.665, 0.382, 0.000],
+    distribution['Ni-O'] = {'bpp' : [1393.540, 0.218, 0.000],
                             'sd'  : [80, 0.01, 0.01]}
 
-    distribution['O-O'] = {'bpp' : [22739.211, 0.146, 20.7],
+    distribution['O-O'] = {'bpp' : [25804.807, 0.284, 0.0],
                            'sd'  : [200, 0.01, 5]}
 
-    excude_from_fit = [] # string of atom1_atom2_param. Example of format = 'O_O_rho'
-    
-    def mode_potentials(trace):
-        potential_dict = {}
-        for var in trace.varnames:
-            potential_dict['{}'.format(var)] = float(stats.mode(trace.get_values(var))[0])
-        return potential_dict
-    
-    i=1
-    prev_modes = None
-    converge = False
-    summary_filename = 'summary.csv'
-    forces_filename = 'forces.csv'
-    initiate_dbs(summary_filename, forces_filename)
+    fit_data = FitModel.collect_info(params, distribution, supercell=[8,4,2])
 
-    while converge is False:
+    include_labels = ['dq_O','q_scaling','O-O spring','Li_O_a','Li_O_rho','Ni_O_a','Ni_O_rho','O_O_a', 'O_O_rho']
+    bounds_list = [(0.01, 4),(0.3,1.0),(10.0,150.0),(100.0,50000.0),(0.01,1.0),(150.0,50000.0),(0.01,1.0),(150.0,50000.0),(0.01,1.0)]
 
-        #Runs FitModel and trace, finds mode, and updates the potentials in the distribution dictionary with mean values
-        trace, fit_data = iter_fitting(params, distribution, excude_from_fit)
-        modes = get_modes(trace)
-        distribution = update_potentials(trace, modes, distribution)
+    if len(include_labels) != len(bounds_list):
+        raise IndexError('include_labels and bounds_list are not of equal length. Check there are bounds associated with each label with the correct bound values.')
 
-        #Runs with mode potential and returns forces
-        kwargs = mode_potentials(trace)
-        mode_forces = fit_data.get_forces(**kwargs)
+    for label, bounds in zip(include_labels, bounds_list):
+        if label.startswith('dq_'):
+            ic.check_coreshell(label, bounds, fit_data2)
+        elif label == 'q_scaling':
+            ic.check_scaling_limits(label, bounds)
+        elif '-' in label:
+            ic.check_spring(label, bounds, params)
+        elif '_a' in label or '_rho' in label or '_c' in label:
+            ic.check_buckingham(label, bounds, params)
+        else:
+            raise TypeError('Label {} is not a valid label type'.format(label))
 
-        #Fills the databases
-        print_forces(i, mode_forces, forces_filename)
-        print_summary(i, trace, summary_filename)
 
-        #Plots the distributions
-        plotter(trace, i)
+    s = optimize.differential_evolution(fit_data.fit_error,
+                                        bounds=bounds_list,
+                                        popsize=25,
+#                                         tol=0.0001,
+                                        args=([include_labels]),
+                                        maxiter=1000,
+                                        disp=True,
+                                        init='latinhypercube',
+                                        workers=-1)
 
-        #Checks convergence, sets modes to prev_moves
-        converge = converge_check(modes, distribution, prev_modes)
-        prev_modes = modes
-        i+=1
+
+    def fit_forces(fit_data, values, args):
+        potential_params = dict(zip( args, np.round(values,4) ))
+        for pot in fit_data.potentials:
+            for param in [ pot.a, pot.rho, pot.c ]:
+                key = param.label_string
+                if key not in potential_params:
+                    potential_params[key] = param.value
+        print(potential_params)
+        ip_forces = fit_data.get_forces()
+        return ip_forces
+
+    include_values = s.x[3:]
+    ip_list = np.concatenate(fit_forces(fit_data, include_values, include_labels[3:]), axis=0)
+    dft_list = np.concatenate(fit_data.expected_forces(), axis=0)
+
+    plt.plot(ip_list, label='ip')
+    plt.plot(dft_list, label='dft', alpha=0.6)
+    plt.ylabel('force')
+    plt.xlabel('index')
+    plt.legend(loc='upper right')
+    plt.text(500,4.5, 'error: {0:.5f}'.format(np.sum(((dft_list-ip_list)**2)/ip_list.size)))
+    plt.text(500,4.0, 'scaling factor: {:.4f}'.format(s.x[1]))
+    plt.text(500,3.5, 'potential values: {:.4f} {:.4f}'.format(*include_values[:2]))
+    plt.text(500,3.0, '{:.4f} {:.4f} {:.4f} {:.4f}'.format(*include_values[2:]))
+    plt.text(500,2.5, 'spring constant: {:.4f}'.format(s.x[2]))
+    plt.text(500,2.0, 'O-O charge ratio: {:.4f}'.format(s.x[0]))
+    plt.savefig('q+buck+cs+spring+ratio_all.png',dpi=500, bbox_inches = "tight")
+    plt.show()

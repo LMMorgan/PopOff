@@ -98,70 +98,15 @@ class FitModel():
         """
         for pot in self.potentials:
             lmp.command('{}'.format(pot.potential_string()))    
-        
-    def _simfunc(self, **kwargs):
-        """
-        Runs a minimization and zero step run for the instance and returns the forces.
-        Args:
-            **kwargs: Contain data for type of fitting and to what parameters as set with pm.Model.
-        Returns:
-            out (np.array): x,y,z forces on each atom.
-        """
-        instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]
-
-        if min(kwargs.values()) > 0:
-            self._update_potentials(**kwargs)
-            out = np.zeros(self.expected_forces().shape)
-            structure_forces = []
-            for ld, instance in zip(self.lammps_data, instances):
-                self._set_potentials(instance)
-                instance.command('fix 1 cores setforce 0.0 0.0 0.0')
-                instance.command('minimize 1e-25 1e-25 5000 10000')
-                instance.command('unfix 1')
-                instance.run(0)
-                structure_forces.append(instance.system.forces[ld.core_mask()])
-            out = np.concatenate(structure_forces, axis=0)
-        else: out = np.ones(self.expected_forces().shape)*999999999 # ThisAlgorithmBecomingSkynetCost
-        return out
-
-                    
-    def run_fit(self, excude_from_fit=None, epsilon=0.1, draws=1000, dist_func='absolute_error'):
-        """
-        Runs the PyMC3 fitting process. Initiating a pm.Model, applying the potentials and distributions, and running the simulator that calls Lammps.
-        Args:
-            excude_from_fit (list(str)): Label of the parameters not wishing to fit to. Example 'Li_O_c'. Default=None.
-            epsilion (float): Designates the value of epsilon. Default=0.1.
-            draws (int): Designates the number of draws per step for the fitting. Default=1000.
-            dist_func (optional:str): Name of distance calculation to perform in pm.SMC. Default='absolute_error'.
-        Returns:
-            trace (obj): A pymc3.backends.base.MultiTrace object containing a multitrace with information on the number of chains, iterations, and variables output from PyMC3. This can be read by arviz to be plotted.
-        """
-        with pm.Model() as model:
-            my_dict = {}
-            for pot in self.potentials:
-                name = '{}'.format(pot.a.label_string)
-                if name not in excude_from_fit:
-                    my_dict[name] = pot.a.distribution()
-                name = '{}'.format(pot.rho.label_string)
-                if name not in excude_from_fit:
-                    my_dict[name] = pot.rho.distribution()
-                name = '{}'.format(pot.c.label_string)
-                if name not in excude_from_fit:
-                    my_dict[name] = pot.c.distribution()
-
-            simulator = pm.Simulator('simulator', self._simfunc, observed=self.expected_forces())
-            trace = pm.sample(step=pm.SMC(ABC=True, epsilon=epsilon), dis_func='absolute_error', draws=draws)
-        return trace
-    
-
-    
-    
-    
-    
-    
-    
     
     def get_forces(self):
+        """
+        Runs a minimization (if core-shell atoms present) and zero step run for each instance and returns the forces. If any core-shell atoms are present the output forces are masked, so only the forces acting on the rigid ion and core atoms are returned for direct comparison with the relating dft forces.
+        Args:
+            None
+        Returns:
+            out (np.array): x,y,z forces on each atom for each instance (each structure).
+        """        
         instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]
         ip_forces = np.zeros(self.expected_forces().shape)
         structure_forces = []
@@ -179,11 +124,25 @@ class FitModel():
         return ip_forces  
     
     def _charge_reset(self):
+        """
+        Resets charge (the working charge) to the formal charge for each atom type.
+        Args:
+            None
+        Returns:
+            None
+        """
         for data in self.lammps_data:
             for at in data.atom_types:
                 at.charge = at.formal_charge
        
     def _update_q_ratio(self, fitting_parameters):
+        """
+        Updates the charge ratio between a given core-shell pair. This is done by passing a factor dQ, which is added to the core charge and sutracted from the shell charge.
+        Args:
+            fitting_parameters (dict): The keys relate to the parameters being fitted, and the values are the corresponding values.
+        Returns:
+            None
+        """
         for arg, value in fitting_parameters.items():
             if arg.startswith('dq_'):
                 for data in self.lammps_data:
@@ -194,6 +153,13 @@ class FitModel():
                             at.charge -= value    
        
     def _update_springs(self, fitting_parameters):
+        """
+        Updates the spring constant for the given core-shell atom.
+        Args:
+            fitting_parameters (dict): The keys relate to the parameters being fitted, and the values are the corresponding values.
+        Returns:
+            None
+        """
         for arg, value in fitting_parameters.items():
             for data in self.lammps_data:
                 for bt in data.bond_types:
@@ -201,6 +167,13 @@ class FitModel():
                         bt.spring_coeff_1 = value
                                              
     def _update_potentials(self, fitting_parameters):
+        """
+        Updates the buckingham potential for all parameters being fitted. If a specific parameter isn't updated, the current default value will be used and not varied.
+        Args:
+            fitting_parameters (dict): The keys relate to the parameters being fitted, and the values are the corresponding values.
+        Returns:
+            None
+        """
         for arg, value in fitting_parameters.items():
             for pot in self.potentials:
                 if arg == pot.a.label_string:
@@ -211,6 +184,13 @@ class FitModel():
                     pot.c.value = value                                                
                             
     def _update_charge_scaling(self, fitting_parameters):
+        """
+        Updates the charge scaling for all atoms. This is done by passing a scaling factor between 0 and 1, which is multiplied by the charge. Example Li = +1 charge, with a scaling factor of 0.5 is 1*0.5, giving a scaled charge of 0.5.
+        Args:
+            fitting_parameters (dict): The keys relate to the parameters being fitted, and the values are the corresponding values.
+        Returns:
+            None
+        """
         for arg, value in fitting_parameters.items():
             if arg == 'q_scaling':
                 for data in self.lammps_data:
@@ -218,6 +198,14 @@ class FitModel():
                         at.charge *= value
                     
     def fit_error(self, values, args):
+        """
+        Takes a list of fitting arguments and their corresponding values, resets the charges on the atoms, then applies a series of updates relating to the given arguements. Following these updates, the forces are extracted and compared to the relating dft forces for the structure(/s). A sum of squared errors is calculated and returned.
+        Args:
+            values (list(float)): Values relating to the fitting arguments passes in.
+            args (list(str)): Keys relating to the fitting parameters for the system, such as charge, springs, and buckingham parameters.
+        Returns:
+            error (float): The sum of squared errors calculated between dft forces and the MD forces under the given conditions.
+        """
         self._charge_reset()
         fitting_parameters = dict(zip(args, values))
         self._update_q_ratio(fitting_parameters)
@@ -233,23 +221,18 @@ class FitModel():
     
     
     
-    
-    
-    
-    
-    
-    def get_lattice_params(self, **kwargs):
-        self._update_potentials(**kwargs)
-        instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]           
- 
+    def get_lattice_params(self):
+        instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]  
         for ld, instance in zip(self.lammps_data, instances):
             self._set_potentials(instance)
-            instance.command('reset_timestep 0')
-            instance.command('timestep 0.5')
-            instance.command('min_style fire')
-            #instance.command('fix 1 cores setforce 0.0 0.0 0.0')
-            instance.command('minimize 1e-25 1e-3 5000 10000')
-            #instance.command('unfix 1')
+            self._set_charges(instance)
+            if self.cs_springs: #If coreshell do the minimisation otherwise do run(0) only
+                self._set_springs(instance)
+                instance.command('reset_timestep 0')
+                instance.command('min_style fire')
+                instance.command('fix 1 cores setforce 0.0 0.0 0.0')
+                instance.command('minimize 1e-25 1e-3 3000 10000')
+                instance.command('unfix 1')
             
             instance.command('reset_timestep 0')
             instance.command('timestep 0.002')
@@ -260,6 +243,65 @@ class FitModel():
         return instances        
         
   
+
+
+
+
+#     def _simfunc(self, **kwargs):
+#         """
+#         Runs a minimization and zero step run for the instance and returns the forces.
+#         Args:
+#             **kwargs: Contain data for type of fitting and to what parameters as set with pm.Model.
+#         Returns:
+#             out (np.array): x,y,z forces on each atom.
+#         """
+#         instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]
+
+#         if min(kwargs.values()) > 0:
+#             self._update_potentials(**kwargs)
+#             out = np.zeros(self.expected_forces().shape)
+#             structure_forces = []
+#             for ld, instance in zip(self.lammps_data, instances):
+#                 self._set_potentials(instance)
+#                 instance.command('fix 1 cores setforce 0.0 0.0 0.0')
+#                 instance.command('minimize 1e-25 1e-3 5000 10000')
+#                 instance.command('unfix 1')
+#                 instance.run(0)
+#                 structure_forces.append(instance.system.forces[ld.core_mask()])
+#             out = np.concatenate(structure_forces, axis=0)
+#         else: out = np.ones(self.expected_forces().shape)*999999999 # ThisAlgorithmBecomingSkynetCost
+#         return out
+
+                    
+#     def run_fit(self, excude_from_fit=None, epsilon=0.1, draws=1000, dist_func='absolute_error'):
+#         """
+#         Runs the PyMC3 fitting process. Initiating a pm.Model, applying the potentials and distributions, and running the simulator that calls Lammps.
+#         Args:
+#             excude_from_fit (list(str)): Label of the parameters not wishing to fit to. Example 'Li_O_c'. Default=None.
+#             epsilion (float): Designates the value of epsilon. Default=0.1.
+#             draws (int): Designates the number of draws per step for the fitting. Default=1000.
+#             dist_func (optional:str): Name of distance calculation to perform in pm.SMC. Default='absolute_error'.
+#         Returns:
+#             trace (obj): A pymc3.backends.base.MultiTrace object containing a multitrace with information on the number of chains, iterations, and variables output from PyMC3. This can be read by arviz to be plotted.
+#         """
+#         with pm.Model() as model:
+#             my_dict = {}
+#             for pot in self.potentials:
+#                 name = '{}'.format(pot.a.label_string)
+#                 if name not in excude_from_fit:
+#                     my_dict[name] = pot.a.distribution()
+#                 name = '{}'.format(pot.rho.label_string)
+#                 if name not in excude_from_fit:
+#                     my_dict[name] = pot.rho.distribution()
+#                 name = '{}'.format(pot.c.label_string)
+#                 if name not in excude_from_fit:
+#                     my_dict[name] = pot.c.distribution()
+
+#             simulator = pm.Simulator('simulator', self._simfunc, observed=self.expected_forces())
+#             trace = pm.sample(step=pm.SMC(ABC=True, epsilon=epsilon), dis_func='absolute_error', draws=draws)
+#         return trace
+    
+
 
 
 
