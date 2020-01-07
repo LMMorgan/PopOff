@@ -5,6 +5,24 @@ from scipy import optimize
 import numpy as np
 import matplotlib.pyplot as plt
 import input_checker as ic
+import json
+
+def fit_forces(fit_data, values, args):
+    potential_params = dict(zip( args, np.round(values,4) ))
+    for pot in fit_data.potentials:
+        for param in [ pot.a, pot.rho, pot.c ]:
+            key = param.label_string
+            if key not in potential_params:
+                potential_params[key] = param.value
+    print(potential_params)
+    ip_forces = fit_data.get_forces()
+    return ip_forces
+
+def get_forces(fit_data, values, args):
+    fit_data.init_potential(values, args)
+    ip_forces = np.concatenate(fit_data.get_forces(), axis=0)
+    dft_forces = np.concatenate(fit_data.expected_forces(), axis=0)
+    return dft_forces, ip_forces
 
 if __name__ == '__main__':
 
@@ -49,7 +67,7 @@ if __name__ == '__main__':
         else:
             raise TypeError('Label {} is not a valid label type'.format(label))
 
-    s = optimize.differential_evolution(fit_data.fit_error,
+    s = optimize.differential_evolution(fit_data.chi_squared_error,
                                         bounds=bounds_list,
                                         popsize=25,
 #                                         tol=0.0001,
@@ -61,26 +79,23 @@ if __name__ == '__main__':
 
     print(s)
 
-    def fit_forces(fit_data, values, args):
-        potential_params = dict(zip( args, np.round(values,4) ))
-        for pot in fit_data.potentials:
-            for param in [ pot.a, pot.rho, pot.c ]:
-                key = param.label_string
-                if key not in potential_params:
-                    potential_params[key] = param.value
-        print(potential_params)
-        ip_forces = fit_data.get_forces()
-        return ip_forces
+
 
     include_values = s.x[3:]
     ip_list = np.concatenate(fit_forces(fit_data, include_values, include_labels[3:]), axis=0)
     dft_list = np.concatenate(fit_data.expected_forces(), axis=0)
-#    other_data = np.array(np.sum(((dft_list-ip_list)**2)/ip_list.size), s.x ) 
-#    other_data_labels = ['error', include_labels]
-    np.savetxt('dft_forces.txt', dft_list, fmt='%.10e', delimiter=' ')
-    np.savetxt('ip_forces.txt', ip_list, fmt='%.10e', delimiter=' ')
-#    np.savetxt('other_data.txt', other_data, fmt='%.4f', delimiter=' ', header=other_data_labels)
+    
+    dft2, ip2 = get_forces(fit_data, s.x, include_labels)
 
+    np.savetxt('dft_forces.dat', dft_list, fmt='%.10e', delimiter=' ')
+    np.savetxt('ip_forces.dat', ip_list, fmt='%.10e', delimiter=' ')
+
+    np.savetxt('error.dat', s.fun, fmt='%.10')
+    potential_dict = {k:v for k, v in zip(include_labels, s.x)}
+    with open('potentials.json', 'w') as f:
+        json.dump(potential_dict, f)
+    
+    
     plt.plot(ip_list, label='ip')
     plt.plot(dft_list, label='dft', alpha=0.6)
     plt.ylabel('force')

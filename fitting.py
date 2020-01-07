@@ -1,5 +1,4 @@
 import numpy as np
-import pymc3 as pm
 import glob
 from vasppy.outcar import forces_from_outcar
 from pymatgen.io.vasp import Poscar
@@ -195,27 +194,37 @@ class FitModel():
             if arg == 'q_scaling':
                 for data in self.lammps_data:
                     for at in data.atom_types:
-                        at.charge *= value
-                    
-    def fit_error(self, values, args):
+                        at.charge *= value                      
+                        
+    def init_potential(self, values, args):
         """
-        Takes a list of fitting arguments and their corresponding values, resets the charges on the atoms, then applies a series of updates relating to the given arguements. Following these updates, the forces are extracted and compared to the relating dft forces for the structure(/s). A sum of squared errors is calculated and returned.
+        Takes a list of potential arguments and their corresponding values, resets the charges on the atoms, then applies a series of updates relating to the given arguements.
         Args:
             values (list(float)): Values relating to the fitting arguments passes in.
             args (list(str)): Keys relating to the fitting parameters for the system, such as charge, springs, and buckingham parameters.
         Returns:
-            error (float): The sum of squared errors calculated between dft forces and the MD forces under the given conditions.
+            None
         """
         self._charge_reset()
         fitting_parameters = dict(zip(args, values))
         self._update_q_ratio(fitting_parameters)
         self._update_springs(fitting_parameters)
         self._update_potentials(fitting_parameters)        
-        self._update_charge_scaling(fitting_parameters)        
-        ip_forces = self.get_forces()
-        error = np.sum((self.expected_forces() - ip_forces)**2)/ ip_forces.size
-        return error
-
+        self._update_charge_scaling(fitting_parameters)                    
+        
+    def chi_squared_error(self, values, args):
+        """
+        Runs potential updates, and calculates a chi squared error between the dft and ip forces.
+        Args:
+            values (list(float)): Values relating to the fitting arguments passes in.
+            args (list(str)): Keys relating to the fitting parameters for the system, such as charge, springs, and buckingham parameters.
+        Returns:
+            error (float): The chi squared error calculated between dft forces and the MD forces under the given potential.
+        """
+        self.init_potential(values,args)
+        return np.sum((self.expected_forces() - self.get_forces())**2)/ self.expected_forces().size
+    
+    
     
     
     

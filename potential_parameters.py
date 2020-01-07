@@ -1,5 +1,3 @@
-import pymc3 as pm
-
 class BuckinghamParameter():
     """
     Class that contains the information for each parameter in the buckingham potentials.
