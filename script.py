@@ -7,17 +7,6 @@ import matplotlib.pyplot as plt
 import input_checker as ic
 import json
 
-def fit_forces(fit_data, values, args):
-    potential_params = dict(zip( args, np.round(values,4) ))
-    for pot in fit_data.potentials:
-        for param in [ pot.a, pot.rho, pot.c ]:
-            key = param.label_string
-            if key not in potential_params:
-                potential_params[key] = param.value
-    print(potential_params)
-    ip_forces = fit_data.get_forces()
-    return ip_forces
-
 def get_forces(fit_data, values, args):
     fit_data.init_potential(values, args)
     ip_forces = np.concatenate(fit_data.get_forces(), axis=0)
@@ -80,12 +69,8 @@ if __name__ == '__main__':
     print(s)
 
 
-
-    include_values = s.x[3:]
-    ip_list = np.concatenate(fit_forces(fit_data, include_values, include_labels[3:]), axis=0)
-    dft_list = np.concatenate(fit_data.expected_forces(), axis=0)
     
-    dft2, ip2 = get_forces(fit_data, s.x, include_labels)
+    dft_forces, ip_forces = get_forces(fit_data, s.x, include_labels)
 
     np.savetxt('dft_forces.dat', dft_list, fmt='%.10e', delimiter=' ')
     np.savetxt('ip_forces.dat', ip_list, fmt='%.10e', delimiter=' ')
