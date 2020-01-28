@@ -224,35 +224,41 @@ class FitModel():
         self.init_potential(values,args)
         return np.sum((self.expected_forces() - self.get_forces())**2)/ self.expected_forces().size
     
-    
-    
-    
-    
-    
-    
     def get_lattice_params(self):
-        instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]  
+        """
+        Runs a minimization (if core-shell atoms present) and a structure relaxation for each instance and returns the lammps instance.
+        Args:
+            None
+        Returns:
+            lmp (obj): Lammps object with structure and specified commands implemented.
+        """  
+        instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]
         for ld, instance in zip(self.lammps_data, instances):
             self._set_potentials(instance)
             self._set_charges(instance)
             if self.cs_springs: #If coreshell do the minimisation otherwise do run(0) only
                 self._set_springs(instance)
-                instance.command('reset_timestep 0')
-                instance.command('min_style fire')
                 instance.command('fix 1 cores setforce 0.0 0.0 0.0')
                 instance.command('minimize 1e-25 1e-3 3000 10000')
                 instance.command('unfix 1')
+            instance.command('reset_timestep 0')
+            instance.command('timestep 0.1')
+            instance.command('fix 2 all box/relax aniso 1.0 vmax 0.0005')
+#             instance.command('dump traj all atom 1 relax_traj.dat')
+            instance.command('min_style cg')
+            instance.command('minimize 1e-25 1e-25 5000 10000')
+            instance.command('unfix 2')
             
             instance.command('reset_timestep 0')
             instance.command('timestep 0.002')
-            instance.command('fix 2 all box/relax aniso 1.0 vmax 0.0005')
-            instance.command('min_style cg')
-            instance.command('minimize 1e-25 1e-25 50000 10000')
-            instance.command('unfix 2')        
-        return instances        
-        
-  
+            instance.command('fix 3 all npt temp 300 300 0.01 aniso 1.0 1.0 0.1')
+#             instance.command('dump traj2 all atom 10 run_traj.dat')
+            instance.command('run 1000')
+            instance.command('unfix 3')
 
+            
+        return instances
+        
 
 
 
