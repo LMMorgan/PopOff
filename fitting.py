@@ -241,12 +241,13 @@ class FitModel():
                 instance.command('fix 1 cores setforce 0.0 0.0 0.0')
                 instance.command('minimize 1e-25 1e-3 3000 10000')
                 instance.command('unfix 1')
+          
             instance.command('reset_timestep 0')
             instance.command('timestep 0.1')
             instance.command('fix 2 all box/relax aniso 1.0 vmax 0.0005')
 #             instance.command('dump traj all atom 1 relax_traj.dat')
             instance.command('min_style cg')
-            instance.command('minimize 1e-25 1e-25 5000 10000')
+            instance.command('minimize 1e-25 1e-25 1000 5000')
             instance.command('unfix 2')
             
             instance.command('reset_timestep 0')
@@ -255,12 +256,12 @@ class FitModel():
 #             instance.command('dump traj2 all atom 10 run_traj.dat')
             instance.command('run 1000')
             instance.command('unfix 3')
-
-            
         return instances
         
 
 
+        
+        
 
 #     def _simfunc(self, **kwargs):
 #         """
