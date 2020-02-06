@@ -8,7 +8,7 @@ class LammpsData():
     """
     Class that collates all structural information for outputing a Lammps format.
     """
-    def __init__(self, atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factors, file_name):
+    def __init__(self, atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factors, file_name, expected_stress_tensors):
         """
         Initialise an instance for all information relating to the pysical and electronic structure needed for the Lammps input.
 
@@ -20,7 +20,7 @@ class LammpsData():
             cell_lengths (list(float)): Lengths of each cell direction.
             tilt_factors (list(float)): Tilt factors of the cell.
             file_name (str): Name of lammps formatted file to be written.
-                
+            expected_stress_tensors (np.array): DFT stress tensors.
         Returns:
             None
         """ 
@@ -32,9 +32,10 @@ class LammpsData():
         self.tilt_factors = tilt_factors
         self.file_name = file_name
         self.write_lammps_files()
+        self.expected_stress_tensors = expected_stress_tensors
         
     @classmethod
-    def from_structure(cls, structure, params, i):
+    def from_structure(cls, structure, params, i, stresses):
         """
         Collects information from initial structure, params, and an index.
 
@@ -43,7 +44,7 @@ class LammpsData():
             params (dict(dict)): Contains core_shell (bool), charges (float), masses (float), and cs_springs (list(float)) dictionaries where the keys are atom label (str). Also contains bpp (list(float)) and sd (list(float)) dictionaries where the keys are atom label pairs (str), example: 'Li-O'.
             i (int): index identifier of the file in the list of files, i.e. 1 for POSCAR1 and OUTCAR1.
         Returns:
-            (LammpsData):  LammpsData object containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factors (list(float)), and file_name (str).          
+            (LammpsData):  LammpsData object containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factors (list(float)), file_name (str), and expected_stress_tensors (np.array).          
         """
         cell_lengths, tilt_factors, structure = lammps_lattice(structure)
         atom_types, bond_types = types_from_structure( structure=structure, 
@@ -53,10 +54,10 @@ class LammpsData():
                                                        cs_spring=params['cs_springs'],
                                                        verbose=True )
         atoms, bonds = atoms_and_bonds_from_structure( structure, atom_types, bond_types )
-        
         file_name = 'lammps/coords{}.lmp'.format(i+1)
+        expected_stress_tensors = stresses
 
-        return cls( atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factors, file_name)
+        return cls( atom_types, bond_types, atoms, bonds, cell_lengths, tilt_factors, file_name, expected_stress_tensors)
     
     def _header_string( self, title='title' ):
         """
