@@ -311,12 +311,12 @@ class FitModel():
             instance.command('minimize 1e-25 1e-25 1000 5000')
             instance.command('unfix 2')
             
-            instance.command('reset_timestep 0')
-            instance.command('timestep 0.002')
-            instance.command('fix 3 all npt temp 300 300 0.01 aniso 1.0 1.0 0.1')
-#             instance.command('dump traj2 all atom 10 run_traj.dat')
-            instance.command('run 1000')
-            instance.command('unfix 3')
+#             instance.command('reset_timestep 0')
+#             instance.command('timestep 0.002')
+#             instance.command('fix 3 all npt temp 300 300 0.01 aniso 1.0 1.0 0.1')
+# #             instance.command('dump traj2 all atom 10 run_traj.dat')
+#             instance.command('run 1000')
+#             instance.command('unfix 3')
         return instances
         
 
