@@ -6,7 +6,7 @@ from atom_types import AtomType
 from bond_types import BondType
 
     
-def types_from_structure( structure, core_shell, charges, masses, cs_spring, verbose=True ):
+def types_from_structure( structure, core_shell, charges, masses, cs_spring=None, verbose=True ):
     """
     Defines the atom types and bond types from the structure and given information from params.
     

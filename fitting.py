@@ -7,7 +7,7 @@ class FitModel():
     """
     Class that collates all fitting information and runs the fitting process using PyMC3 and LAMMPS.
     """
-    def __init__(self, potentials, lammps_data, cs_springs):
+    def __init__(self, potentials, lammps_data, cs_springs=None):
         """
         Initialise an instance for all information relating to the pysical and electronic structure needed for the Lammps input.
         
@@ -38,9 +38,12 @@ class FitModel():
         """  
         lammps_data = collate_structural_data(params, supercell)
         parameters = pot.buckingham_parameters(distribution)
-        potentials = pot.buckingham_potentials(distribution, lammps_data[0].atom_types, parameters) #REWRITE TO READ ATOM_TYPES WITHOUT [0] 
-        cs_springs =  params['cs_springs']
-        return cls(potentials, lammps_data, cs_springs)
+        potentials = pot.buckingham_potentials(distribution, lammps_data[0].atom_types, parameters) #REWRITE TO READ ATOM_TYPES WITHOUT [0]
+        if 'cs_springs' in params.keys():
+            cs_springs =  params['cs_springs']
+            return cls(potentials, lammps_data, cs_springs)
+        else:
+            return cls(potentials, lammps_data)
     
     def expected_forces(self):
         """
@@ -281,7 +284,7 @@ class FitModel():
         ip_forces, ip_stresses = self.get_forces_and_stresses()
         force_diff = np.sum((self.expected_forces() - ip_forces)**2)/ self.expected_forces().size
         stress_diff = np.sum((self.expected_stresses() - ip_stresses)**2)/6
-        return force_diff + stress_diff
+        return force_diff + (stress_diff*0.001)
     
     def get_lattice_params(self):
         """
@@ -311,12 +314,12 @@ class FitModel():
             instance.command('minimize 1e-25 1e-25 1000 5000')
             instance.command('unfix 2')
             
-#             instance.command('reset_timestep 0')
-#             instance.command('timestep 0.002')
-#             instance.command('fix 3 all npt temp 300 300 0.01 aniso 1.0 1.0 0.1')
-# #             instance.command('dump traj2 all atom 10 run_traj.dat')
-#             instance.command('run 1000')
-#             instance.command('unfix 3')
+            instance.command('reset_timestep 0')
+            instance.command('timestep 0.002')
+            instance.command('fix 3 all npt temp 300 300 0.01 aniso 1.0 1.0 0.1')
+#             instance.command('dump traj2 all atom 10 run_traj.dat')
+            instance.command('run 1000')
+            instance.command('unfix 3')
         return instances
         
 

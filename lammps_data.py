@@ -47,12 +47,19 @@ class LammpsData():
             (LammpsData):  LammpsData object containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factors (list(float)), file_name (str), and expected_stress_tensors (np.array).          
         """
         cell_lengths, tilt_factors, structure = lammps_lattice(structure)
-        atom_types, bond_types = types_from_structure( structure=structure, 
-                                                       core_shell=params['core_shell'], 
-                                                       charges=params['charges'], 
-                                                       masses=params['masses'],
-                                                       cs_spring=params['cs_springs'],
-                                                       verbose=True )
+        if 'cs_springs' in params.keys():
+            atom_types, bond_types = types_from_structure( structure=structure, 
+                                                           core_shell=params['core_shell'], 
+                                                           charges=params['charges'], 
+                                                           masses=params['masses'],
+                                                           cs_spring=params['cs_springs'],
+                                                           verbose=True )
+        else:
+            atom_types, bond_types = types_from_structure( structure=structure, 
+                                                           core_shell=params['core_shell'], 
+                                                           charges=params['charges'], 
+                                                           masses=params['masses'],
+                                                           verbose=True )
         atoms, bonds = atoms_and_bonds_from_structure( structure, atom_types, bond_types )
         file_name = 'lammps/coords{}.lmp'.format(i+1)
         expected_stress_tensors = stresses
