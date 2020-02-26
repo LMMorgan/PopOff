@@ -27,12 +27,13 @@ def setup_error_checks(include_labels, bounds_list, fit_data, params):
                 ic.check_buckingham(label, bounds, params)
             else:
                 raise TypeError('Label {} is not a valid label type'.format(label))
-                
-def get_forces(fit_data, values, args):
+
+def extract_stresses_and_forces(fit_data, values, args):
     fit_data.init_potential(values, args)
-    ip_forces = fit_data.get_forces()
+    ip_forces, ip_stresses = fit_data.get_forces_and_stresses()
     dft_forces = fit_data.expected_forces()
-    return dft_forces, ip_forces
+    dft_stresses = fit_data.expected_stresses()
+    return dft_forces, ip_forces, dft_stresses, ip_stresses                
 
 if __name__ == '__main__':
 
@@ -61,8 +62,8 @@ if __name__ == '__main__':
 
     tot_num_structures = 15
     num_struct_to_fit = 2
-    num_of_fits = 15
-    head_directory_name = '{}_structure_fits'.format(num_struct_to_fit)
+    num_of_fits = 1
+    head_directory_name = 'final_potentials/partial+coreshell'.format(num_struct_to_fit)
 
     sets_of_structures = []
     while len(sets_of_structures) < num_of_fits:
@@ -75,7 +76,7 @@ if __name__ == '__main__':
 
     poscar_directory = os.path.join('poscars','thermos')
     outcar_directory = os.path.join('outcars','thermos')
-    for fit, structs in enumerate(sets_of_structures): 
+    for fit, structs in enumerate(sets_of_structures):
         for struct_num, struct in enumerate(structs):
             os.system('cp {}/POSCAR{} {}/POSCAR{}'.format(poscar_directory, struct+1, 'poscars', struct_num+1))
             os.system('cp {}/OUTCAR{} {}/OUTCAR{}'.format(outcar_directory, struct+1, 'outcars', struct_num+1))
@@ -84,13 +85,16 @@ if __name__ == '__main__':
         s = optimize.differential_evolution(fit_data.chi_squared_error, bounds=bounds_list, popsize=25,
                                             args=([include_labels]), maxiter=2000,
                                             disp=True, init='latinhypercube', workers=-1)
-        dft_forces, ip_forces = get_forces(fit_data, s.x, include_labels)
+        dft_f, ip_f, dft_s, ip_s = extract_stresses_and_forces(fit_data, s.x, include_labels)
         local_struct_dir = '-'.join([ '{}'.format(struct+1) for struct in structs])
         struct_directory = create_directory(head_directory_name, local_struct_dir)
-        np.savetxt('{}/dft_forces.dat'.format(struct_directory), dft_forces, fmt='%.10e', delimiter=' ')
-        np.savetxt('{}/ip_forces.dat'.format(struct_directory), ip_forces, fmt='%.10e', delimiter=' ')
+        np.savetxt('{}/dft_forces.dat'.format(struct_directory), dft_f, fmt='%.10e', delimiter=' ')
+        np.savetxt('{}/ip_forces.dat'.format(struct_directory), ip_f, fmt='%.10e', delimiter=' ')
+        np.savetxt('{}/dft_stresses.dat'.format(struct_directory), dft_s, fmt='%.10e', delimiter=' ')
+        np.savetxt('{}/ip_stresses.dat'.format(struct_directory), ip_s, fmt='%.10e', delimiter=' ')
         with open('{}/error.dat'.format(struct_directory), 'w') as f:
             f.write(str(s.fun))
         potential_dict = {k:v for k, v in zip(include_labels, s.x)}
         with open('{}/potentials.json'.format(struct_directory), 'w') as f:
             json.dump(potential_dict, f)
+
