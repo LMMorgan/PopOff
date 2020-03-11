@@ -14,8 +14,8 @@ def collate_structural_data(params, supercell=None):
     Returns:
         lammps_data (list(obj)):  LammpsData objects containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factor (list(float)), file_name (str), and expected_stress_tensors (np.array).
         """
-    if isinstance(supercell, list) is False :
-            raise TypeError('Incorrect type for supercell. Requires integers for x,y,z expansion in a list, e.g. [1,1,1], or list of x,y,z expansions for each structure, e.g. [[1,1,1], [2,2,2], [3,3,3]]')
+    if (isinstance(supercell, list) is False) and (supercell is not None):
+            raise TypeError('Incorrect type for supercell. Requires integers for x,y,z expansion in a list, e.g. [1,1,1], or list of x,y,z expansions for each structure, e.g. [[1,1,1], [2,2,2], [3,3,3]]. Alternatively do not include.')
             
     lammps_data = []
     for i, pos in enumerate(sorted(glob.glob('poscars/POSCAR*'))):

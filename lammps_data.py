@@ -41,7 +41,7 @@ class LammpsData():
 
         Args:
             structure (obj): A pymatgen structural object created from a POSCAR, with forces from an OUTCAR included as site properties.
-            params (dict(dict)): Contains core_shell (bool), charges (float), masses (float), and cs_springs (list(float)) dictionaries where the keys are atom label (str). Also contains bpp (list(float)) and sd (list(float)) dictionaries where the keys are atom label pairs (str), example: 'Li-O'.
+            params (dict(dict)): Contains core_shell (bool), charges (float), masses (float), and cs_springs (list(float)) dictionaries where the keys are atom label (str). Also contains potentials dict(list) where the keys are atom label pairs (str), example: 'Li-O'.
             i (int): index identifier of the file in the list of files, i.e. 1 for POSCAR1 and OUTCAR1.
         Returns:
             (LammpsData):  LammpsData object containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factors (list(float)), file_name (str), and expected_stress_tensors (np.array).          

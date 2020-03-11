@@ -48,7 +48,7 @@ def check_spring(label, bounds, params):
     Args:
         label (str): core-shell spring parameter key, relating to the spring to be applied between the core and shell of an element.
         bounds (tuple(float)): Lower and upper bounds associated with the spring parameter.
-        params (dict(dict)): Setup dictionary containing the inputs for coreshell, charges, masses, and core-shell springs.
+        params (dict(dict)): Setup dictionary containing the inputs for coreshell, charges, masses, potentials, and core-shell springs.
     Returns:
         None
     """
@@ -72,7 +72,7 @@ def check_buckingham(label, bounds, params):
     Args:
         label (str): buckingham parameter key, relating to the buckingham parameter to be fitted.
         bounds (tuple(float)): Lower and upper bounds associated with the buckingham parameter.
-        params (dict(dict)): Setup dictionary containing the inputs for coreshell, charges, masses, and core-shell springs.
+        params (dict(dict)): Setup dictionary containing the inputs for coreshell, charges, masses, potentials, and core-shell springs.
     Returns:
         None
     """
@@ -86,5 +86,29 @@ def check_buckingham(label, bounds, params):
             raise TypeError('Element {} in label {} not found in structure. Please check your labels and params.'.format(element, label))
     for element in individual_labels[2:]:
         if element not in ['a', 'rho', 'c']:
-            raise TypeError('Parameter {} in label {} is not a buckingham parameter. Please check your labels and params.'.format(element, label))
-    
+            raise TypeError('Parameter {} in label {} is not a buckingham parameter. Please check your labels and params.'.format(element, label))       
+            
+def setup_error_checks(include_labels, bounds_list, fit_data, params):
+    """
+    Checks the labels list and bounds list are the same length, then iterated through each item to run specific checks ensuring the labels and associated bounds are appropriate.
+    Args:
+        include_labels (list(str)): List of parameters to be fitted.
+        bounds_list (list(tuple(float))): List of lower and upper bound tuples associated with each parameter.
+        fit_data (obj(FitModel)): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS. 
+        params (dict(dict)): Setup dictionary containing the inputs for coreshell, charges, masses, potentials, and core-shell springs.
+    Returns:
+        None
+    """ 
+    if len(include_labels) != len(bounds_list):
+        raise IndexError('include_labels and bounds_list are not of equal length. Check there are bounds associated with each label with the correct bound values.')
+    for label, bounds in zip(include_labels, bounds_list):
+        if label.startswith('dq_'):
+            check_coreshell(label, bounds, fit_data)
+        elif label == 'q_scaling':
+            check_scaling_limits(label, bounds)
+        elif '-' in label:
+            check_spring(label, bounds, params)
+        elif '_a' in label or '_rho' in label or '_c' in label:
+            check_buckingham(label, bounds, params)
+        else:
+            raise TypeError('Label {} is not a valid label type'.format(label))
