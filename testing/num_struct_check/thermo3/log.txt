@@ -1,3 +1,0 @@
-Found elements: ['Li', 'Ni', 'O']
-Found elements: ['Li', 'Ni', 'O']
-Found elements: ['Li', 'Ni', 'O']
