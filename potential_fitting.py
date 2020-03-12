@@ -8,6 +8,15 @@ import numpy as np
 from input_checker import setup_error_checks
 
 def random_set_of_structures(fits, structures, structures_to_fit):
+    """
+    Randomly selects structures up to the number of structures to include in the fit, checks there are no repeats and returns the structure numbers of those to be included in the fit.
+    Args:
+        fits (int): Number of fits to run.
+        structures (int): Total number of structures in the training set.
+        structures_to_fit (int): Number of structures to fit to.
+    Returns:
+        (np.array): Structure numbers of structures in training set to be fitted to.
+    """
     sets_of_structures = []
     while len(sets_of_structures) < fits:
         struct_set = np.sort(np.random.randint(0, structures, size=structures_to_fit), axis=0)
@@ -18,6 +27,17 @@ def random_set_of_structures(fits, structures, structures_to_fit):
     return np.array(sets_of_structures)
 
 def run_fit(sets_of_structures, params, labels, bounds, supercell=None):
+    """
+    Collates the structures to be fitted into the working directory, creates the lammps inputs and runs the optimiser to fit to the designated parameters. Calls another function to save the data in the appropriate output directory.
+    Args:
+        sets_of_structures (np.array): Structure numbers of structures in training set to be fitted to.
+        params (dict(dict)): Setup dictionary containing the inputs for coreshell, charges, masses, potentials, and core-shell springs.
+        labels (list(str)): List of parameters to be fitted.
+        bounds (list(tuple(float))): List of lower and upper bound tuples associated with each parameter.
+        supercell (optional:list(int) or list(list(int))): 3 integers defining the cell increase in x, y, and z for all structures, or a list of lists where each list is 3 integers defining the cell increase in x, y, z, for each individual structure in the fitting process. i.e. all increase by the same amount, or each structure increased but different amounts. Default=None.
+    Returns:
+        None
+    """ 
     poscars = os.path.join('poscars','training_set')
     outcars = os.path.join('outcars','training_set')
     for fit, structs in enumerate(sets_of_structures): 
