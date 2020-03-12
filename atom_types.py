@@ -3,7 +3,7 @@ class AtomType():
     Class for each atom type.
     """
     
-    def __init__( self, atom_type_index, label, mass, charge, core_shell=None ):
+    def __init__( self, atom_type_index, label, element_type, mass, charge, core_shell=None ):
         """
         Initialise an instance for each atom type in the structure.
 
@@ -19,8 +19,10 @@ class AtomType():
         """        
         self.atom_type_index = atom_type_index
         self.label = label
+        self.element_type = element_type
         self.mass = mass
         self.charge = charge
+        self.formal_charge = charge
         if core_shell not in ['core', 'shell', None]:
             raise ValueError('core_shell argument should be "core" or "shell"')
         self.core_shell = core_shell

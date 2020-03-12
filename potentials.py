@@ -41,26 +41,24 @@ class BuckinghamPotential():
                                                                        self.a.value,
                                                                        self.rho.value,
                                                                        self.c.value)
-        
         return return_str
     
 
-def buckingham_potentials(distribution, atom_types, parameters):
+def buckingham_potentials(potentials_dict, atom_types, parameters):
     """
     Defines the buckingham potential for each given atom pair.
     
     Args:
-        distribution(dict(dict)): Contains buckingham potential, 'bpp':list(float), 'distribution_type':str, and 'sd':list(float) dictionaries where the distribution keys are atom label pairs (str), example: 'Li-O'.
+        potentials(dict): Contains buckingham potentials (list(float)), where the potentials keys are atom label pairs (str), example: 'Li-O'.
         atom_types (list(obj)): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), and core_shell (str).                  
         parameters (list(obj)): BuckinghamParameter objects including parameter_type (str), label_string (str), value (float), and sd (float).                
     Returns:
         potentials (list(obj)): BuckinghamPotential objects including labels (list(str)), atom_type_index (list(int)), a (obj), rho (obj), and c (obj). Each object is a BuckinghamParameter object.
-        
     """
     i = 0 #parameter_counter
     potentials = []
     
-    for key, value in distribution.items():
+    for key, value in potentials_dict.items():
         at1, at2 = key.split('-') #at is atom_type
         for atom in atom_types:
             if at1 in atom.label and 'core' not in atom.label:
