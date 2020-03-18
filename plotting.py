@@ -4,19 +4,6 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 
-def create_directory(head_directory_name, plot_directory_name):
-    """
-    Returns a string of the joint file path to the output directory and creates the directory pathway.
-    Args:
-        head_directory_name (str): Name of the main output directory. 
-        plot_directory_name (str): Name of the directory which the plots should be saved in.
-    Returns:
-        directory (str): directory pathway to output directory.
-    """
-    directory = os.path.join(head_directory_name, plot_directory_name)
-    os.makedirs(directory)
-    return directory
-
 def setup_error_dict(head_directory_name):
     """
     Returns a dictionary of the chi squared errors associated with each fit in the group.
@@ -156,3 +143,34 @@ def plot_stresses(dft_stresses, ip_stresses, output_directory, local_directory, 
     if save is True:
         plt.savefig('{}/{}_stresses.png'.format(output_directory,local_directory),dpi=500, bbox_inches = "tight")
     plt.show()
+    
+    
+
+def plot_cross_validation(error_dict, cv_directory, head_output_directory, xlabel_rotation=50, title='default', save=True):
+    """
+    Plots the chi squared errors for each fit in a sequence of fits, with the x-axis being the fit (labeled with the structure numbers in the fit) and the y-axis being the chi squared error.
+    Args:
+        error_dict (dict): Keys are the structurs in the fit separated by a dash, i.e. '1-2-5', and values are the chi squared error of that fit.
+        cv_directory (str): The cross-validation directory.
+        head_output_directory (str): Directory pathway to main output directory.
+        xlabel_rotation (optional: int): Rotation applied to the x-axis labels. Default=50.
+        title (optional: str): plot title, default='{} structure fit errors ($\chi^2$)'.format(structures_in_fit).
+        save (optional: bool): True to save the plot, Flase to not save. Default=True.
+    Returns:
+        None
+    """
+    plt.scatter(*zip(*sorted(error_dict.items())))
+    plt.xticks(rotation=xlabel_rotation)
+    plt.xlabel('cross-validation structure numbers')
+    plt.ylabel('$\chi^2$ error')
+    
+    if title is 'default':
+        plt.title('Potential {} cross-validation fit errors ($\chi^2$)'.format(cv_directory.replace('{}/p'.format(head_output_directory),'')))
+    elif title is not None and title is not 'default':
+        plt.title('{}'.format(title))
+        
+    if save is True:
+        plt.savefig('{}/p{}_cv_fit_errors.png'.format(head_output_directory,cv_directory.replace('{}/p'.format(head_output_directory),'')),dpi=500, bbox_inches = "tight")
+    plt.show()
+
+
