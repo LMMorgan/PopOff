@@ -34,17 +34,16 @@ def setup_potential_dicts(head_directory_name):
         structure_num = potential_file.replace('/potentials.json', '').replace('{}/'.format(head_directory_name), '')
         potentials.update((k, (structure_num,v) ) for k,v in potentials.items()) #Remove int if directory naming system changes to include strings. This will change the order of the structures though.
         potential_dicts.append(potentials)
-        return potential_dict
+        return potential_dicts
     
-def plot_errors(error_dict, structures_in_fit, output_directory, xlabel_rotation=50, title='default', save=True):
+def plot_errors(error_dict, output_directory, xlabel_rotation=50, title='default', save=True):
     """
     Plots the chi squared errors for each fit in a sequence of fits, with the x-axis being the fit (labeled with the structure numbers in the fit) and the y-axis being the chi squared error.
     Args:
         error_dict (dict): Keys are the structurs in the fit separated by a dash, i.e. '1-2-5', and values are the chi squared error of that fit.
-        structures_in_fit (int): Number of structures in the fit
         output_directory (str): Directory pathway to output directory.
         xlabel_rotation (optional: int): Rotation applied to the x-axis labels. Default=50.
-        title (optional: str): plot title, default='{} structure fit errors ($\chi^2$)'.format(structures_in_fit).
+        title (optional: str): plot title, default='fitted errors ($\chi^2$)'.
         save (optional: bool): True to save the plot, Flase to not save. Default=True.
     Returns:
         None
@@ -55,23 +54,22 @@ def plot_errors(error_dict, structures_in_fit, output_directory, xlabel_rotation
     plt.ylabel('$\chi^2$ error')
     
     if title is 'default':
-        plt.title('{} structure fit errors ($\chi^2$)'.format(structures_in_fit))
+        plt.title('fit errors ($\chi^2$)')
     elif title is not None and title is not 'default':
         plt.title('{}'.format(title))
         
     if save is True:
-        plt.savefig('{}/{}_structure_fit_errors.png'.format(output_directory, structures_in_fit),dpi=500, bbox_inches = "tight")
+        plt.savefig('{}/fit_errors.png'.format(output_directory),dpi=500, bbox_inches = "tight")
     plt.show()
 
-def plot_parameters(potentials_dict, structures_in_fit, output_directory, xlabel_rotation=50, title='default', save=True):
+def plot_parameters(potentials_dict, output_directory, xlabel_rotation=50, title='default', save=True):
     """
     Plots the potential parameters for each fit in a sequence of fits, with the x-axis being the fit (labeled with the structure numbers in the fit) and the y-axis being the parameter value.
     Args:
         potentials_dict (dict): Keys are the potential parameter labels (str) and values are a tuple of the fitted structure numbers (str) and the associated parameter value (float).
-        structures_in_fit (int): Number of structures in the fit
         output_directory (str): Directory pathway to output directory.
         xlabel_rotation (optional: int): Rotation applied to the x-axis labels. Default=50
-        title (optional: str): Plot title, default='{} structure fit errors ($\chi^2$)'.format(structures_in_fit).
+        title (optional: str): Plot title, default=''{} fitted parameter'.format(k)'.
         save (optional: bool): True to save the plot, Flase to not save. Default=True.
     Returns:
         None
@@ -85,12 +83,12 @@ def plot_parameters(potentials_dict, structures_in_fit, output_directory, xlabel
         plt.ylabel('{} value'.format(k))
     
         if title is 'default':
-            plt.title('{} {} structure fit'.format(k, structures_in_fit))
+            plt.title('{} fitted parameter'.format(k))
         elif title is not None and title is not 'default':
             plt.title('{}'.format(title))
         
         if save is True:
-            plt.savefig('{}/{}_structure_fit_{}.png'.format(output_directory, structures_in_fit, k) ,dpi=500, bbox_inches = "tight")
+            plt.savefig('{}/fitted_{}.png'.format(output_directory, k) ,dpi=500, bbox_inches = "tight")
         
         plt.show()
             
@@ -137,9 +135,9 @@ def plot_stresses(dft_stresses, ip_stresses, output_directory, local_directory, 
         plt.scatter(x, dy, label='dft', color='tab:blue')
         plt.scatter(x, iy , label='ip', color='tab:orange')
     plt.ylabel('stress tensor')
-    plt.text(2,250, 'error: {0:.5f}'.format(np.sum((dft_stresses - ip_stresses)**2)/ 6))
-    plt.text(4.5,250, 'DFT', color='tab:blue')
-    plt.text(4.5,220, 'IP', color='tab:orange')
+    plt.text(1.5,110, 'stress tensor error: {0:.5f}'.format(np.sum((dft_stresses - ip_stresses)**2)/ 6))
+    plt.text(4.5,110, 'DFT', color='tab:blue')
+    plt.text(4.5,95, 'IP', color='tab:orange')
     if save is True:
         plt.savefig('{}/{}_stresses.png'.format(output_directory,local_directory),dpi=500, bbox_inches = "tight")
     plt.show()

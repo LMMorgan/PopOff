@@ -18,7 +18,7 @@ def validation_sets(fits, structures, structures_in_fit, structure_nums):
         (np.array): Sets of structure numbers of structures in training set to be in validation sets.
     """
     sets_of_structures = []
-    while len(sets_of_structures) < fitsnum_of_fits:
+    while len(sets_of_structures) < fits:
         struct_set = np.sort(np.random.randint(1,structures+1, size=structures_in_fit), axis=0)
         if len(set(struct_set)) != structures_in_fit:
             continue
@@ -64,17 +64,24 @@ def save_cv_data(output_directory, structs, error, dft_forces, ip_forces, dft_st
     with open('{}/s{}_error.dat'.format(output_directory, '-'.join([str(num) for num in structs])), 'w') as f:
         f.write(str(error))
         
-def run_cross_validation(head_directory_name, head_output_directory, params, supercell=None):
+def run_cross_validation(fits, structures, structures_in_fit, head_directory_name, head_output_directory, params, supercell=None):
     """
     Collates the structures to be fitted into the working directory, creates the lammps inputs and runs the optimiser to fit to the designated parameters. Calls another function to save the data in the appropriate output directory.
     Args:
+        fits (int): Number of fits to run.
+        structures (int): Total number of structures in the training set.
+        structures_in_fit (int): Number of structures to fit to.
         head_directory_name (str): Name of the main results directory.
         head_output_directory (str): Name of the main output directory for the cross-validation.
         params (dict(dict)): Setup dictionary containing the inputs for coreshell, charges, masses, potentials, and core-shell springs.
         supercell (optional:list(int) or list(list(int))): 3 integers defining the cell increase in x, y, and z for all structures, or a list of lists where each list is 3 integers defining the cell increase in x, y, z, for each individual structure in the fitting process. i.e. all increase by the same amount, or each structure increased but different amounts. Default=None.
     Returns:
         None
-    """ 
+    """
+    # Define paths to poscar/outcar directories
+    poscars = os.path.join('poscars','training_set')
+    outcars = os.path.join('outcars','training_set')
+    
     for potential_file in sorted(glob.glob('{}/*/potentials.json'.format(head_directory_name))):
         with open(potential_file, 'r') as f:
             potentials = json.load(f)
