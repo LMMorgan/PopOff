@@ -261,6 +261,7 @@ class FitModel():
         Returns:
             None
         """
+        self.reset_directories()
         self._charge_reset()
         fitting_parameters = dict(zip(args, values))
         self._update_q_ratio(fitting_parameters)
@@ -313,7 +314,17 @@ class FitModel():
             instance.command('unfix 2')
     
         return instances
+
+    def reset_directories(self):
+        """
+        Removes any poscar, outcar, and lammps files from the working directory.
         
-
-
-
+        Args:
+            None
+            
+        Returns:
+            None
+        """  
+        os.system('rm poscars/POSCAR*')
+        os.system('rm outcars/OUTCAR*')
+        os.system('rm lammps/coords*')

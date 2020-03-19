@@ -4,7 +4,7 @@ import os
 import json
 import glob
 import fitting_output as fit_out
-# import sys
+import matplotlib.pyplot as plt
 
 def validation_sets(fits, structures, structures_in_fit, structure_nums):
     """
@@ -91,11 +91,12 @@ def run_cross_validation(fits, structures, structures_in_fit, head_directory_nam
         include_values = list(potentials.values())
         indv_output_directory = fit_out.create_directory(head_output_directory, 'p{}'.format('-'.join([str(num) for num in structure_nums])))
         sets_of_structures = validation_sets(fits, structures, structures_in_fit, structure_nums)
-        for structs in sets_of_structures: 
+        for structs in sets_of_structures:
+            fit_data = FitModel.collect_info(params, supercell=supercell)
+            fit_data.reset_directories()
             for struct_num, struct in enumerate(structs):
                 os.system('cp {}/POSCAR{} {}/POSCAR{}'.format(poscars, struct, 'poscars', struct_num+1))
                 os.system('cp {}/OUTCAR{} {}/OUTCAR{}'.format(outcars, struct, 'outcars', struct_num+1))    
-            fit_data = FitModel.collect_info(params, supercell=supercell)
             dft_f, ip_f, dft_s, ip_s = fit_out.extract_stresses_and_forces(fit_data, include_values, include_labels)
             error = chi_squared_error(dft_f, ip_f, dft_s, ip_s)
             save_cv_data(indv_output_directory, structs, error, dft_f, ip_f, dft_s, ip_s)
@@ -114,3 +115,32 @@ def setup_error_dict(cv_directory):
         error = float(np.loadtxt(error_file))
         error_dict.update( {cv_struct_nums:error})
     return error_dict
+
+
+
+def plot_cross_validation(error_dict, cv_directory, head_output_directory, xlabel_rotation=50, title='default', save=True):
+    """
+    Plots the chi squared errors for each fit in a sequence of fits, with the x-axis being the fit (labeled with the structure numbers in the fit) and the y-axis being the chi squared error.
+    Args:
+        error_dict (dict): Keys are the structures in the fit separated by a dash, i.e. '1-2-5', and values are the chi squared error of that fit.
+        cv_directory (str): The cross-validation directory.
+        head_output_directory (str): Directory pathway to main output directory.
+        xlabel_rotation (optional: int): Rotation applied to the x-axis labels. Default=50.
+        title (optional: str): plot title, default='{} structure fit errors ($\chi^2$)'.format(structures_in_fit).
+        save (optional: bool): True to save the plot, Flase to not save. Default=True.
+    Returns:
+        None
+    """
+    plt.scatter(*zip(*sorted(error_dict.items())))
+    plt.xticks(rotation=xlabel_rotation)
+    plt.xlabel('cross-validation structure numbers')
+    plt.ylabel('$\chi^2$ error')
+    
+    if title is 'default':
+        plt.title('Potential {} cross-validation fit errors ($\chi^2$)'.format(cv_directory.replace('{}/p'.format(head_output_directory),'')))
+    elif title is not None and title is not 'default':
+        plt.title('{}'.format(title))
+        
+    if save is True:
+        plt.savefig('{}/p{}_cv_fit_errors.png'.format(head_output_directory,cv_directory.replace('{}/p'.format(head_output_directory),'')),dpi=500, bbox_inches = "tight")
+    plt.show()
