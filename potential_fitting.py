@@ -7,16 +7,19 @@ from scipy import optimize
 import numpy as np
 from input_checker import setup_error_checks
 
-def random_set_of_structures(fits, structures, structures_to_fit):
+def random_set_of_structures(fits, structures, structures_to_fit, seed=False):
     """
     Randomly selects structures up to the number of structures to include in the fit, checks there are no repeats and returns the structure numbers of those to be included in the fit.
     Args:
         fits (int): Number of fits to run.
         structures (int): Total number of structures in the training set.
         structures_to_fit (int): Number of structures to fit to.
+        seed (optional: int or 1-d array_like): Seed for RandomState. Must be convertible to 32 bit unsigned integers. Default=False
     Returns:
         (np.array): Structure numbers of structures in training set to be fitted to.
     """
+    if seed is not False:
+        np.random.seed(seed)
     sets_of_structures = []
     while len(sets_of_structures) < fits:
         struct_set = np.sort(np.random.randint(0, structures, size=structures_to_fit), axis=0)
@@ -26,7 +29,7 @@ def random_set_of_structures(fits, structures, structures_to_fit):
             sets_of_structures.append(struct_set) 
     return np.array(sets_of_structures)
 
-def run_fit(sets_of_structures, params, labels, bounds, supercell=None):
+def run_fit(sets_of_structures, params, labels, bounds, supercell=None, seed=None):
     """
     Collates the structures to be fitted into the working directory, creates the lammps inputs and runs the optimiser to fit to the designated parameters. Calls another function to save the data in the appropriate output directory.
     Args:
@@ -35,24 +38,26 @@ def run_fit(sets_of_structures, params, labels, bounds, supercell=None):
         labels (list(str)): List of parameters to be fitted.
         bounds (list(tuple(float))): List of lower and upper bound tuples associated with each parameter.
         supercell (optional:list(int) or list(list(int))): 3 integers defining the cell increase in x, y, and z for all structures, or a list of lists where each list is 3 integers defining the cell increase in x, y, z, for each individual structure in the fitting process. i.e. all increase by the same amount, or each structure increased but different amounts. Default=None.
+        seed (optional: int or np.random.RandomState): If seed is not specified the np.RandomState singleton is used. If seed is an int, a new np.random.RandomState instance is used, seeded with seed. If seed is already a np.random.RandomState instance, then that np.random.RandomState instance is used. Specify seed for repeatable minimizations.
     Returns:
         None
     """ 
     poscars = os.path.join('poscars','training_set')
     outcars = os.path.join('outcars','training_set')
-    for fit, structs in enumerate(sets_of_structures): 
+    for fit, structs in enumerate(sets_of_structures):
         for struct_num, struct in enumerate(structs):
             os.system('cp {}/POSCAR{} {}/POSCAR{}'.format(poscars, struct+1, 'poscars', struct_num+1))
             os.system('cp {}/OUTCAR{} {}/OUTCAR{}'.format(outcars, struct+1, 'outcars', struct_num+1))
         fit_data = FitModel.collect_info(params, supercell=supercell)
         setup_error_checks(labels, bounds, fit_data, params)
         fit_output = optimize.differential_evolution(fit_data.chi_squared_error, bounds=bounds, popsize=25,
-                                            args=([labels]), maxiter=1,
-                                            disp=True, init='latinhypercube', workers=-1)
+                                            args=([labels]), maxiter=1000, updating='deferred',
+                                            disp=True, init='latinhypercube', workers=-1, seed=seed)
         dft_forces, ip_forces, dft_stresses, ip_stresses = output.extract_stresses_and_forces(fit_data, fit_output.x, labels)
         local_struct_dir = '-'.join([ '{}'.format(struct+1) for struct in structs])
         struct_directory = output.create_directory(head_directory_name, local_struct_dir)
-        output.save_data(struct_directory, labels, fit_output, dft_forces, ip_forces, dft_stresses, ip_stresses)               
+        output.save_data(struct_directory, labels, fit_output, dft_forces, ip_forces, dft_stresses, ip_stresses)
+    fit_data.reset_directories()
 
 if __name__ == '__main__':
 
@@ -79,6 +84,6 @@ if __name__ == '__main__':
     num_of_fits = 1 #Number of fits to run
     head_directory_name = 'results/{}_fit'.format(num_struct_to_fit)
 
-    sets_of_structures = random_set_of_structures(fits, structures, structures_to_fit)
+    sets_of_structures = random_set_of_structures(fits, structures, structures_to_fit, seed=7)
 
-    run_fit(sets_of_structures, params, labels, bounds)#, supercell=[2,2,2])
+    run_fit(sets_of_structures, params, labels, bounds)#, supercell=[2,2,2], seed=7)

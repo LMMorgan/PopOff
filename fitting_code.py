@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import lammps
 from collate_structures import collate_structural_data
 import potentials as pot
@@ -261,7 +262,7 @@ class FitModel():
         Returns:
             None
         """
-        self.reset_directories()
+#         self.reset_directories()
         self._charge_reset()
         fitting_parameters = dict(zip(args, values))
         self._update_q_ratio(fitting_parameters)
