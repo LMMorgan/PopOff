@@ -6,7 +6,7 @@ import fitting_output as output
 from scipy import optimize
 import numpy as np
 from input_checker import setup_error_checks
-
+from glopty.sos import SOS 
 def random_set_of_structures(fits, structures, structures_to_fit, seed=False):
     """
     Randomly selects structures up to the number of structures to include in the fit, checks there are no repeats and returns the structure numbers of those to be included in the fit.
@@ -50,9 +50,13 @@ def run_fit(sets_of_structures, params, labels, bounds, supercell=None, seed=Non
             os.system('cp {}/OUTCAR{} {}/OUTCAR{}'.format(outcars, struct+1, 'outcars', struct_num+1))
         fit_data = FitModel.collect_info(params, supercell=supercell)
         setup_error_checks(labels, bounds, fit_data, params)
-        fit_output = optimize.differential_evolution(fit_data.chi_squared_error, bounds=bounds, popsize=25,
-                                            args=([labels]), maxiter=1000, updating='deferred',
-                                            disp=True, init='latinhypercube', workers=-1, seed=seed)
+
+        sos = SOS(fit_data.chi_squared_error,bounds,niter=1000,population=200,ftol=0.001,workers=8,restart=False, vec_dump = 5)
+        fit_output = sos.optimise(args=(labels))
+
+#        fit_output = optimize.differential_evolution(fit_data.chi_squared_error, bounds=bounds, popsize=25,
+#                                            args=([labels]), maxiter=1000, updating='deferred',
+#                                            disp=True, init='latinhypercube', workers=-1, seed=seed)
         dft_forces, ip_forces, dft_stresses, ip_stresses = output.extract_stresses_and_forces(fit_data, fit_output.x, labels)
         local_struct_dir = '-'.join([ '{}'.format(struct+1) for struct in structs])
         struct_directory = output.create_directory(head_directory_name, local_struct_dir)
@@ -80,10 +84,11 @@ if __name__ == '__main__':
     bounds = [(0.01, 4), (0.3,1.0), (10.0,150.0), (100.0,50000.0), (0.01,1.0), (100.0,50000.0), (0.01,1.0), (150.0,50000.0), (0.01,1.0)]
 
     tot_num_structures = 15 #Total number of structures in the training set
-    num_struct_to_fit = 1 #Number of structures you wish to fit to
+    num_struct_to_fit = 3 #Number of structures you wish to fit to
     num_of_fits = 1 #Number of fits to run
     head_directory_name = 'results/{}_fit'.format(num_struct_to_fit)
 
-    sets_of_structures = random_set_of_structures(fits, structures, structures_to_fit, seed=7)
+#    sets_of_structures = random_set_of_structures(fits, structures, structures_to_fit, seed=7)
+    sets_of_structures = random_set_of_structures(num_of_fits, tot_num_structures, num_struct_to_fit)
 
     run_fit(sets_of_structures, params, labels, bounds)#, supercell=[2,2,2], seed=7)
