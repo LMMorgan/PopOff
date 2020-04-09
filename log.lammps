@@ -1,0 +1,4 @@
+LAMMPS (3 Mar 2020)
+units lj
+atom_style atomic
+Total wall time: 0:00:02
