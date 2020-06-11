@@ -1,3 +1,5 @@
+from bond_types import BondType
+
 class Bond():
     """
     Class for each bond present between core-shell atoms.
@@ -14,7 +16,17 @@ class Bond():
                 
         Returns:
             None
-        """        
+        """
+        if not isinstance(bond_index, int) or  isinstance(bond_index, bool):
+            raise TypeError('The bond_index must be an integer.')
+        if not isinstance(atom_indices, list) or len(atom_indices) != 2:
+            raise TypeError('The atom_indices must be a list of length 2.')
+        for item in atom_indices:
+            if not isinstance(item, int) or isinstance(item,bool):
+                raise ValueError('Both items in the atom_indices list must be integers.')
+        if not isinstance(bond_type, BondType):
+            raise TypeError('The bond_type must be a BondType object.')            
+            
         self.bond_index = bond_index
         self.atom_indices = atom_indices
         self.bond_type = bond_type

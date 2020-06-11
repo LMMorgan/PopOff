@@ -1,3 +1,6 @@
+import numpy as np
+from atom_types import AtomType
+
 class Atom():
     """
     Class for each atom.
@@ -10,7 +13,6 @@ class Atom():
         Args:
             atom_index (int): Individual atom number.
             molecule_index (int): Index of the molecule the atom belongs to i.e. core and shell will be the same molecule, but indivdual atoms will be separate.
-            atom_type_id (int): Integer value given for the atom type.
             coords (np.array): x, y, and z positions of the atom.
             atom_forces (np.array): x, y, and z forces of the atom.
             atom_type (obj): AtomType object including atom_type_index (int), label (str), mass (float), charge (float), formal_charge (float), and core_shell (str).
@@ -18,6 +20,21 @@ class Atom():
         Returns:
             None
         """
+        if not isinstance(atom_index, int) or  isinstance(atom_index, bool):
+            raise TypeError('The atom_index must be an integer.')
+        if not isinstance(molecule_index, int) or  isinstance(molecule_index, bool):
+            raise TypeError('The molecule_index must be an integer.')
+        if not isinstance(coords, np.ndarray):
+            raise TypeError('coords must be a numpy.array.')
+        if np.shape(coords) != (3,):
+            raise ValueError('coords np.array must be 1-d with 3 components containing the x y z coordinates, respectively.')
+        if not isinstance(atom_forces, np.ndarray):
+            raise TypeError('atom_forces must be a numpy.array.')
+        if np.shape(atom_forces) != (3,):
+            raise ValueError('atom_forces np.array must be 1-d with 3 components containing the x y z coordinates, respectively.')
+        if not isinstance(atom_type, AtomType):
+            raise TypeError('The atom_type must be a AtomType object.')
+        
         self.atom_index = atom_index
         self.molecule_index = molecule_index
         self.coords = coords

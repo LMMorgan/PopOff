@@ -13,7 +13,21 @@ class BuckinghamParameter():
                 
         Returns:
             None
-        """  
+        """
+        
+        if not isinstance(label_string, str):
+            raise TypeError('The label must be of type string.')        
+        if not isinstance(param_type, str):
+            raise TypeError('The param_type must be of type string. Example: "a","rho","c".')
+        if not isinstance(value, float):
+            raise TypeError('The value must be of type float.')
+            
+        if '_' not in label_string or len(label_string.split('_')) != 3:
+            raise ValueError('Label string must be in format "atomtype1_atomtype2_parameter". Example: "Li_O_rho".')
+        if param_type not in ['a', 'rho', 'c']:
+            raise ValueError('param_type argument should be "a","rho", or "c".')
+            
+            
         self.label_string = label_string
         self.param_type = param_type
         self.value = value
@@ -30,6 +44,20 @@ def buckingham_parameters(potentials):
         parameters (list(obj)): BuckinghamParameter objects including label_string (str), param_type (str), and value (float).
         
     """
+    if not isinstance(potentials, dict):
+        raise TypeError('Potentials should be stored in a dictionary. The keys should be at the atom pairs as a string (i.e. "Li-O") and the values a list of buckingham a, rho, c values.')
+
+    for key, pot in potentials.items():
+        if not isinstance(key, str):
+            raise TypeError('Potentials keys should be at the atom pairs as a string (i.e. "Li-O").')
+        if '-' not in key or len(key.split('-')) != 2:
+            raise ValueError('Potentials keys should be at the atom pairs as a string (i.e. "Li-O").') 
+        if not isinstance(pot, list):
+            raise TypeError('Potentials values should be a list of buckingham a, rho, c values.')
+        for parameter in pot:
+            if not isinstance(parameter, float):
+                raise TypeError('Potentials values must be of type float.')
+                
     parameters = []
     
     for key, value in potentials.items():

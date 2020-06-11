@@ -12,8 +12,12 @@ def create_directory(head_directory_name, local_struct_dir):
         directory (str): directory pathway to output directory.
     """
     directory = os.path.join(head_directory_name, local_struct_dir)
-    os.makedirs(directory)
-    return directory
+    if os.path.isdir(directory):
+        raise FileExistsError('Results directory already exists. Please either delete/rename the directory or rename the output location.')
+    else:
+        os.makedirs(directory)
+        return directory
+    
 
 def extract_stresses_and_forces(fit_data, values, args):
     """

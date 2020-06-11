@@ -26,11 +26,10 @@ def check_coreshell(label, bounds, fit_data):
     if bounds[0] > bounds[1]:
         raise ValueError('dq lower bound larger than upper bound.')    
             
-def check_scaling_limits(label, bounds):
+def check_scaling_limits(bounds):
     """
     Checks scaling inputs into the fitting fuctions are correct. This includes checking the upper bound doesn't exceed 1.0, neither bound is <=0, and the lower bound is smaller than the upper bound.
     Args:
-        label (str): charge scaling factor parameter key, relating to the scaling to be applied to the stated element.
         bounds (tuple(float)): Lower and upper bounds associated with the scaling parameter.
     Returns:
         None
@@ -105,7 +104,7 @@ def setup_error_checks(include_labels, bounds_list, fit_data, params):
         if label.startswith('dq_'):
             check_coreshell(label, bounds, fit_data)
         elif label == 'q_scaling':
-            check_scaling_limits(label, bounds)
+            check_scaling_limits(bounds)
         elif '-' in label:
             check_spring(label, bounds, params)
         elif '_a' in label or '_rho' in label or '_c' in label:
