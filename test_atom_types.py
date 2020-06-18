@@ -4,12 +4,12 @@ import pytest
 
 @pytest.fixture
 def atom_type():
-    return AtomType(1, 'Li', 'Li', 1.555, 1.0)
+    return AtomType(1, 'O core', 'O', 1.555, 1.0)
 
 def test_assert_atom_type(atom_type):
     assert atom_type.atom_type_index == 1
-    assert atom_type.label == 'Li'
-    assert atom_type.element_type == 'Li'
+    assert atom_type.label == 'O core'
+    assert atom_type.element_type == 'O'
     assert atom_type.mass == 1.555
     assert atom_type.charge == 1.0
     assert atom_type.core_shell == None

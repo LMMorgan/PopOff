@@ -1,4 +1,5 @@
-from potential_parameters import buckingham_parameters
+from potential_parameters import BuckinghamParameter, buckingham_parameters
+from atom_types import AtomType
 
 class BuckinghamPotential():
     """
@@ -18,7 +19,19 @@ class BuckinghamPotential():
                 
         Returns:
             None
-        """ 
+        """
+        
+        if not isinstance(labels, list) or not all(isinstance(label, str) for label in labels) or len(labels) !=2:
+            raise TypeError('labels should be a list of atoms in the potential. Each of the TWO items should be a string.')
+        if not isinstance(atom_type_index, list) or not all(isinstance(index, int) for index in atom_type_index):
+            raise TypeError('atom_type_index should be a list of the index for each atom type for the atoms in the potential. Each item type should be an integer.')
+        if not isinstance(a, BuckinghamParameter):
+            raise TypeError('"a" must be a BuckinghamParameter object.')              
+        if not isinstance(rho, BuckinghamParameter):
+            raise TypeError('"rho" must be a BuckinghamParameter object.')          
+        if not isinstance(c, BuckinghamParameter):
+            raise TypeError('"c" must be a BuckinghamParameter object.')  
+            
         self.labels = labels
         self.atype_index = atom_type_index
         self.a = a
@@ -46,15 +59,25 @@ class BuckinghamPotential():
 
 def buckingham_potentials(potentials_dict, atom_types, parameters):
     """
-    Defines the buckingham potential for each given atom pair.
+    Defines the buckingham potential for each given atom pair. Making sure if core-shell models are used, the interations are on teh shell, not the core.
     
     Args:
         potentials(dict): Contains buckingham potentials (list(float)), where the potentials keys are atom label pairs (str), example: 'Li-O'.
         atom_types (list(obj)): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), and core_shell (str).                  
-        parameters (list(obj)): BuckinghamParameter objects including parameter_type (str), label_string (str), value (float), and sd (float).                
+        parameters (list(obj)): BuckinghamParameter objects including parameter_type (str), label_string (str), and value (float).
+        
     Returns:
         potentials (list(obj)): BuckinghamPotential objects including labels (list(str)), atom_type_index (list(int)), a (obj), rho (obj), and c (obj). Each object is a BuckinghamParameter object.
     """
+    
+    if not isinstance(potentials_dict, dict):
+        raise TypeError('Potentials should be stored in a dictionary. The keys should be at the atom pairs as a string (i.e. "Li-O") and the values a list of buckingham a, rho, c values.')
+    if not isinstance(atom_types, list) or not all(isinstance(at, AtomType) for at in atom_types):
+        raise TypeError('atom_types must be a list of AtomType objects.')        
+    if not isinstance(parameters, list)or not all(isinstance(bp,  BuckinghamParameter) for bp in parameters):
+        raise TypeError('parameters must be a list of BuckinghamPotential objects.')  
+        
+        
     i = 0 #parameter_counter
     potentials = []
     
@@ -62,12 +85,12 @@ def buckingham_potentials(potentials_dict, atom_types, parameters):
         at1, at2 = key.split('-') #at is atom_type
         for atom in atom_types:
             if at1 in atom.label and 'core' not in atom.label:
-                at_index_1 = atom.atom_type_index
+                at1_index = atom.atom_type_index
             if at2 in atom.label and 'core' not in atom.label:
-                at_index_2 = atom.atom_type_index
+                at2_index = atom.atom_type_index
     
         potentials.append(BuckinghamPotential(labels = [at1, at2],
-                                              atom_type_index = [at_index_1, at_index_2],
+                                              atom_type_index = [at1_index, at2_index],
                                               a = parameters[i],
                                               rho=parameters[i+1],
                                               c=parameters[i+2]))

@@ -1,12 +1,10 @@
 #! /usr/bin/env python3
 
-import os
 from fitting_code import FitModel
 import fitting_output as output
 from scipy import optimize
 import numpy as np
 from input_checker import setup_error_checks
-from glopty.sos import SOS 
 
 def random_set_of_structures(fits, structures, structures_to_fit, seed=False):
     """
@@ -52,14 +50,10 @@ def run_fit(sets_of_structures, params, labels, bounds, supercell=None, seed=Non
         seed (optional: int or np.random.RandomState): If seed is not specified the np.RandomState singleton is used. If seed is an int, a new np.random.RandomState instance is used, seeded with seed. If seed is already a np.random.RandomState instance, then that np.random.RandomState instance is used. Specify seed for repeatable minimizations.
     Returns:
         None
-    """ 
-    poscars = os.path.join('poscars','training_set')
-    outcars = os.path.join('outcars','training_set')
+    """
+    
     for fit, structs in enumerate(sets_of_structures):
-        for struct_num, struct in enumerate(structs):
-            os.system('cp {}/POSCAR{} {}/POSCAR{}'.format(poscars, struct+1, 'poscars', struct_num+1))
-            os.system('cp {}/OUTCAR{} {}/OUTCAR{}'.format(outcars, struct+1, 'outcars', struct_num+1))
-        fit_data = FitModel.collect_info(params, supercell=supercell)
+        fit_data = FitModel.collect_info(params, structs, supercell=supercell)
         setup_error_checks(labels, bounds, fit_data, params)
 
         fit_output = optimize.differential_evolution(fit_data.chi_squared_error, bounds=bounds, popsize=25,

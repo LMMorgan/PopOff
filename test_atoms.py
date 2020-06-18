@@ -26,7 +26,6 @@ def test_assert_atom(atom):
     assert (atom.forces == np.array([0.01, 0.02, 0.03])).all()
     assert type(atom.atom_type) == type(AtomType(1, 'Li', 'Li', 1.555, 1.0))  #only compares the type, not the content.
 
-
 @pytest.mark.parametrize( 'atom_index', [('test'),(1.0),(True)])
 def test_typeerror_for_atom_index_in_atom(atom_index, atom):
     with pytest.raises(TypeError):

@@ -53,6 +53,7 @@ def test_assert_buckingham_parameters(potentials):
     assert potentials['Ni-O'] == [100.00, 0.1, 0.0]
     assert potentials['O-O'] == [1000.00, 1.0, 1.0]
     
+    
 @pytest.mark.parametrize( 'keys', [(1),(1.0),(True)])
 def test_typeerror_for_keys_in_potential_parameters(keys, potentials):
     potentials[keys] = potentials.pop('Li-O')

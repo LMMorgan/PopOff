@@ -21,7 +21,6 @@ class BuckinghamParameter():
             raise TypeError('The param_type must be of type string. Example: "a","rho","c".')
         if not isinstance(value, float):
             raise TypeError('The value must be of type float.')
-            
         if '_' not in label_string or len(label_string.split('_')) != 3:
             raise ValueError('Label string must be in format "atomtype1_atomtype2_parameter". Example: "Li_O_rho".')
         if param_type not in ['a', 'rho', 'c']:

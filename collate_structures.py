@@ -1,14 +1,13 @@
-import glob
-from pymatgen.io.vasp import Poscar
-from vasp_outcar import forces_from_outcar, stresses_from_outcar
+from pymatgen.io.vasp.outputs import Vasprun
 from lammps_data import LammpsData
 
-def collate_structural_data(params, supercell=None):
+def collate_structural_data(params, structs, supercell=None):
     """
     Collects the information needed for the lammps data inputs from the POSCARs and OUTCARs with additional information provided by params.
     
     Args:
         params (dict(dict)): Contains core_shell (bool), charges (float), masses (float), and cs_springs (list(float)) dictionaries where the keys are atom label (str). Also contains bpp (list(float)) and sd (list(float)) dictionaries where the keys are atom label pairs (str), example: 'Li-O'.
+        structs (np.array): An array containing the list of structure numbers to fit to. Note: this starts from 0 not 1 so check your vasprun.xml numbering.
         supercell (list(int)): 3 integers defining the cell increase in x, y, and z. Default=None if called directly.
         
     Returns:
@@ -18,11 +17,12 @@ def collate_structural_data(params, supercell=None):
             raise TypeError('Incorrect type for supercell. Requires integers for x,y,z expansion in a list, e.g. [1,1,1], or list of x,y,z expansions for each structure, e.g. [[1,1,1], [2,2,2], [3,3,3]]. Alternatively do not include.')
             
     lammps_data = []
-    for i, pos in enumerate(sorted(glob.glob('poscars/POSCAR*'))):
-        structure = Poscar.from_file(pos).structure
-        forces = forces_from_outcar('outcars/OUTCAR{}'.format(i+1))[-1]
-        stresses = stresses_from_outcar('outcars/OUTCAR{}'.format(i+1))
-        structure.add_site_property('forces', forces)
+    
+    for i in structs:
+        vasprun = Vasprun(f'vaspruns/vasprun{i}.xml')
+        structure = vasprun.ionic_steps[0]['structure']
+        structure.add_site_property('forces', vasprun.ionic_steps[0]['forces'])
+        stresses = vasprun.ionic_steps[0]['stress']        
         if supercell is not None:
             if isinstance(supercell[0], int) and len(supercell) == 3:
                 structure = structure*supercell
