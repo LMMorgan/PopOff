@@ -22,8 +22,8 @@ def atom():
 def test_assert_atom(atom):
     assert atom.atom_index == 1
     assert atom.molecule_index == 2
-    assert (atom.coords == np.array([0.1, 0.2, 0.3])).all()
-    assert (atom.forces == np.array([0.01, 0.02, 0.03])).all()
+    assert np.allclose(atom.coords,np.array([0.1, 0.2, 0.3]))
+    assert np.allclose(atom.forces, np.array([0.01, 0.02, 0.03]))
     assert type(atom.atom_type) == type(AtomType(1, 'Li', 'Li', 1.555, 1.0))  #only compares the type, not the content.
 
 @pytest.mark.parametrize( 'atom_index', [('test'),(1.0),(True)])

@@ -36,8 +36,8 @@ def check_scaling_limits(bounds):
     """
     if bounds[0] <= 0 or bounds[1] <= 0:
         raise ValueError('Charge scaling bounds must be greater than zero.')
-    if bounds[1] > 1:
-        raise ValueError('Charge scaling can not be greater than 1. Check upper bound.')
+    if bounds[0] > 1 or bounds[1] > 1:
+        raise ValueError('Charge scaling can not be greater than 1. Check bounds.')
     if bounds[0] > bounds[1]:
         raise ValueError('Charge scalling lower bound larger than upper bound.')
         

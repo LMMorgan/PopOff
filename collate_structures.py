@@ -1,5 +1,6 @@
 from pymatgen.io.vasp.outputs import Vasprun
 from lammps_data import LammpsData
+import numpy as np
 
 def collate_structural_data(params, structs, supercell=None):
     """
@@ -21,7 +22,7 @@ def collate_structural_data(params, structs, supercell=None):
     for i in structs:
         vasprun = Vasprun(f'vaspruns/vasprun{i}.xml')
         structure = vasprun.ionic_steps[0]['structure']
-        structure.add_site_property('forces', vasprun.ionic_steps[0]['forces'])
+        structure.add_site_property('forces', np.array(vasprun.ionic_steps[0]['forces']))
         stresses = vasprun.ionic_steps[0]['stress']        
         if supercell is not None:
             if isinstance(supercell[0], int) and len(supercell) == 3:

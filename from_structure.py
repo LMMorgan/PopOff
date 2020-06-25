@@ -15,6 +15,7 @@ def types_from_structure( structure, core_shell, charges, masses, cs_spring=None
         core_shell (dict): A dictionary of booleans stating if any atoms should be made core-shell.
         charges (dict): A dictionary of charges for each atom type. Key = atom label (str), value = charge(float)/sub_dict(dict). If atom is core-shell a sub dictionary will be the value, where sub_key = 'core' or 'shell' (str) and sub_value = charge (float).
         masses (dict): A dictionary of masses for each atom type. Key = atom label (str), value = mass(float)/sub_dict(dict). If atom is core-shell a sub dictionary will be the value, where sub_key = 'core' or 'shell' and sub_value = mass (float).
+        cs_spring (dict): A dictionary of the cor-shell spring values. Key = atom labels separated by "-" (str), value = list of two values (float) for the spring values.
         verbose (optional:bool): Print verbose output. Default = True.
 
     Returns:
