@@ -5,35 +5,6 @@ from potential_parameters import BuckinghamParameter
 import pytest
 import numpy as np
 
-@pytest.fixture
-def pot_params():
-    parameters = []
-    parameters.append(BuckinghamParameter('Li_O_a', 'a', 1.0))
-    parameters.append(BuckinghamParameter('Li_O_rho', 'rho', 0.1))
-    parameters.append(BuckinghamParameter('Li_O_c', 'c', 0.0))
-    return parameters
-
-@pytest.fixture
-def buckingham_potential(pot_params):
-    return BuckinghamPotential(['Li','O'], [1,3], pot_params[0], pot_params[1], pot_params[2])
-
-@pytest.fixture
-def potentials():
-    potentials = {'Li-O':[10.00, 0.1, 0.0],
-                  'Ni-O':[100.00, 0.1, 0.0],
-                  'O-O':[1000.00, 1.0, 1.0]}
-    return potentials
-
-@pytest.fixture
-def atom_types():
-    atom_types = []
-    atom_types.append(AtomType(1, 'Li', 'Li', 1.555, 1.0))
-    atom_types.append(AtomType(2, 'Ni', 'Ni', 56.111, 3.0))
-    atom_types.append(AtomType(3, 'O core', 'O', 14.001, -0.96, 'core'))
-    atom_types.append(AtomType(3, 'O shell', 'O', 1.998, -1.04, 'shell'))
-    return atom_types
-
-
 def test_assert_buckingham_potential(buckingham_potential, pot_params):
     assert buckingham_potential.labels == ['Li','O']
     assert buckingham_potential.atype_index == [1,3]
@@ -41,8 +12,6 @@ def test_assert_buckingham_potential(buckingham_potential, pot_params):
     assert type(buckingham_potential.rho) == type(pot_params[1])  #only compares the type, not the content.
     assert type(buckingham_potential.c) == type(pot_params[2])  #only compares the type, not the content.
         
-        
-
 @pytest.mark.parametrize( 'labels', [(1),(1.0),(True), ([1,'a']), (['Li','O','a']) ])
 def test_typeerror_for_labels_in_buckingham_potential(labels, buckingham_potential):
     with pytest.raises(TypeError):
@@ -102,8 +71,8 @@ def test_assert_atom_types_2_in_buckingham_potentials(atom_types):
     assert atom_types[2].label == 'O core'
     assert atom_types[2].element_type == 'O'
     assert atom_types[2].mass == 14.001
-    assert atom_types[2].charge == -0.96
-    assert atom_types[2].formal_charge == -0.96
+    assert atom_types[2].charge == -0.00
+    assert atom_types[2].formal_charge == -0.00
     assert atom_types[2].core_shell == 'core'
     
 def test_assert_atom_types_3_in_buckingham_potentials(atom_types):
@@ -111,8 +80,8 @@ def test_assert_atom_types_3_in_buckingham_potentials(atom_types):
     assert atom_types[3].label == 'O shell'
     assert atom_types[3].element_type == 'O'
     assert atom_types[3].mass == 1.998
-    assert atom_types[3].charge == -1.04
-    assert atom_types[3].formal_charge == -1.04
+    assert atom_types[3].charge == -2.0
+    assert atom_types[3].formal_charge == -2.0
     assert atom_types[3].core_shell == 'shell'
     
 def test_assert_pot_params_0_in_buckingham_potentials(pot_params):

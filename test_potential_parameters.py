@@ -7,18 +7,10 @@ import numpy as np
 def potential_parameters():
     return BuckinghamParameter('Li_O_a', 'a', 1000.0)
 
-@pytest.fixture
-def potentials():
-    potentials = {'Li-O':[10.00, 0.1, 0.0],
-                  'Ni-O':[100.00, 0.1, 0.0],
-                  'O-O':[1000.00, 1.0, 1.0]}
-    return potentials
-
 def test_assert_potential_parameters(potential_parameters):
     assert potential_parameters.label_string == 'Li_O_a'
     assert potential_parameters.param_type == 'a'
     assert potential_parameters.value == 1000.0
-
 
 @pytest.mark.parametrize( 'label_string', [(1),(1.0),(True), (['Li','O','a']) ])
 def test_typeerror_for_label_string_in_potential_parameters(label_string, potential_parameters):

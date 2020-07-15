@@ -7,29 +7,6 @@ from bond_types import BondType
 import pytest
 import numpy as np
 
-@pytest.fixture
-def structure():
-    vasprun = Vasprun('test_files/test_vasprun.xml')
-    structure = vasprun.ionic_steps[0]['structure']
-    structure.add_site_property('forces', np.array(vasprun.ionic_steps[0]['forces']))
-    return structure
-
-
-@pytest.fixture
-def params():
-    params = {}
-    params['core_shell'] = { 'Li': False, 'Ni': False, 'O': True }
-    params['charges'] = {'Li': +1.0,
-                         'Ni': +3.0,
-                         'O': {'core':  -2.0,
-                               'shell': 0.0}} 
-    params['masses'] = {'Li': 6.941,
-                        'Ni': 58.6934,
-                        'O': {'core': 14.3991,
-                              'shell': 1.5999} }
-    params['cs_springs'] = {'O-O' : [10.0, 0.0]}
-    return params
-
 @pytest.fixture        
 def types_output(structure, params):
     atom_types, bond_types = types_from_structure( structure, params['core_shell'], params['charges'], params['masses'], params['cs_springs'] )

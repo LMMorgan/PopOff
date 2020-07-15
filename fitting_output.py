@@ -18,13 +18,12 @@ def create_directory(head_directory_name, local_struct_dir):
         os.makedirs(directory)
         return directory
     
-
 def extract_stresses_and_forces(fit_data, values, args):
     """
     Returns the extracted forces and stress tensors for the dft training structures and then runs a shell relaxation (if core-shell) and single point canculation to get the forces and stress tensors using the fitted potential.
     Args:
         fit_data (obj(FitModel)): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS. 
-        args (list(str)): Keys relating to the fitting parameters for the system, such as charge, springs, and buckingham parameters.
+        args (list(str)): Keys relating to the fitting parameters for the system, such as charge, springs, and buckingham parameter
         values (list(float)): Values relating to the fitting arguments passes in.
     Returns:
         dft_forces (np.array): 3D array of dft forces in x,y,z for each atom in each structure.

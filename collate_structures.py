@@ -4,7 +4,7 @@ import numpy as np
 
 def collate_structural_data(params, structs, supercell=None):
     """
-    Collects the information needed for the lammps data inputs from the POSCARs and OUTCARs with additional information provided by params.
+    Creates a list of directory paths for the vasprun.xml files and passes them and the params data to data_from_vasprun to collect the lammps_data objects. These are returned into a list of lammps_data objects for each structure.
     
     Args:
         params (dict(dict)): Contains core_shell (bool), charges (float), masses (float), and cs_springs (list(float)) dictionaries where the keys are atom label (str). Also contains bpp (list(float)) and sd (list(float)) dictionaries where the keys are atom label pairs (str), example: 'Li-O'.
@@ -14,24 +14,33 @@ def collate_structural_data(params, structs, supercell=None):
     Returns:
         lammps_data (list(obj)):  LammpsData objects containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factor (list(float)), file_name (str), and expected_stress_tensors (np.array).
         """
-    if (isinstance(supercell, list) is False) and (supercell is not None):
-            raise TypeError('Incorrect type for supercell. Requires integers for x,y,z expansion in a list, e.g. [1,1,1], or list of x,y,z expansions for each structure, e.g. [[1,1,1], [2,2,2], [3,3,3]]. Alternatively do not include.')
-            
-    lammps_data = []
-    
-    for i in structs:
-        vasprun = Vasprun(f'vaspruns/vasprun{i}.xml')
-        structure = vasprun.ionic_steps[0]['structure']
-        structure.add_site_property('forces', np.array(vasprun.ionic_steps[0]['forces']))
-        stresses = vasprun.ionic_steps[0]['stress']        
-        if supercell is not None:
-            if isinstance(supercell[0], int) and len(supercell) == 3:
-                structure = structure*supercell
-            elif isinstance(supercell[i], list) and (all([len(supercell[i]) == 3 for i, x in enumerate(supercell)])):
-                structure = structure*supercell[i]
-            else:
-                raise ValueError('Incorrect dimensions for supercell. Requires x,y,z expansion (i.e. list of 3 integers) or list of x,y,z expansions for each structure (i.e. list of list(x,y,z))')
- 
-        struct_data = LammpsData.from_structure(structure, params, i, stresses)
-        lammps_data.append(struct_data)  
+    vaspruns = [f'vaspruns/vasprun{i}.xml' for i in structs]
+    lammps_data = [data_from_vasprun(params, v, i, supercell) for i, v in enumerate(vaspruns)]
     return lammps_data
+
+
+def data_from_vasprun(params, filename, i, supercell):
+    """
+    Collects the information needed for the lammps data inputs from vasprun.xml files with additional information provided by params.
+    
+    Args:
+        params (dict(dict)): Contains core_shell (bool), charges (float), masses (float), and cs_springs (list(float)) dictionaries where the keys are atom label (str). Also contains bpp (list(float)) and sd (list(float)) dictionaries where the keys are atom label pairs (str), example: 'Li-O'.
+        filename (str): directory path and filename of the vasprun.xml file to be read.
+        i (int): Counter for the structures. Used in naming the lammps input files.
+        supercell (list(int)): 3 integers defining the cell increase in x, y, and z. Default=None if called directly.
+        
+    Returns:
+        struct_data (obj:LammpsData):  LammpsData objects containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factor (list(float)), file_name (str), and expected_stress_tensors (np.array).
+        """
+    vasprun = Vasprun(filename)
+    structure = vasprun.ionic_steps[0]['structure']
+    structure.add_site_property('forces', np.array(vasprun.ionic_steps[0]['forces']))
+    stresses = vasprun.ionic_steps[0]['stress']
+    if supercell is not None:
+        if all(isinstance(i, int) for i in supercell) and len(supercell) == 3:
+            structure = structure*supercell
+        else:
+            raise TypeError('Incorrect dimensions for supercell. Requires x,y,z expansion (i.e. list of 3 integers).')
+
+    struct_data = LammpsData.from_structure(structure, params, i, stresses)
+    return struct_data
