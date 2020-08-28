@@ -1,9 +1,9 @@
 #! /usr/bin/env python3
 import pytest
 import numpy as np
-from mock import Mock, patch, call, mock_open
+from mock import Mock, patch, call, mock_open, MagicMock
 from lammps_potenial_fitting.fitting_code import FitModel
-
+from lammps_potenial_fitting.lammps_data import LammpsData
 
 def test_init_in_FitModel(mock_lammps_data, buckingham_potential):
     fit_data = FitModel([buckingham_potential], mock_lammps_data)
@@ -11,29 +11,39 @@ def test_init_in_FitModel(mock_lammps_data, buckingham_potential):
     assert fit_data.lammps_data == mock_lammps_data
     assert fit_data.cs_springs == None
 
-# @patch('fitting_code.potentials.buckingham_potentials') 
-# @patch('fitting_code.pot', autospec=True) 
-# @patch('fitting_code.collate_structural_data', autospec=True)   
-# def test_collect_info_in_FitModel(mock_struct_data, mock_pot, params, buckingham_potential,
-#                                   pot_params, mock_lammps_data): 
-#     structs = np.array([0, 1, 2])
-#     mock_pot.buckingham_parameters = Mock(return_value = pot_params)
-#     mock_pot.buckingham_potentials = Mock(return_value = [buckingham_potential])
-#     mock_struct_data = mock_lammps_data
-#     fit_data = FitModel.collect_info(params, structs)
-#     print(mock_struct_data.return_value)
-# #     print(fit_data.lammps_data.return_value)
-#     assert fit_data.potentials == [buckingham_potential]
-#     assert fit_data.cs_springs == {'O-O': [10.0, 0.0]}
-# #     assert fit_data.lammps_data.return_value == mock_lammps_data
+
+@patch('lammps_potenial_fitting.fitting_code.pot', autospec=True) 
+@patch('lammps_potenial_fitting.fitting_code.collate_structural_data', autospec=True)   
+def test_collect_info_with_cs_in_FitModel(mock_collate, mock_pot, params, buckingham_potential,
+                                  pot_params): 
+    structs = np.array([0, 1, 2])
+    mock_pot.buckingham_parameters = Mock(return_value = pot_params)
+    mock_pot.buckingham_potentials = Mock(return_value = [buckingham_potential])
+    fit_data = FitModel.collect_info(params, structs)    
+    assert fit_data.potentials == [buckingham_potential]
+    assert fit_data.cs_springs == {'O-O': [10.0, 0.0]}
+
+@patch('lammps_potenial_fitting.fitting_code.pot', autospec=True) 
+@patch('lammps_potenial_fitting.fitting_code.collate_structural_data', autospec=True)   
+def test_collect_info_no_cs_in_FitModel(mock_collate, mock_pot, buckingham_potential,
+                                  pot_params, mock_lammps_data): 
+    structs = np.array([0, 1, 2])
+    params = {}
+    params['core_shell'] = { 'Li': False, 'Ni': False, 'O': False }
+    params['charges'] = {'Li': +1.0, 'Ni': +3.0, 'O': -2.0} 
+    params['masses'] = {'Li': 6.941, 'Ni': 58.6934, 'O': 15.999}
+    params['potentials'] = {'Li-O': [100.00, 0.1, 0.0],
+                            'Ni-O': [1000.00, 0.2, 0.0],
+                            'O-O':  [10000.00, 0.3, 0.0]}
+    mock_pot.buckingham_parameters = Mock(return_value = pot_params)
+    mock_pot.buckingham_potentials = Mock(return_value = [buckingham_potential])
+    fit_data = FitModel.collect_info(params, structs)    
+    assert fit_data.potentials == [buckingham_potential]
+    assert fit_data.cs_springs == None
 
 
-#     assert struct_data.atoms == mock_atoms
-#     assert struct_data.bonds == mock_bonds
-#     assert struct_data.atom_types == atom_types
-#     assert struct_data.bond_types == mock_bt
-#     assert struct_data.file_name == 'lammps/coords1.lmp'
-#     assert np.allclose(mock_lammps_data.expected_stress_tensors, np.array([1,2,3,4,5,6]))    
+
+ 
     
 # def test_header_string_in_LammpsData(lammps_data):
 #     head_string = lammps_data._header_string()

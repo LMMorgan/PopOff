@@ -119,7 +119,7 @@ def mock_lammps_data(atom_types, mock_atoms, mock_bonds, mock_bt):
     return lammps_data
 
 @pytest.fixture
-@patch('lammps_data.LammpsData.write_lammps_files')
+@patch('lammps_potenial_fitting.lammps_data.LammpsData.write_lammps_files')
 def lammps_data(mock_write, atom_types, mock_atoms, mock_bonds, mock_bt):
     cell_lengths = [10.1, 10.2, 10.3]
     tilt_factors = [0.0, 0.0, 0.0]

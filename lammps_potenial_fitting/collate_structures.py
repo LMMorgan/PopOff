@@ -35,7 +35,10 @@ def data_from_vasprun(params, filename, i, supercell):
     vasprun = Vasprun(filename)
     structure = vasprun.ionic_steps[0]['structure']
     structure.add_site_property('forces', np.array(vasprun.ionic_steps[0]['forces']))
-    stresses = vasprun.ionic_steps[0]['stress']
+    stressT = vasprun.ionic_steps[0]['stress']
+    stresses = np.array([stressT[0][0], stressT[1][1], stressT[2][2],
+                         stressT[0][1], stressT[2][1], stressT[0][2]])
+    
     if supercell is not None:
         if all(isinstance(i, int) for i in supercell) and len(supercell) == 3:
             structure = structure*supercell
