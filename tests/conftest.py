@@ -9,6 +9,7 @@ from lammps_potenial_fitting.atoms import Atom
 from lammps_potenial_fitting.bonds import Bond
 from lammps_potenial_fitting.potential_parameters import BuckinghamParameter
 from lammps_potenial_fitting.lammps_data import LammpsData
+from lammps_potenial_fitting.fitting_code import FitModel
 from pymatgen.io.vasp.outputs import Vasprun
 
 @pytest.fixture
@@ -36,6 +37,10 @@ def labels():
 @pytest.fixture
 def bounds():
     return [(0.01, 4), (0.3,1.0), (10.0,150.0), (100.0,50000.0), (0.01,1.0), (100.0,50000.0), (0.01,1.0), (150.0,50000.0), (0.01,1.0)]
+
+@pytest.fixture
+def values():
+    return [0.5, 0.6, 20.0, 40000.0, 0.5, 700.0, 0.3, 10000, 0.1]
 
 @pytest.fixture
 def potentials():
@@ -129,3 +134,8 @@ def lammps_data(mock_write, atom_types, mock_atoms, mock_bonds, mock_bt):
                              cell_lengths, tilt_factors, file_name, expected_st)
     mock_write.assert_called_with()
     return lammps_data
+
+@pytest.fixture
+def fit_data(buckingham_potential, lammps_data):
+    fit_data = FitModel([buckingham_potential], [lammps_data], cs_springs=None)
+    return fit_data

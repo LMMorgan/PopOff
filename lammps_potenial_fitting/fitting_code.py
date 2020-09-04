@@ -318,7 +318,7 @@ class FitModel():
 
     def reset_directories(self):
         """
-        Removes any poscar, outcar, and lammps files from the working directory.
+        Removes any lammps files from the working directory.
         
         Args:
             None
@@ -326,6 +326,4 @@ class FitModel():
         Returns:
             None
         """  
-        os.system('rm poscars/POSCAR*')
-        os.system('rm outcars/OUTCAR*')
         os.system('rm lammps/coords*')

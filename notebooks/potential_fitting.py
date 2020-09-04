@@ -1,10 +1,10 @@
 #! /usr/bin/env python3
 
-from fitting_code import FitModel
-import fitting_output as output
+from lammps_potenial_fitting.fitting_code import FitModel
+import lammps_potenial_fitting.fitting_output as output
+from lammps_potenial_fitting.input_checker import setup_error_checks
 from scipy import optimize
 import numpy as np
-from input_checker import setup_error_checks
 
 def random_set_of_structures(fits, structures, structures_to_fit, seed=False):
     """
@@ -86,7 +86,7 @@ if __name__ == '__main__':
     bounds = [(0.01, 4), (0.3,1.0), (10.0,150.0), (100.0,50000.0), (0.01,1.0), (100.0,50000.0), (0.01,1.0), (150.0,50000.0), (0.01,1.0)]
 
     structures = 15 #Total number of structures in the training set
-    structures_to_fit = 3 #Number of structures you wish to fit to
+    structures_to_fit = 5 #Number of structures you wish to fit to
     fits = 1 #Number of fits to run
     head_directory_name = 'results/{}_fit'.format(structures_to_fit)
 

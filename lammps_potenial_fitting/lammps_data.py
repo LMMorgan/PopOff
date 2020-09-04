@@ -220,7 +220,7 @@ class LammpsData():
     
     def write_lammps_files(self):
         """
-        Writes the structure information to a lammps input file, which name is designated/identified by the numerical value in the related POSCAR and OUTCAR files i.e. if input files are 'POSCAR1' and 'OUTCAR1', the written lammps file will be 'coords1.lmp'.
+        Writes the structure information to a lammps input file, which name is designated/identified by the numerical value in the related vasprun.xml file i.e. if input file is 'vasprun1.xml', the written lammps file will be 'coords1.lmp'.
 
         Args:
             None
@@ -322,7 +322,7 @@ def lammps_lattice(structure):
     Imposes transformation for non-orthorobic cell for LAMMPS to read cell_lengths and tilt_factors, creates a new pymatgen structure object with the new transformation and associated forces.
     
     Args:
-        structure (obj): A pymatgen structural object created from a POSCAR, with forces from an OUTCAR included as site properties.
+        structure (obj): A pymatgen structural object created from a vasprun.xml file with forces included as site properties.
     
     Returns:
         cell_lengths (np.array): Lengths of each cell direction.
