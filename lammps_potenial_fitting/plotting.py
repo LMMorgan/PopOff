@@ -135,9 +135,9 @@ def plot_stresses(dft_stresses, ip_stresses, output_directory, local_directory, 
         plt.scatter(x, dy, label='dft', color='tab:blue')
         plt.scatter(x, iy , label='ip', color='tab:orange')
     plt.ylabel('stress tensor')
-    plt.text(1.5,110, 'stress tensor error: {0:.5f}'.format(np.sum((dft_stresses - ip_stresses)**2)/ 6))
-    plt.text(4.5,110, 'DFT', color='tab:blue')
-    plt.text(4.5,95, 'IP', color='tab:orange')
+    plt.text(1.5,90, 'stress tensor error: {0:.5f}'.format(np.sum((dft_stresses - ip_stresses)**2)/ 6))
+    plt.text(4.5,90, 'DFT', color='tab:blue')
+    plt.text(4.5,75, 'IP', color='tab:orange')
     if save is True:
         plt.savefig('{}/{}_stresses.png'.format(output_directory,local_directory),dpi=500, bbox_inches = "tight")
     plt.show()

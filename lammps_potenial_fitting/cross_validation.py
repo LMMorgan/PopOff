@@ -75,13 +75,10 @@ def run_cross_validation(fits, structures, structures_in_fit, head_directory_nam
         head_output_directory (str): Name of the main output directory for the cross-validation.
         params (dict(dict)): Setup dictionary containing the inputs for coreshell, charges, masses, potentials, and core-shell springs.
         supercell (optional:list(int) or list(list(int))): 3 integers defining the cell increase in x, y, and z for all structures, or a list of lists where each list is 3 integers defining the cell increase in x, y, z, for each individual structure in the fitting process. i.e. all increase by the same amount, or each structure increased but different amounts. Default=None.
+        
     Returns:
         None
     """
-    # Define paths to poscar/outcar directories
-    poscars = os.path.join('poscars','training_set')
-    outcars = os.path.join('outcars','training_set')
-    
     for potential_file in sorted(glob.glob('{}/*/potentials.json'.format(head_directory_name))):
         with open(potential_file, 'r') as f:
             potentials = json.load(f)
@@ -92,14 +89,11 @@ def run_cross_validation(fits, structures, structures_in_fit, head_directory_nam
         indv_output_directory = fit_out.create_directory(head_output_directory, 'p{}'.format('-'.join([str(num) for num in structure_nums])))
         sets_of_structures = validation_sets(fits, structures, structures_in_fit, structure_nums)
         for structs in sets_of_structures:
-            fit_data = FitModel.collect_info(params, supercell=supercell)
-            fit_data.reset_directories()
-            for struct_num, struct in enumerate(structs):
-                os.system('cp {}/POSCAR{} {}/POSCAR{}'.format(poscars, struct, 'poscars', struct_num+1))
-                os.system('cp {}/OUTCAR{} {}/OUTCAR{}'.format(outcars, struct, 'outcars', struct_num+1))    
+            fit_data = FitModel.collect_info(params, structs, supercell=supercell)
             dft_f, ip_f, dft_s, ip_s = fit_out.extract_stresses_and_forces(fit_data, include_values, include_labels)
             error = chi_squared_error(dft_f, ip_f, dft_s, ip_s)
             save_cv_data(indv_output_directory, structs, error, dft_f, ip_f, dft_s, ip_s)
+            fit_data.reset_directories()
             
 def setup_error_dict(cv_directory):
     """

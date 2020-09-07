@@ -49,8 +49,6 @@ def run_relaxation(structures, directory, output_directory, params, labels, ref_
     Returns:
         percent_difference (np.array): percentage difference for each lattice parameter in each strucutre of the training set, from the reference lattice parameters.
     """    
-    poscars = os.path.join('poscars','training_set')
-    outcars = os.path.join('outcars','training_set')
     for potential_file in sorted(glob.glob('{}/*/potentials.json'.format(directory))):
         with open(potential_file, 'r') as f:
             potentials = json.load(f)
@@ -58,16 +56,14 @@ def run_relaxation(structures, directory, output_directory, params, labels, ref_
         calculated_parameters = []
         percent_difference = []
         for structure in range(structures):
-            fit_data = FitModel.collect_info(params, supercell=supercell)
-            fit_data.reset_directories()
-            os.system('cp {}/POSCAR{} {}/POSCAR1'.format(poscars, structure+1, 'poscars'))
-            os.system('cp {}/OUTCAR{} {}/OUTCAR1'.format(outcars, structure+1, 'outcars'))
+            fit_data = FitModel.collect_info(params, [structure], supercell=supercell)
             lmp = get_lattice(fit_data, potentials.values(), potentials.keys())
             lammps = lmp[0]
             lattice_params = np.array([lammps.box.lengths[0], lammps.box.lengths[1], lammps.box.lengths[2], lammps.box.volume])
             calculated_parameters.append(lattice_params)
             diffs = differences(lattice_params, ref_DFT)
             percent_difference.append(diffs)
+            fit_data.reset_directories()
         np.savetxt('{}/{}_lattice_values.dat'.format(output_directory, pot_structures), calculated_parameters, header = ' '.join(labels))
         np.savetxt('{}/{}_lattice_diffs.dat'.format(output_directory, pot_structures), percent_difference, header = ' '.join(labels))
     return np.array(percent_difference)
