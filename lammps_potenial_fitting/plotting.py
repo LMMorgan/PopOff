@@ -19,7 +19,7 @@ def setup_error_dict(head_directory_name):
         error_dict.update( {structure_num:error})
     return error_dict
 
-def setup_potential_dicts(head_directory_name):
+def setup_potentials_dict(head_directory_name):
     """
     Returns a dictionary of the chi squared errors associated with each fit in the group.
     Args:
@@ -27,14 +27,17 @@ def setup_potential_dicts(head_directory_name):
     Returns:
         potential_dicts (list(dict)): keys are the potential parameter labels (str) and values are a tuple of the fitted structure numbers (str) and the associated parameter value (float).
     """
-    potential_dicts = []
+    list_of_potential_dicts = []
     for potential_file in sorted(glob.glob('{}/*/potentials.json'.format(head_directory_name))):
         with open(potential_file, 'r') as f:
             potentials = json.load(f)
         structure_num = potential_file.replace('/potentials.json', '').replace('{}/'.format(head_directory_name), '')
         potentials.update((k, (structure_num,v) ) for k,v in potentials.items()) #Remove int if directory naming system changes to include strings. This will change the order of the structures though.
-        potential_dicts.append(potentials)
-        return potential_dicts
+        list_of_potential_dicts.append(potentials)
+    potentials_dict = {}
+    for key in list_of_potential_dicts[0].keys():
+        potentials_dict[key] = [potentials_dict[key] for potentials_dict in list_of_potential_dicts]
+    return potentials_dict
     
 def plot_errors(error_dict, output_directory, xlabel_rotation=50, title='default', save=True):
     """

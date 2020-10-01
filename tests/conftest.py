@@ -119,7 +119,7 @@ def mock_lammps_data(atom_types, mock_atoms, mock_bonds, mock_bt):
     lammps_data.bond_types = mock_bt
     lammps_data.cell_lengths = [10.1, 10.2, 10.3]
     lammps_data.tilt_factors = [0.0, 0.0, 0.0]
-    lammps_data.file_name = 'test_files/vasprun_small.xml'
+    lammps_data.file_name = 'test_files/test_coords.lmp'
     lammps_data.expected_stress_tensors = np.array([1,2,3,4,5,6])
     return lammps_data
 
@@ -128,7 +128,7 @@ def mock_lammps_data(atom_types, mock_atoms, mock_bonds, mock_bt):
 def lammps_data(mock_write, atom_types, mock_atoms, mock_bonds, mock_bt):
     cell_lengths = [10.1, 10.2, 10.3]
     tilt_factors = [0.0, 0.0, 0.0]
-    file_name = 'test_files/vasprun_small.xml'
+    file_name = 'test_files/test_coords.lmp'
     expected_st = np.array([1,2,3,4,5,6])
     lammps_data = LammpsData(atom_types, mock_bt, mock_atoms, mock_bonds,
                              cell_lengths, tilt_factors, file_name, expected_st)
@@ -139,3 +139,12 @@ def lammps_data(mock_write, atom_types, mock_atoms, mock_bonds, mock_bt):
 def fit_data(buckingham_potential, lammps_data):
     fit_data = FitModel([buckingham_potential], [lammps_data], cs_springs=None)
     return fit_data
+
+
+@pytest.fixture
+def force_stress():
+    ip_forces = np.array([0.1, 0.2, 0.3, 0.2, 0.3, 0.4, 0.3, 0.4, 0.5])
+    ip_stresses = np.array([0.1, 0.2, 0.3, 0.2, 0.3, 0.4])
+    dft_forces = np.array([0.2, 0.2, 0.3, 0.3, 0.3, 0.4, 0.3, 0.4, 0.5])
+    dft_stresses = np.array([0.1, 0.3, 0.4, 0.2, 0.3, 0.2])
+    return ip_forces, ip_stresses, dft_forces, dft_stresses

@@ -6,7 +6,7 @@ import glob
 import lammps_potenial_fitting.fitting_output as fit_out
 import matplotlib.pyplot as plt
 
-def validation_sets(fits, structures, structures_in_fit, structure_nums):
+def validation_sets(fits, structures, structures_in_fit, structure_nums, seed=False):
     """
     Randomly selects structures up to the number of structures to include in the cross-validation, checks there are no repeats and no structures used in the fit. The number of structure sets is equal to the number of cross-validation fits to be performed. Note: check you have enough structures avaliable (not including those in the fit) to make a complete set, and to the number of sets you want.
     Args:
@@ -17,6 +17,8 @@ def validation_sets(fits, structures, structures_in_fit, structure_nums):
     Returns:
         (np.array): Sets of structure numbers of structures in training set to be in validation sets.
     """
+    if seed is not False:
+        np.random.seed(seed)
     sets_of_structures = []
     while len(sets_of_structures) < fits:
         struct_set = np.sort(np.random.randint(1,structures+1, size=structures_in_fit), axis=0)
@@ -64,7 +66,7 @@ def save_cv_data(output_directory, structs, error, dft_forces, ip_forces, dft_st
     with open('{}/s{}_error.dat'.format(output_directory, '-'.join([str(num) for num in structs])), 'w') as f:
         f.write(str(error))
         
-def run_cross_validation(fits, structures, structures_in_fit, head_directory_name, head_output_directory, params, supercell=None):
+def run_cross_validation(fits, structures, structures_in_fit, head_directory_name, head_output_directory, params, supercell=None, seed=False):
     """
     Collates the structures to be fitted into the working directory, creates the lammps inputs and runs the optimiser to fit to the designated parameters. Calls another function to save the data in the appropriate output directory.
     Args:
@@ -87,7 +89,7 @@ def run_cross_validation(fits, structures, structures_in_fit, head_directory_nam
         include_labels = list(potentials.keys())
         include_values = list(potentials.values())
         indv_output_directory = fit_out.create_directory(head_output_directory, 'p{}'.format('-'.join([str(num) for num in structure_nums])))
-        sets_of_structures = validation_sets(fits, structures, structures_in_fit, structure_nums)
+        sets_of_structures = validation_sets(fits, structures, structures_in_fit, structure_nums, seed=False)
         for structs in sets_of_structures:
             fit_data = FitModel.collect_info(params, structs, supercell=supercell)
             dft_f, ip_f, dft_s, ip_s = fit_out.extract_stresses_and_forces(fit_data, include_values, include_labels)

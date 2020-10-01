@@ -217,14 +217,10 @@ def test_init_potential_in_FitModel(q_reset, q_ratio, springs, pot, q_scaling, f
 @patch('lammps_potenial_fitting.fitting_code.FitModel.expected_forces')     
 @patch('lammps_potenial_fitting.fitting_code.FitModel.get_forces_and_stresses')  
 @patch('lammps_potenial_fitting.fitting_code.FitModel.init_potential')     
-def test_chi_squared_error(init_pot, get_fs, expect_f, expect_s,fit_data, labels, values):
-    ip_forces = np.array([0.1, 0.2, 0.3, 0.2, 0.3, 0.4, 0.3, 0.4, 0.5])
-    ip_stresses = np.array([0.1, 0.2, 0.3, 0.2, 0.3, 0.4])
-    dft_forces = np.array([0.2, 0.2, 0.3, 0.3, 0.3, 0.4, 0.3, 0.4, 0.5])
-    dft_stresses = np.array([0.1, 0.3, 0.4, 0.2, 0.3, 0.2])
-    get_fs.return_value = ip_forces, ip_stresses
-    expect_f.return_value = dft_forces
-    expect_s.return_value = dft_stresses 
+def test_chi_squared_error(init_pot, get_fs, expect_f, expect_s,fit_data, labels, values, force_stress):
+    get_fs.return_value = force_stress[0], force_stress[1]
+    expect_f.return_value = force_stress[2]
+    expect_s.return_value = force_stress[3]
     chi = fit_data.chi_squared_error(values, labels)
     init_pot.assert_called_with(values, labels)
     get_fs.assert_called_with()
