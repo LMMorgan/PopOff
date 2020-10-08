@@ -93,7 +93,7 @@ def test_type_shell_in_LammpsData(lammps_data):
 @patch("builtins.open", new_callable=mock_open)
 def test_write_lammps_files_in_LammpsData(mock_open, lammps_data):
     lammps_data.write_lammps_files()
-    calls_open = [call('test_files/vasprun_small.xml', 'w'),
+    calls_open = [call('test_files/test_coords.lmp', 'w'),
                   call().__enter__(),
                   call().write(lammps_data.input_string()),
                   call().__exit__(None, None, None)]

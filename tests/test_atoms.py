@@ -34,7 +34,8 @@ def test_typeerror_for_atom_index_in_atom(atom_index, atom):
 @pytest.mark.parametrize( 'molecule_index', [('test'),(1.0),(True)])
 def test_typeerror_for_molecule_index_in_atom(molecule_index, atom):
     with pytest.raises(TypeError):
-        Atom(atom.atom_index, molecule_index, atom.coords, atom.forces, atom.atom_type)        
+        Atom(atom.atom_index, molecule_index, atom.coords, atom.forces, atom.atom_type)  
+        
 @pytest.mark.parametrize( 'coords', [('test'),(1.0),(True),([1,2,3]),(1)])
 def test_typeerror_for_coords_in_atom(coords, atom):
     with pytest.raises(TypeError):
@@ -43,7 +44,8 @@ def test_typeerror_for_coords_in_atom(coords, atom):
 @pytest.mark.parametrize( 'atom_forces', [('test'),(1.0),(True),([1,2,3]),(1)])
 def test_typeerror_for_atom_forces_in_atom(atom_forces, atom):
     with pytest.raises(TypeError):
-        Atom(atom.atom_index, atom.molecule_index, atom.coords, atom_forces, atom.atom_type)  
+        Atom(atom.atom_index, atom.molecule_index, atom.coords, atom_forces, atom.atom_type)
+        
 @pytest.mark.parametrize( 'atom_type', [('test'),(1.0),(True),
                                         ([1,2,3]),(1),(BondType(1, 'Li-O', 1.555, 1.0))])
 def test_typeerror_for_atom_type_in_atom(atom_type, atom):
@@ -59,3 +61,6 @@ def test_valueerror_for_atom_forces_in_atom(testing_arrays, atom):
     for atom_forces in testing_arrays:
         with pytest.raises(ValueError):
             Atom(atom.atom_index, atom.molecule_index, atom.coords, atom_forces, atom.atom_type)
+
+def test_input_string_in_atom(atom):
+    assert atom.input_string() == '1    2    1     1.0000   0.100000   0.200000   0.300000'

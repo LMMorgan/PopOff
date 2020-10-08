@@ -39,8 +39,10 @@ def test_typeerror_for_rho_in_buckingham_potential(rho, buckingham_potential):
                                 (1),(AtomType(1, 'Li', 'Li', 1.555, 1.0))])
 def test_typeerror_for_c_in_buckingham_potential(c, buckingham_potential):
     with pytest.raises(TypeError):
-        BuckinghamPotential(buckingham_potential.labels, buckingham_potential.atype_index, buckingham_potential.a, buckingham_potential.rho, c)  
+        BuckinghamPotential(buckingham_potential.labels, buckingham_potential.atype_index, buckingham_potential.a, buckingham_potential.rho, c) 
         
+def test_potential_string_in_buckingham_potential(buckingham_potential):
+    assert buckingham_potential.potential_string() == 'pair_coeff 1 3 1.0000 0.1000 0.0000'        
 
 def test_assert_potentials_in_buckingham_potentials(potentials, atom_types, pot_params):
     assert potentials.keys() == {'Li-O', 'Ni-O', 'O-O'}

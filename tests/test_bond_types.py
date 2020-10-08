@@ -37,3 +37,6 @@ def test_typeerror_for_spring_coeff_2_in_bond_type(spring_coeff_2, bond_type):
 def test_valueerror_for_label_in_bond_type(label, bond_type):
     with pytest.raises(ValueError):
         BondType(bond_type.bond_type_index, label, bond_type.spring_coeff_1, bond_type.spring_coeff_2)
+        
+def test_bond_string_in_bond_type(bond_type):
+    assert bond_type.bond_string() == 'bond_coeff 1  65.00    0.0'

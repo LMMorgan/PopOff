@@ -35,3 +35,6 @@ def test_typeerror_for_bond_type_in_bond(bond_type, bond):
 def test_valueerror_for_atom_indices_in_bond(atom_indices, bond):
     with pytest.raises(ValueError):
         Bond(bond.bond_index, atom_indices, bond.bond_type)
+        
+def test_input_string_in_atom(bond):
+    assert bond.input_string() == '1    1    1    2   '

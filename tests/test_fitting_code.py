@@ -233,7 +233,7 @@ def test_get_lattice_params_in_FitModel(mock_lammps, set_pot, set_q, fit_data):
     instances = [lmp.initiate_lmp(fit_data.cs_springs) for lmp in fit_data.lammps_data]
     fit_data.get_lattice_params()
     calls_command = [call(units='metal', style='full', args=['-log', 'none', '-screen', 'none']),
-                     call().command('read_data test_files/vasprun_small.xml'),
+                     call().command('read_data test_files/test_coords.lmp'),
                      call().command('group cores type 1 2 3'),
                      call().command('group shells type 3'),
                      call().command('pair_style buck/coul/long 10.0'),
