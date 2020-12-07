@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
-from lammps_potenial_fitting.potentials import BuckinghamPotential, buckingham_potentials
-from lammps_potenial_fitting.atom_types import AtomType
-from lammps_potenial_fitting.potential_parameters import BuckinghamParameter
+from buckfit.potentials import BuckinghamPotential, buckingham_potentials
+from buckfit.atom_types import AtomType
+from buckfit.potential_parameters import BuckinghamParameter
 import pytest
 import numpy as np
 

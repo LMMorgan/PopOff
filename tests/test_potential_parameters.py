@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-from lammps_potenial_fitting.potential_parameters import BuckinghamParameter, buckingham_parameters
+from buckfit.potential_parameters import BuckinghamParameter, buckingham_parameters
 import pytest
 import numpy as np
 

@@ -2,14 +2,11 @@
 import pytest
 import numpy as np
 from mock import Mock
-from lammps_potenial_fitting.fitting_code import FitModel
-from lammps_potenial_fitting.lammps_data import LammpsData
-from lammps_potenial_fitting.atom_types import AtomType
-from lammps_potenial_fitting.input_checker import (check_coreshell,
-                                                   check_scaling_limits,
-                                                   check_spring,
-                                                   check_buckingham,
-                                                   setup_error_checks)
+from buckfit.fitting_code import FitModel
+from buckfit.lammps_data import LammpsData
+from buckfit.atom_types import AtomType
+from buckfit.input_checker import (check_coreshell, check_scaling_limits,
+                                   check_spring, check_buckingham, setup_error_checks)
 
 @pytest.fixture
 def mock_fit_data(mock_lammps_data):

@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-from lammps_potenial_fitting.atom_types import AtomType
+from buckfit.atom_types import AtomType
 import pytest
 from mock import Mock
 

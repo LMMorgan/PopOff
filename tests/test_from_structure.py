@@ -1,9 +1,9 @@
 #! /usr/bin/env python3
-from lammps_potenial_fitting.from_structure import types_from_structure, atoms_and_bonds_from_structure
+from buckfit.from_structure import types_from_structure, atoms_and_bonds_from_structure
 from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.core.composition import Composition
-from lammps_potenial_fitting.atom_types import AtomType
-from lammps_potenial_fitting.bond_types import BondType
+from buckfit.atom_types import AtomType
+from buckfit.bond_types import BondType
 import pytest
 import numpy as np
 

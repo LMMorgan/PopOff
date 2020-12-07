@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
-from lammps_potenial_fitting.atom_types import AtomType
-from lammps_potenial_fitting.bond_types import BondType
-from lammps_potenial_fitting.atoms import Atom
+from buckfit.atom_types import AtomType
+from buckfit.bond_types import BondType
+from buckfit.atoms import Atom
 import pytest
 import numpy as np
 

@@ -4,10 +4,10 @@ import numpy as np
 import json
 from scipy import optimize
 from mock import Mock, patch, call, mock_open
-from lammps_potenial_fitting.fitting_code import FitModel
-from lammps_potenial_fitting.fitting_output import (create_directory,
-                                                    extract_stresses_and_forces,
-                                                    save_data)
+from buckfit.fitting_code import FitModel
+from buckfit.fitting_output import (create_directory,
+                                    extract_stresses_and_forces,
+                                    save_data)
 
 @pytest.fixture
 def mock_forces():
@@ -28,8 +28,8 @@ def test_fileexistserror_for_directory_in_create_directory():
     with pytest.raises(FileExistsError):
         create_directory(head_directory_name, local_struct_dir)
 
-@patch('lammps_potenial_fitting.fitting_output.os.path.isdir')
-@patch('lammps_potenial_fitting.fitting_output.os.makedirs')
+@patch('buckfit.fitting_output.os.path.isdir')
+@patch('buckfit.fitting_output.os.makedirs')
 def test_output_for_directory_in_create_directory(mock_makedirs, mock_isdir):
     head_directory_name = 'test_files'
     local_struct_dir = "test2"
@@ -51,9 +51,9 @@ def test_asserts_for_extract_stresses_and_forces(labels, mock_forces, mock_stres
     assert np.allclose(ip_stresses, np.array([[0,1,2],[3,4,5],[6,7,8]]))
 
 
-@patch('lammps_potenial_fitting.fitting_output.json.dump')
-@patch("builtins.open", new_callable=mock_open)
-@patch('lammps_potenial_fitting.fitting_output.np.savetxt')
+@patch('buckfit.fitting_output.json.dump')
+@patch('builtins.open', new_callable=mock_open)
+@patch('buckfit.fitting_output.np.savetxt')
 def test_saves_for_save_data(mock_savetxt, mock_open, mock_json, labels, mock_forces, mock_stresses):
     struct_dir = 'test_files'
     fit_output = Mock(spec=optimize.OptimizeResult)

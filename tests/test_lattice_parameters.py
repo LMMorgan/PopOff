@@ -7,13 +7,12 @@ from matplotlib.axes import Axes
 from matplotlib import gridspec
 from mock import Mock, patch, call, mock_open, MagicMock
 
-# from lammps_potenial_fitting.fitting_code import FitModel
-from lammps_potenial_fitting.lattice_parameters import (get_lattice, differences, run_relaxation,
-                                                        plot_lattice_params, _scatter_plot, _distribution_plot,
-                                                        _y_limits, plot_lattice_params_with_distributions)
+from buckfit.lattice_parameters import (get_lattice, differences, run_relaxation,
+                                        plot_lattice_params, _scatter_plot, _distribution_plot,
+                                        _y_limits, plot_lattice_params_with_distributions)
 
-@patch('lammps_potenial_fitting.lattice_parameters.FitModel.get_lattice_params') 
-@patch('lammps_potenial_fitting.lattice_parameters.FitModel.init_potential')   
+@patch('buckfit.lattice_parameters.FitModel.get_lattice_params') 
+@patch('buckfit.lattice_parameters.FitModel.init_potential')   
 def test_get_lattice_in_lattice_parameters(fit_init, lat_params, fit_data, labels, values):
     lat_params.return_value = 'foo'
     lmp = get_lattice(fit_data, values, labels)
@@ -27,10 +26,10 @@ def test_differences_in_lattice_parameters():
     diff = differences(lattice_params, ref)
     np.testing.assert_almost_equal(diff, np.array([-0.99009901,0.0,-1.96078431, -2.93146962]))
 
-@patch('lammps_potenial_fitting.lattice_parameters.np.savetxt')
-@patch('lammps_potenial_fitting.lattice_parameters.differences')
-@patch('lammps_potenial_fitting.lattice_parameters.get_lattice')
-@patch('lammps_potenial_fitting.lattice_parameters.FitModel')
+@patch('buckfit.lattice_parameters.np.savetxt')
+@patch('buckfit.lattice_parameters.differences')
+@patch('buckfit.lattice_parameters.get_lattice')
+@patch('buckfit.lattice_parameters.FitModel')
 def test_run_relaxation_in_lattice_parameters(fitmodel, get_lattice, diffs, savetxt, fit_data, params, labels):
     head_dir = 'test_files/test_outputs'
     head_out = 'test_files/test_outputs/outputs'   
@@ -55,8 +54,8 @@ def test_run_relaxation_in_lattice_parameters(fitmodel, get_lattice, diffs, save
     fitmodel.assert_has_calls(fitmodel_calls)
     np.testing.assert_almost_equal(per_diff,np.zeros((15,4)))
 
-@patch("lammps_potenial_fitting.lattice_parameters.np.random.rand")
-@patch("lammps_potenial_fitting.lattice_parameters.plt")
+@patch('buckfit.lattice_parameters.np.random.rand')
+@patch('buckfit.lattice_parameters.plt')
 def test_plot_lattice_params_in_lattice_parameters(mock_plt, rand):
     labels = ['A ang', 'rho ang', 'C ang']
     calc_params = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
@@ -73,8 +72,8 @@ def test_plot_lattice_params_in_lattice_parameters(mock_plt, rand):
                      call.show()]
     mock_plt.assert_has_calls(calls_command)
 
-@patch("lammps_potenial_fitting.lattice_parameters.plt.subplots_adjust")     
-@patch("lammps_potenial_fitting.lattice_parameters.plt.subplot")    
+@patch('buckfit.lattice_parameters.plt.subplots_adjust')     
+@patch('buckfit.lattice_parameters.plt.subplot')    
 def test_scatter_plot_in_lattice_parameters(mock_subplot, mock_adjust):
     gs = Mock(spec=gridspec.GridSpec)
     x = np.array([0.1, 0.2, 0.3])
@@ -91,7 +90,7 @@ def test_scatter_plot_in_lattice_parameters(mock_subplot, mock_adjust):
     mock_subplot.assert_has_calls(calls_command)
     mock_adjust.assert_called_with(wspace=0)
          
-@patch("lammps_potenial_fitting.lattice_parameters.plt.subplot")    
+@patch('buckfit.lattice_parameters.plt.subplot')    
 def test_distribution_plot_in_lattice_parameters(mock_subplot):
     gs = Mock(spec=gridspec.GridSpec)
     y = np.array([10.0, 10.1, 10.3])
@@ -109,12 +108,12 @@ def test_y_limits_in_lattice_parameters():
         assert ylims == output[i]
 
 
-@patch("lammps_potenial_fitting.lattice_parameters._y_limits")        
-@patch("lammps_potenial_fitting.lattice_parameters._distribution_plot")
-@patch("lammps_potenial_fitting.lattice_parameters._scatter_plot")         
-@patch("lammps_potenial_fitting.lattice_parameters.gridspec.GridSpec")         
-@patch("lammps_potenial_fitting.lattice_parameters.np.random.rand")  
-@patch("lammps_potenial_fitting.lattice_parameters.plt")    
+@patch('buckfit.lattice_parameters._y_limits')        
+@patch('buckfit.lattice_parameters._distribution_plot')
+@patch('buckfit.lattice_parameters._scatter_plot')         
+@patch('buckfit.lattice_parameters.gridspec.GridSpec')         
+@patch('buckfit.lattice_parameters.np.random.rand')  
+@patch('buckfit.lattice_parameters.plt')    
 def test_plot_lattice_params_with_distributions_in_lattice_parameters(mock_plt, rand, gridspec, scatter, distribution, ylims):
     labels = ['A ang', 'rho ang']
     calc_params = np.array([[0.1, 0.2], [0.5, 0.6]])

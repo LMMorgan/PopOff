@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-from lammps_potenial_fitting.bond_types import BondType
+from buckfit.bond_types import BondType
 import pytest
 
 @pytest.fixture

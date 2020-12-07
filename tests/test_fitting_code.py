@@ -2,8 +2,8 @@
 import pytest
 import numpy as np
 from mock import Mock, patch, call, mock_open, MagicMock
-from lammps_potenial_fitting.fitting_code import FitModel
-from lammps_potenial_fitting.lammps_data import LammpsData
+from buckfit.fitting_code import FitModel
+from buckfit.lammps_data import LammpsData
 
 def test_init_in_FitModel(mock_lammps_data, buckingham_potential):
     fit_data = FitModel([buckingham_potential], mock_lammps_data)
@@ -11,8 +11,8 @@ def test_init_in_FitModel(mock_lammps_data, buckingham_potential):
     assert fit_data.lammps_data == mock_lammps_data
     assert fit_data.cs_springs == None
 
-@patch('lammps_potenial_fitting.fitting_code.pot', autospec=True) 
-@patch('lammps_potenial_fitting.fitting_code.collate_structural_data', autospec=True)   
+@patch('buckfit.fitting_code.pot', autospec=True) 
+@patch('buckfit.fitting_code.collate_structural_data', autospec=True)   
 def test_collect_info_with_cs_in_FitModel(mock_collate, mock_pot, params, buckingham_potential,
                                   pot_params): 
     structs = np.array([0, 1, 2])
@@ -22,8 +22,8 @@ def test_collect_info_with_cs_in_FitModel(mock_collate, mock_pot, params, buckin
     assert fit_data.potentials == [buckingham_potential]
     assert fit_data.cs_springs == {'O-O': [10.0, 0.0]}
 
-@patch('lammps_potenial_fitting.fitting_code.pot', autospec=True) 
-@patch('lammps_potenial_fitting.fitting_code.collate_structural_data', autospec=True)   
+@patch('buckfit.fitting_code.pot', autospec=True) 
+@patch('buckfit.fitting_code.collate_structural_data', autospec=True)   
 def test_collect_info_no_cs_in_FitModel(mock_collate, mock_pot, buckingham_potential,
                                   pot_params, mock_lammps_data): 
     structs = np.array([0, 1, 2])
@@ -41,7 +41,7 @@ def test_collect_info_no_cs_in_FitModel(mock_collate, mock_pot, buckingham_poten
     assert fit_data.cs_springs == None
     assert fit_data.lammps_data is not None
     
-@patch('lammps_potenial_fitting.lammps_data.LammpsData.core_mask', autospec=True) 
+@patch('buckfit.lammps_data.LammpsData.core_mask', autospec=True) 
 def test_expected_forces_in_FitModel(mock_core_mask, fit_data):
     mock_core_mask.return_value = [True, True, True, False]
     expected_forces = fit_data.expected_forces()
@@ -53,7 +53,7 @@ def test_expected_stresses_in_FitModel(fit_data):
     expected_stresses = fit_data.expected_stresses()
     assert np.allclose(expected_stresses, np.array([1,2,3,4,5,6]))
     
-@patch("lammps_potenial_fitting.lammps_data.lammps.Lammps")
+@patch('buckfit.lammps_data.lammps.Lammps')
 def test_set_charges_in_FitModel(mock_lammps, fit_data):
     fit_data._set_charges(mock_lammps)
     calls_command = [call.command('set type 1 charge 1.000000'),
@@ -62,19 +62,19 @@ def test_set_charges_in_FitModel(mock_lammps, fit_data):
                      call.command('set type 3 charge -2.000000')]
     mock_lammps.assert_has_calls(calls_command)
                      
-@patch("lammps_potenial_fitting.lammps_data.lammps.Lammps")
+@patch('buckfit.lammps_data.lammps.Lammps')
 def test_set_springs_in_FitModel(mock_lammps, fit_data):
     fit_data._set_springs(mock_lammps)
     calls_command = [call.command('bond_coeff foo')]
     mock_lammps.assert_has_calls(calls_command)
     
-@patch("lammps_potenial_fitting.lammps_data.lammps.Lammps")
+@patch('buckfit.lammps_data.lammps.Lammps')
 def test_set_potentials_in_FitModel(mock_lammps, fit_data):
     fit_data._set_potentials(mock_lammps)
     calls_command = [call.command('pair_coeff 1 3 1.0000 0.1000 0.0000')]
     mock_lammps.assert_has_calls(calls_command)
     
-@patch("lammps_potenial_fitting.lammps_data.lammps.Lammps")
+@patch('buckfit.lammps_data.lammps.Lammps')
 def test_calls_for_get_forces_and_stresses_in_FitModel(mock_lammps, fit_data):
     fit_data.get_forces_and_stresses()
     calls_command = [call(units='metal',style='full',args=['-log','none','-screen','none']),
@@ -95,7 +95,7 @@ def test_calls_for_get_forces_and_stresses_in_FitModel(mock_lammps, fit_data):
 #                      call().thermo.computes.__getitem__('thermo_press')]
     mock_lammps.assert_has_calls(calls_command)
 
-@patch("lammps_potenial_fitting.lammps_data.lammps.Lammps")
+@patch('buckfit.lammps_data.lammps.Lammps')
 def test_calls_for_convert_stresses_to_vasp_in_FitModel(mock_lammps, fit_data):
     instances = [lmp.initiate_lmp(fit_data.cs_springs) for lmp in fit_data.lammps_data]
     ip_stresses = fit_data.convert_stresses_to_vasp(instances[0])
@@ -199,11 +199,11 @@ def test_update_charge_scaling_in_FitModel(fit_data):
                     elif at.label == 'O shell':
                         np.testing.assert_almost_equal(at.charge, -1.2)
 
-@patch('lammps_potenial_fitting.fitting_code.FitModel._update_charge_scaling')
-@patch('lammps_potenial_fitting.fitting_code.FitModel._update_potentials')                        
-@patch('lammps_potenial_fitting.fitting_code.FitModel._update_springs')                        
-@patch('lammps_potenial_fitting.fitting_code.FitModel._update_q_ratio') 
-@patch('lammps_potenial_fitting.fitting_code.FitModel._charge_reset')    
+@patch('buckfit.fitting_code.FitModel._update_charge_scaling')
+@patch('buckfit.fitting_code.FitModel._update_potentials')                        
+@patch('buckfit.fitting_code.FitModel._update_springs')                        
+@patch('buckfit.fitting_code.FitModel._update_q_ratio') 
+@patch('buckfit.fitting_code.FitModel._charge_reset')    
 def test_init_potential_in_FitModel(q_reset, q_ratio, springs, pot, q_scaling, fit_data, labels, values):
     fitting_parameters = dict(zip(labels, values))
     fit_data.init_potential(values, labels)
@@ -213,10 +213,10 @@ def test_init_potential_in_FitModel(q_reset, q_ratio, springs, pot, q_scaling, f
     pot.assert_called_with(fitting_parameters)
     q_scaling.assert_called_with(fitting_parameters)
 
-@patch('lammps_potenial_fitting.fitting_code.FitModel.expected_stresses') 
-@patch('lammps_potenial_fitting.fitting_code.FitModel.expected_forces')     
-@patch('lammps_potenial_fitting.fitting_code.FitModel.get_forces_and_stresses')  
-@patch('lammps_potenial_fitting.fitting_code.FitModel.init_potential')     
+@patch('buckfit.fitting_code.FitModel.expected_stresses') 
+@patch('buckfit.fitting_code.FitModel.expected_forces')     
+@patch('buckfit.fitting_code.FitModel.get_forces_and_stresses')  
+@patch('buckfit.fitting_code.FitModel.init_potential')     
 def test_chi_squared_error(init_pot, get_fs, expect_f, expect_s,fit_data, labels, values, force_stress):
     get_fs.return_value = force_stress[0], force_stress[1]
     expect_f.return_value = force_stress[2]
@@ -226,9 +226,9 @@ def test_chi_squared_error(init_pot, get_fs, expect_f, expect_s,fit_data, labels
     get_fs.assert_called_with()
     np.testing.assert_almost_equal(chi, 0.00223222222)
      
-@patch('lammps_potenial_fitting.fitting_code.FitModel._set_charges') 
-@patch('lammps_potenial_fitting.fitting_code.FitModel._set_potentials')          
-@patch("lammps_potenial_fitting.lammps_data.lammps.Lammps")
+@patch('buckfit.fitting_code.FitModel._set_charges') 
+@patch('buckfit.fitting_code.FitModel._set_potentials')          
+@patch('buckfit.lammps_data.lammps.Lammps')
 def test_get_lattice_params_in_FitModel(mock_lammps, set_pot, set_q, fit_data):
     instances = [lmp.initiate_lmp(fit_data.cs_springs) for lmp in fit_data.lammps_data]
     fit_data.get_lattice_params()
@@ -250,7 +250,7 @@ def test_get_lattice_params_in_FitModel(mock_lammps, set_pot, set_q, fit_data):
     set_q.assert_called_with(instances[0])
     mock_lammps.assert_has_calls(calls_command)
     
-@patch('lammps_potenial_fitting.fitting_code.os.system')
+@patch('buckfit.fitting_code.os.system')
 def test_reset_directories(mock_os, fit_data):
     fit_data.reset_directories()
     mock_os.assert_called_with('rm lammps/coords*')

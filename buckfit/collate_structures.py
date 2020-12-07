@@ -1,5 +1,5 @@
 from pymatgen.io.vasp.outputs import Vasprun
-from lammps_potenial_fitting.lammps_data import LammpsData
+from buckfit.lammps_data import LammpsData
 import numpy as np
 
 def collate_structural_data(params, structs, supercell=None):

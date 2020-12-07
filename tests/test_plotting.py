@@ -2,9 +2,8 @@
 import pytest
 import numpy as np
 from mock import patch, call
-from lammps_potenial_fitting.plotting import (setup_error_dict, setup_potentials_dict,
-                                              plot_errors, plot_parameters, plot_forces,
-                                              plot_stresses)
+from buckfit.plotting import (setup_error_dict, setup_potentials_dict, plot_errors,
+                              plot_parameters, plot_forces, plot_stresses)
 
 def test_setup_error_dict_in_plotting():
     head_dir = 'test_files/test_outputs'
@@ -16,7 +15,7 @@ def test_setup_potentials_dict_in_plotting():
     pot_dict = setup_potentials_dict(head_dir)
     assert pot_dict == {'q_scaling': [('1', 0.5), ('2', 0.6)], 'Li_O_a': [('1', 1.0), ('2', 2.0)], 'Li_O_rho': [('1', 0.1), ('2', 0.2)]}
 
-@patch("lammps_potenial_fitting.plotting.plt")
+@patch('buckfit.plotting.plt')
 def test_plot_errors_in_plotting(mock_plt):
     error_dict = {'1': 0.1, '2': 0.2}
     plot_errors(error_dict, 'test', xlabel_rotation=50, title='default', save=True)
@@ -37,7 +36,7 @@ def test_plot_errors_in_plotting(mock_plt):
                      call.show()]
     mock_plt.assert_has_calls(calls_command)
     
-@patch("lammps_potenial_fitting.plotting.plt")
+@patch('buckfit.plotting.plt')
 def test_plot_parameters_in_plotting(mock_plt):
     pot_dict = {'q_scaling': [('1', 0.5), ('2', 0.6)], 'Li_O_a': [('1', 1.0), ('2', 2.0)], 'Li_O_rho': [('1', 0.1), ('2', 0.2)]}
     plot_parameters(pot_dict, 'test', xlabel_rotation=50, title='default', save=True)
@@ -64,7 +63,7 @@ def test_plot_parameters_in_plotting(mock_plt):
                      call.show()]
     mock_plt.assert_has_calls(calls_command)
 
-@patch("lammps_potenial_fitting.plotting.plt")
+@patch('buckfit.plotting.plt')
 def test_plot_forces_in_plotting(mock_plt):
     dft_forces = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
     ip_forces = np.array([[0.2, 0.3, 0.4], [0.5, 0.6, 0.7]])
@@ -80,7 +79,7 @@ def test_plot_forces_in_plotting(mock_plt):
                      call.show()]
     mock_plt.assert_has_calls(calls_command)
 
-@patch("lammps_potenial_fitting.plotting.plt")
+@patch('buckfit.plotting.plt')
 def test_plot_stresses_in_plotting(mock_plt):
     dft_stresses = np.array([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,
                              1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,

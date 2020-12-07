@@ -1,8 +1,8 @@
 import numpy as np
 import os
 import lammps
-from lammps_potenial_fitting.collate_structures import collate_structural_data
-import lammps_potenial_fitting.potentials as pot
+from buckfit.collate_structures import collate_structural_data
+import buckfit.potentials as pot
 
 class FitModel():
     """

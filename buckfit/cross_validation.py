@@ -1,9 +1,9 @@
-from lammps_potenial_fitting.fitting_code import FitModel
+from buckfit.fitting_code import FitModel
 import numpy as np
 import os
 import json
 import glob
-import lammps_potenial_fitting.fitting_output as fit_out
+import buckfit.fitting_output as fit_out
 import matplotlib.pyplot as plt
 
 def validation_sets(fits, structures, structures_in_fit, structure_nums, seed=False):

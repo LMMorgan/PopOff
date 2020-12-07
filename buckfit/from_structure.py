@@ -1,9 +1,9 @@
 from collections import Counter
 import numpy as np
-from lammps_potenial_fitting.bonds import Bond
-from lammps_potenial_fitting.atoms import Atom
-from lammps_potenial_fitting.atom_types import AtomType
-from lammps_potenial_fitting.bond_types import BondType
+from buckfit.bonds import Bond
+from buckfit.atoms import Atom
+from buckfit.atom_types import AtomType
+from buckfit.bond_types import BondType
 
     
 def types_from_structure( structure, core_shell, charges, masses, cs_spring=None, verbose=True ):

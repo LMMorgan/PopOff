@@ -1,4 +1,4 @@
-from lammps_potenial_fitting.bond_types import BondType
+from buckfit.bond_types import BondType
 
 class Bond():
     """

@@ -1,5 +1,5 @@
 import numpy as np
-from lammps_potenial_fitting.from_structure import types_from_structure, atoms_and_bonds_from_structure
+from buckfit.from_structure import types_from_structure, atoms_and_bonds_from_structure
 import lammps
 from pymatgen.core.lattice import Lattice
 from pymatgen.core.structure import Structure

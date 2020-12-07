@@ -1,5 +1,5 @@
-from lammps_potenial_fitting.potential_parameters import BuckinghamParameter, buckingham_parameters
-from lammps_potenial_fitting.atom_types import AtomType
+from buckfit.potential_parameters import BuckinghamParameter, buckingham_parameters
+from buckfit.atom_types import AtomType
 
 class BuckinghamPotential():
     """

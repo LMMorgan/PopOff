@@ -1,5 +1,5 @@
 import numpy as np
-from lammps_potenial_fitting.atom_types import AtomType
+from buckfit.atom_types import AtomType
 
 class Atom():
     """
