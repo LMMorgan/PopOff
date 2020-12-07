@@ -1,4 +1,4 @@
-# lammps_potenial_fitting
+# BuckFit
 
 ## Prelude
 
