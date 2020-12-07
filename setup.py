@@ -1,5 +1,5 @@
 from setuptools import setup
-from lammps_potenial_fitting import __version__ as VERSION
+from buckfit import __version__ as VERSION
 import re
 
 def remove_img_tags(data):
@@ -12,11 +12,11 @@ with open("README.md", "r") as fh:
 config = {"description": "Modular potential fitting code for classical MD buckingham potentials",
           "long_description": long_description,
           "long_description_content_type": "text/markdown",
-          "name": "lammps_potenial_fitting",
+          "name": "buckfit",
           "author": "Lucy M. Morgan",
           "author_email": "l.m.morgan@bath.ac.uk",
-          "packages": ["lammps_potenial_fitting"],    #setuptools.find_packages()
-          "url": "https://github.com/LMMorgan/lammps_potenial_fitting",
+          "packages": ["buckfit"],    #setuptools.find_packages()
+          "url": "https://github.com/LMMorgan/buckfit",
           "version": VERSION,
           "install_requires": open( "requirements.txt" ).read(),
           "license": "MIT"}
