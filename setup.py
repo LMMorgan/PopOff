@@ -12,11 +12,11 @@ with open("README.md", "r") as fh:
 config = {"description": "Modular potential fitting code for classical MD buckingham potentials",
           "long_description": long_description,
           "long_description_content_type": "text/markdown",
-          "name": "buckfit",
+          "name": "BuckFit",
           "author": "Lucy M. Morgan",
           "author_email": "l.m.morgan@bath.ac.uk",
           "packages": ["buckfit"],    #setuptools.find_packages()
-          "url": "https://github.com/LMMorgan/buckfit",
+          "url": "https://github.com/LMMorgan/BuckFit",
           "version": VERSION,
           "install_requires": open( "requirements.txt" ).read(),
           "license": "MIT"}
