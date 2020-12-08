@@ -1,5 +1,5 @@
 # BuckFit
-
+https://zenodo.org/badge/DOI/10.5281/zenodo.4311103.svg
 ## Prelude
 
 To run the potential fitting code, you must first install LAMMPS and the lammps-cython interface. Installing LAMMPS itself is a relatively easy task. You just download the relevant source files, go to the src directory and run make. Simple. Installing LAMMPS with lammps-cython however is a little more complex.
