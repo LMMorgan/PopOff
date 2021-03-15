@@ -1,8 +1,3 @@
-PotPy
-=====
-
-PotPy introduction
-
 Dependencies
 ============
 

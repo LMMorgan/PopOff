@@ -1,0 +1,5 @@
+-r ../requirements.txt
+Sphinx>=1.6.3
+sphinx_rtd_theme
+nbsphinx
+numpy
