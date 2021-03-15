@@ -11,7 +11,7 @@ Here I am going to go through how to install this using *make* and *pip*, with t
 [This link](https://costrouc.gitlab.io/lammps-cython/installation.html#id3) contains the instructions which most of this guide is based on.
 
 ## Installing dependencies
-As with all great bits of code, you need to install some packages to get things working properly. `lammps-cython` is no exception. You will need make sure you have openblas, openmpi, and fftw. These can be installed in the follwoing ways.
+As with all great bits of code, you need to install some packages to get things working properly. `lammps-cython` is no exception. You will need make sure you have openblas, openmpi, and fftw. These can be installed in the following ways.
 
 For Ubuntu/linux systems use:
 ```
