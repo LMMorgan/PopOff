@@ -109,8 +109,9 @@ Testing
 ^^^^^^^
 
 If this works you should be able to run::
-	``from lammps import Lammps``
-	``Lammps()``
+ 
+	from lammps import Lammps
+	Lammps()
 
 There are example/test notebooks (basic.ipynb and benchmark.ipynb) located `here <https://github.com/costrouc/lammps-cython>`_ under ``Binder Notebooks``, which you can use to test everything is running correctly and also give you an idea of how to use lammps-cython.
 
