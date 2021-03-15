@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'PotPy'
+project = 'BuckFit'
 copyright = '2021, Lucy M. Morgan, Matt J. Clarke, M. Saiful Islam, Benjamin J. Morgan'
 author = 'Lucy M. Morgan, Matt J. Clarke, M. Saiful Islam, Benjamin J. Morgan'
 
