@@ -49,7 +49,7 @@ class Atom():
             None
                 
         Returns:
-            input_string (str): Contains atom_index (int), molecule (int), atom_type_id (int), charge(float), and coordinates (list(float)) for lammps file.
+            str: LAMMPS input string containing atom_index (int), molecule (int), atom_type_id (int), charge (float), and coordinates (list(float)).
         """
         return '{:<4} {:<4} {:<4} {: 1.4f}  {: 2.6f}  {: 2.6f}  {: 2.6f}'.format( 
             self.atom_index, self.molecule_index, self.atom_type.atom_type_index, self.atom_type.charge, *self.coords )

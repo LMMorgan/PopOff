@@ -41,7 +41,7 @@ class BondType():
             None
                 
         Returns:
-            return_str (str): Bond coefficient command for LAMMPS input.
+            str: Bond coefficient command for LAMMPS input.
         """  
 
         return_str = 'bond_coeff {} {:6.2f} {:6.2}'.format(self.bond_type_index,

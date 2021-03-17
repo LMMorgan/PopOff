@@ -48,7 +48,7 @@ class AtomType():
             None
                 
         Returns:
-            core_shell (str): Either 'core', 'shell', or '' if core_shell is None. 
+            str: Either 'core', 'shell', or '' if core_shell is None. 
         """  
         if self.core_shell is None:
             return ''

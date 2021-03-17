@@ -12,7 +12,7 @@ class Bond():
         Args:
             bond_index (int): Individual bond number.
             atom_indices (list(int)): Index numbers of the 2 atoms in the bond.
-            bond_type (obj): BondType object including bond_type_index (int) and label (str).
+            bond_type (:obj:`BondType`): BondType object including bond_type_index (int) and label (str).
                 
         Returns:
             None
@@ -39,7 +39,6 @@ class Bond():
             None
                 
         Returns:
-            input_string (str): Containing bond_index (int), bond_type.bond_type_index (int), and
-                   atom_indices (list(int)) for lammps file.
+            str: LAMMPS input containing bond_index (int), bond_type_index (int), and atom_indices (list(int)).
         """       
         return '{:<4} {:<4} {:<4} {:<4}'.format( self.bond_index, self.bond_type.bond_type_index, *self.atom_indices )

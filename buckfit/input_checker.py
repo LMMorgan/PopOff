@@ -3,10 +3,12 @@
 def check_coreshell(label, bounds, fit_data):
     """
     Checks core-shell inputs into the fitting fuctions are correct. This includes checking the charge ratio between the core and shell is applied to a core-shell atom, that the atoms exist within the system, the upper bound doesn't exceed 2*formal charge, neither bound is <=0, and the lower bound is smaller than the upper bound.
+
      Args:
         label (str): dQ parameter key, relating to the dQ to be applied to the stated element.
         bounds (tuple(float)): Lower and upper bounds associated with the dQ parameter.
-        fit_data (obj(FitModel)): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS.
+        fit_data (:obj:'FitModel'): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS.
+
     Returns:
         None
     """
@@ -29,8 +31,10 @@ def check_coreshell(label, bounds, fit_data):
 def check_scaling_limits(bounds):
     """
     Checks scaling inputs into the fitting fuctions are correct. This includes checking the upper bound doesn't exceed 1.0, neither bound is <=0, and the lower bound is smaller than the upper bound.
+
     Args:
         bounds (tuple(float)): Lower and upper bounds associated with the scaling parameter.
+
     Returns:
         None
     """
@@ -44,10 +48,12 @@ def check_scaling_limits(bounds):
 def check_spring(label, bounds, params):
     """
     Checks core-shell spring inputs into the fitting fuctions are correct. This includes checking the spring is applied to a core-shell atom, that the atoms exist within the system, the core and shell belong to the same element, neither bound is <=0, and the lower bound is smaller than the upper bound.
+
     Args:
         label (str): core-shell spring parameter key, relating to the spring to be applied between the core and shell of an element.
         bounds (tuple(float)): Lower and upper bounds associated with the spring parameter.
         params (dict(dict)): Setup dictionary containing the inputs for coreshell, charges, masses, potentials, and core-shell springs.
+
     Returns:
         None
     """
@@ -68,10 +74,12 @@ def check_spring(label, bounds, params):
 def check_buckingham(label, bounds, params):
     """
     Checks the buckingham parameter input into the fitting fuction is correct. This includes checking the parameter is correctly formatted for a buckingham potential, that the elements exist within the system, neither bound is <=0, and the lower bound is smaller than the upper bound.
+
     Args:
         label (str): buckingham parameter key, relating to the buckingham parameter to be fitted.
         bounds (tuple(float)): Lower and upper bounds associated with the buckingham parameter.
         params (dict(dict)): Setup dictionary containing the inputs for coreshell, charges, masses, potentials, and core-shell springs.
+
     Returns:
         None
     """
@@ -90,11 +98,13 @@ def check_buckingham(label, bounds, params):
 def setup_error_checks(include_labels, bounds_list, fit_data, params):
     """
     Checks the labels list and bounds list are the same length, then iterated through each item to run specific checks ensuring the labels and associated bounds are appropriate.
+
     Args:
         include_labels (list(str)): List of parameters to be fitted.
         bounds_list (list(tuple(float))): List of lower and upper bound tuples associated with each parameter.
-        fit_data (obj(FitModel)): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS. 
+        fit_data (:obj:'FitModel'): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS. 
         params (dict(dict)): Setup dictionary containing the inputs for coreshell, charges, masses, potentials, and core-shell springs.
+
     Returns:
         None
     """ 

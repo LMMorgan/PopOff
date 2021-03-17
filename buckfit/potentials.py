@@ -13,9 +13,9 @@ class BuckinghamPotential():
         Args:
             labels (list(str)): List of the atoms in the potential i.e. ['O','O'] for O-O potential.
             atom_type_index (list(int)): List of the atom type index for the atoms in the potential.
-            a (obj): BuckinghamParameter objects including label_string (str), param_type (str), value (float), and sd (float).
-            rho (obj): BuckinghamParameter objects including label_string (str), param_type (str), value (float), and sd (float).
-            c (obj): BuckinghamParameter objects including label_string (str), param_type (str), value (float), and sd (float).
+            a (:obj:'BuckinghamParameter'): BuckinghamParameter objects including label_string (str), param_type (str), value (float), and sd (float).
+            rho (:obj:'BuckinghamParameter'): BuckinghamParameter objects including label_string (str), param_type (str), value (float), and sd (float).
+            c (:obj:'BuckinghamParameter'): BuckinghamParameter objects including label_string (str), param_type (str), value (float), and sd (float).
                 
         Returns:
             None
@@ -46,8 +46,7 @@ class BuckinghamPotential():
             None
             
         Returns:
-            return_str (str): atype_index for atom pairs, and buckingham potential parameter values
-                              formatted as a lammps command.
+            str: LAMMPS input command for pair coefficients containing atype_index for atom pairs, and buckingham potential parameter values.
         """
         return_str = 'pair_coeff {} {} {:6.4f} {:6.4f} {:6.4f}'.format(self.atype_index[0],
                                                                        self.atype_index[1],

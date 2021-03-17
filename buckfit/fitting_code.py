@@ -13,8 +13,8 @@ class FitModel():
         Initialise an instance for all information relating to the pysical and electronic structure needed for the Lammps input.
         
         Args:
-            potentials (list(obj)): BuckinghamPotential objects including labels (list(str)), atom_type_index (list(int)), a (obj), rho (obj), and c (obj). Each object is a BuckinghamParameter object.
-            lammps_data (list(obj)):  LammpsData objects containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factor (list(float)), file_name (str), and expected_stress_tensors (np.array).
+            potentials (list(:obj:'BuckinghamPotential')): BuckinghamPotential objects including labels (list(str)), atom_type_index (list(int)), a (obj), rho (obj), and c (obj). Each object is a BuckinghamParameter object.
+            lammps_data (list(:obj:'LammpsData')):  LammpsData objects containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factor (list(float)), file_name (str), and expected_stress_tensors (np.array).
             cs_springs (dict): The key is the atom label (str) and the value the spring values (list(float)).
             
         Returns:
@@ -32,10 +32,10 @@ class FitModel():
         Args:
             params (dict(dict)): Contains core_shell (bool), charges (float), masses (float), and cs_springs (list(float)) dictionaries where the keys are atom label (str). Also contains a potentials (list(float)) dictionary where the potentials keys are atom label pairs (str), example: 'Li-O'.
             structs (np.array): An array containing the list of structure numbers to fit to. Note: this starts from 0 not 1 so check your vasprun.xml numbering.
-            supercell (optional:list(int)): 3 integers defining the cell increase in x, y, and z for all structures. Default=None.
+            supercell (list(int) (optional)): 3 integers defining the cell increase in x, y, and z for all structures. Default=None.
             
         Returns:
-            (FitModel):  FitModel object containing potentials (list(obj:BuckinghamPotential)), lammps_data (obj:LammpsData), and cs_spring (dict).      
+            :obj:'FitModel':  FitModel object containing potentials (list(:obj:'BuckinghamPotential')), lammps_data (:obj:'LammpsData'), and cs_spring (dict).      
         """  
         lammps_data = collate_structural_data(params, structs, supercell)
         parameters = pot.buckingham_parameters(params['potentials'])
@@ -54,7 +54,7 @@ class FitModel():
             None      
             
         Returns:
-            expected_forces (np.array): 2D array of all atoms forces in all structures.
+            np.array: 2D array of all atoms forces in all structures.
         """
         forces_data = []
         for structure in self.lammps_data:
@@ -75,7 +75,7 @@ class FitModel():
             None
             
         Returns:
-            expected_stresses (np.array): 2D array of the stress tensors in each structure.
+            np.array: 2D array of the stress tensors in each structure.
         """
         stress_data = []
         for structure in self.lammps_data:
@@ -88,7 +88,7 @@ class FitModel():
         Sets the charge on each atom in the structure by type for the specified Lammps system (changes for each iteration of the potential fit).
         
         Args:
-            lmp (obj): Lammps object with structure and specified commands implemented.
+            lmp (:obj:'lmp'): Lammps object with structure and specified commands implemented.
             
         Returns:
             None
@@ -102,7 +102,7 @@ class FitModel():
         Sets the spring constant for the core-shell bonds for the specified Lammps system (changes for each iteration of the potential fit).
         
         Args:
-            lmp (obj): Lammps object with structure and specified commands implemented.
+            lmp (:obj:'lmp'): Lammps object with structure and specified commands implemented.
             
         Returns:
             None
@@ -116,7 +116,7 @@ class FitModel():
         Sets the potential for the specified Lammps system (changes for each iteration of the potential fit).
         
         Args:
-            lmp (obj): Lammps object with structure and specified commands implemented.
+            lmp (:obj:'lmp'): Lammps object with structure and specified commands implemented.
             
         Returns:
             None
@@ -132,8 +132,7 @@ class FitModel():
             None
             
         Returns:
-            ip_forces (np.array): x,y,z forces on each atom for each instance (each structure).
-            ip_stresses (np.array): stress tenosrs for each instance (each structure).
+				np.array, np.array: x,y,z forces on each atom for each instance; stress tenosrs for each instance (each structure).
         """    
         instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]
         ip_forces = np.zeros(self.expected_forces().shape)
@@ -159,10 +158,10 @@ class FitModel():
         Extracts the stress tensors from the lammps object after MD has been run and converts them from bar to kBar, then swaps the last two columns to be in the same format as vasp stress tensors (XX YY ZZ XY YZ XZ).
         
         Args:
-            instance (obj): Lammps object after minimisation (if core-shell) and a zero step run.  
+            instance (:obj:'lmp'): Lammps object after minimisation (if core-shell) and a zero step run.  
             
         Returns:
-            ip_stresses (np.array): stress tenosrs for the lammps instance (single structure).
+            np.array: stress tenosrs for the lammps instance (single structure).
         """
         ip_stresses = instance.thermo.computes['thermo_press'].vector / 1000
         ip_stresses[5], ip_stresses[4] = ip_stresses[4], ip_stresses[5]
@@ -279,7 +278,7 @@ class FitModel():
             args (list(str)): Keys relating to the fitting parameters for the system, such as charge, springs, and buckingham parameters.
             
         Returns:
-            error (float): The chi squared error calculated between dft forces and the MD forces under the given potential and the DFT and MD stress tensors.
+            float: The chi squared error calculated between dft forces and the MD forces under the given potential and the DFT and MD stress tensors.
         """
         self.init_potential(values,args)
         ip_forces, ip_stresses = self.get_forces_and_stresses()
@@ -295,7 +294,7 @@ class FitModel():
             None
             
         Returns:
-            lmp (obj): Lammps object with structure and specified commands implemented.
+            :obj:'lmp': Lammps object with structure and specified commands implemented.
         """  
         instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]
         for ld, instance in zip(self.lammps_data, instances):

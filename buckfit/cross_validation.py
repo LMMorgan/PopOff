@@ -9,13 +9,15 @@ import matplotlib.pyplot as plt
 def validation_sets(fits, structures, structures_in_fit, structure_nums, seed=False):
     """
     Randomly selects structures up to the number of structures to include in the cross-validation, checks there are no repeats and no structures used in the fit. The number of structure sets is equal to the number of cross-validation fits to be performed. Note: check you have enough structures avaliable (not including those in the fit) to make a complete set, and to the number of sets you want.
+
     Args:
         fits (int): Number of fits to run.
         structures (int): Total number of structures in the training set.
         structures_in_fit (int): Number of structures to fit to.
         structure_nums (np.array): Structure numbers of structures in the fit which is being validated.
+
     Returns:
-        (np.array): Sets of structure numbers of structures in training set to be in validation sets.
+        np.array: Sets of structure numbers of structures in training set to be in validation sets.
     """
     if seed is not False:
         np.random.seed(seed)
@@ -33,13 +35,15 @@ def validation_sets(fits, structures, structures_in_fit, structure_nums, seed=Fa
 def chi_squared_error(dft_forces, ip_forces, dft_stresses, ip_stresses):
     """
     Calculates a chi squared error between the dft and ip forces and stress tensors.
+
     Args:
         dft_forces (np.array): 3D array of dft forces in x,y,z for each atom in each structure.
         ip_forces (np.array): 3D array of fitted interatomic potential forces in x,y,z for each atom in each structure.
         dft_stresses (np.array): 3D array of dft stress tensors in each structure.
         ip_stresses (np.array): 3D array of fitted interatomic potential stress tensors in each structure.
+
      Returns:
-         error (float): The chi squared error calculated between dft forces and the MD forces under the given potential and the DFT and MD stress tensors.
+         float: The chi squared error calculated between dft forces and the MD forces under the given potential and the DFT and MD stress tensors.
      """
     force_diff = np.sum((dft_forces - ip_forces)**2)/ dft_forces.size
     stess_diff = np.sum((dft_stresses - ip_stresses)**2)/6
@@ -48,6 +52,7 @@ def chi_squared_error(dft_forces, ip_forces, dft_stresses, ip_stresses):
 def save_cv_data(output_directory, structs, error, dft_forces, ip_forces, dft_stresses, ip_stresses):
     """
     Collates the output data from the fit and saves it to different files within the designated output directory.
+
     Args:
         output_directory (str): directory pathway to local output directory.
         structs (np.array): Structure numbers of structures in the validation set.
@@ -56,6 +61,7 @@ def save_cv_data(output_directory, structs, error, dft_forces, ip_forces, dft_st
         ip_forces (np.array): 3D array of fitted interatomic potential forces in x,y,z for each atom in each structure.
         dft_stresses (np.array): 3D array of dft stress tensors in each structure.
         ip_stresses (np.array): 3D array of fitted interatomic potential stress tensors in each structure.
+
      Returns:
          None
      """
@@ -69,6 +75,7 @@ def save_cv_data(output_directory, structs, error, dft_forces, ip_forces, dft_st
 def run_cross_validation(fits, structures, structures_in_fit, head_directory_name, head_output_directory, params, supercell=None, seed=False):
     """
     Collates the structures to be fitted into the working directory, creates the lammps inputs and runs the optimiser to fit to the designated parameters. Calls another function to save the data in the appropriate output directory.
+
     Args:
         fits (int): Number of fits to run.
         structures (int): Total number of structures in the training set.
@@ -76,7 +83,7 @@ def run_cross_validation(fits, structures, structures_in_fit, head_directory_nam
         head_directory_name (str): Name of the main results directory.
         head_output_directory (str): Name of the main output directory for the cross-validation.
         params (dict(dict)): Setup dictionary containing the inputs for coreshell, charges, masses, potentials, and core-shell springs.
-        supercell (optional:list(int) or list(list(int))): 3 integers defining the cell increase in x, y, and z for all structures, or a list of lists where each list is 3 integers defining the cell increase in x, y, z, for each individual structure in the fitting process. i.e. all increase by the same amount, or each structure increased but different amounts. Default=None.
+        supercell (list(int) or list(list(int)) (optional)): 3 integers defining the cell increase in x, y, and z for all structures, or a list of lists where each list is 3 integers defining the cell increase in x, y, z, for each individual structure in the fitting process. i.e. all increase by the same amount, or each structure increased but different amounts. Default=None.
         
     Returns:
         None
@@ -100,10 +107,12 @@ def run_cross_validation(fits, structures, structures_in_fit, head_directory_nam
 def setup_error_dict(cv_directory):
     """
     Returns a dictionary of the chi squared errors associated with each fit in the group.
+
     Args:
         cv_directory (str): Name of the individual cross-validation output directory. 
+
     Returns:
-        error_dict (dict): keys are the structurs in the fit separated by a dash, i.e. '1-2-5', and values are the chi squared error of that fit.
+        dict: Error dictionary where the keys are the structures in the fit separated by a dash, i.e. '1-2-5', and values are the chi squared error of that fit.
     """
     error_dict = {}
     for error_file in sorted(glob.glob('{}/*error.dat'.format(cv_directory))):
@@ -117,13 +126,15 @@ def setup_error_dict(cv_directory):
 def plot_cross_validation(error_dict, cv_directory, head_output_directory, xlabel_rotation=50, title='default', save=True):
     """
     Plots the chi squared errors for each fit in a sequence of fits, with the x-axis being the fit (labeled with the structure numbers in the fit) and the y-axis being the chi squared error.
+
     Args:
         error_dict (dict): Keys are the structures in the fit separated by a dash, i.e. '1-2-5', and values are the chi squared error of that fit.
         cv_directory (str): The cross-validation directory.
         head_output_directory (str): Directory pathway to main output directory.
-        xlabel_rotation (optional: int): Rotation applied to the x-axis labels. Default=50.
-        title (optional: str): plot title, default='{} structure fit errors ($\chi^2$)'.format(structures_in_fit).
-        save (optional: bool): True to save the plot, Flase to not save. Default=True.
+        xlabel_rotation (int(optional)): Rotation applied to the x-axis labels. Default=50.
+        title (str(optional)): plot title, default='{} structure fit errors ($\chi^2$)'.format(structures_in_fit).
+        save (bool(optional)): True to save the plot, Flase to not save. Default=True.
+
     Returns:
         None
     """

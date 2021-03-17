@@ -7,10 +7,12 @@ import matplotlib.pyplot as plt
 def setup_error_dict(head_directory_name):
     """
     Returns a dictionary of the chi squared errors associated with each fit in the group.
+
     Args:
         head_directory_name (str): Name of the main output directory. 
+
     Returns:
-        error_dict (dict): keys are the structurs in the fit separated by a dash, i.e. '1-2-5', and values are the chi squared error of that fit.
+        dict: Error dictionary where the keys are the structurs in the fit separated by a dash, i.e. '1-2-5', and values are the chi squared error of that fit.
     """
     error_dict = {}
     for error_file in sorted(glob.glob('{}/*/error.dat'.format(head_directory_name))):
@@ -22,10 +24,12 @@ def setup_error_dict(head_directory_name):
 def setup_potentials_dict(head_directory_name):
     """
     Returns a dictionary of the chi squared errors associated with each fit in the group.
+
     Args:
         head_directory_name (str): Name of the main output directory. 
+
     Returns:
-        potential_dicts (list(dict)): keys are the potential parameter labels (str) and values are a tuple of the fitted structure numbers (str) and the associated parameter value (float).
+        list(dict): Potentials dictionary where the keys are the potential parameter labels (str) and values are a tuple of the fitted structure numbers (str) and the associated parameter value (float).
     """
     list_of_potential_dicts = []
     for potential_file in sorted(glob.glob('{}/*/potentials.json'.format(head_directory_name))):
@@ -42,12 +46,14 @@ def setup_potentials_dict(head_directory_name):
 def plot_errors(error_dict, output_directory, xlabel_rotation=50, title='default', save=True):
     """
     Plots the chi squared errors for each fit in a sequence of fits, with the x-axis being the fit (labeled with the structure numbers in the fit) and the y-axis being the chi squared error.
+
     Args:
         error_dict (dict): Keys are the structurs in the fit separated by a dash, i.e. '1-2-5', and values are the chi squared error of that fit.
         output_directory (str): Directory pathway to output directory.
-        xlabel_rotation (optional: int): Rotation applied to the x-axis labels. Default=50.
-        title (optional: str): plot title, default='fitted errors ($\chi^2$)'.
-        save (optional: bool): True to save the plot, Flase to not save. Default=True.
+        xlabel_rotation (int(optional)): Rotation applied to the x-axis labels. Default=50.
+        title (str(optional)): plot title, default='fitted errors ($\chi^2$)'.
+        save (bool(optional)): True to save the plot, Flase to not save. Default=True.
+
     Returns:
         None
     """
@@ -68,12 +74,14 @@ def plot_errors(error_dict, output_directory, xlabel_rotation=50, title='default
 def plot_parameters(potentials_dict, output_directory, xlabel_rotation=50, title='default', save=True):
     """
     Plots the potential parameters for each fit in a sequence of fits, with the x-axis being the fit (labeled with the structure numbers in the fit) and the y-axis being the parameter value.
+
     Args:
         potentials_dict (dict): Keys are the potential parameter labels (str) and values are a tuple of the fitted structure numbers (str) and the associated parameter value (float).
         output_directory (str): Directory pathway to output directory.
-        xlabel_rotation (optional: int): Rotation applied to the x-axis labels. Default=50
-        title (optional: str): Plot title, default=''{} fitted parameter'.format(k)'.
-        save (optional: bool): True to save the plot, Flase to not save. Default=True.
+        xlabel_rotation (int(optional)): Rotation applied to the x-axis labels. Default=50
+        title (str(optional)): Plot title, default=''{} fitted parameter'.format(k)'.
+        save (bool(optional)): True to save the plot, Flase to not save. Default=True.
+
     Returns:
         None
     """
@@ -97,14 +105,16 @@ def plot_parameters(potentials_dict, output_directory, xlabel_rotation=50, title
             
 def plot_forces(dft_forces, ip_forces, output_directory, local_directory, alpha=0.02, save=True):
     """
-    Plots the 
+    Plots the forces for each fit in a sequence of fits, with the x-axis being the fit (labeled with the structure numbers in the fit) and the y-axis being the forces.
+
     Args:
         dft_forces (np.array): dft forces associated with each atom (x,y,and z) in each structure fitted.
         ip_forces (np.array): Fitted forces associated with each atom (x,y,and z) in each structure fitted.
         output_directory (str): Directory pathway to output directory.
-        local_directory (Str): The individual fit directory in a series of fits or the singular fit directory.
-        alpha (optional: float): Degree of transprancy for the plot series. Default=0.02.
-        save (optional: bool): True to save the plot, Flase to not save. Default=True.
+        local_directory (str): The individual fit directory in a series of fits or the singular fit directory.
+        alpha (float(optional)): Degree of transprancy for the plot series. Default=0.02.
+        save (bool(optional)): True to save the plot, Flase to not save. Default=True.
+
     Returns:
         None
     """
@@ -121,13 +131,15 @@ def plot_forces(dft_forces, ip_forces, output_directory, local_directory, alpha=
     
 def plot_stresses(dft_stresses, ip_stresses, output_directory, local_directory, save=True):
     """
-    Plots the 
+    Plots the stresses for each fit in a sequence of fits, with the x-axis being the fit (labeled with the structure numbers in the fit) and the y-axis being the stresses.
+
     Args:
         dft_stresses (np.array): dft stress tensors associated with each structure fitted.
         ip_stressed (np.array): Fitted stress tensors associated with each structure fitted.
         output_directory (str): Directory pathway to output directory.
-        local_directory (Str): The individual fit directory in a series of fits or the singular fit directory.
-        save (optional: bool): True to save the plot, Flase to not save. Default=True.
+        local_directory (str): The individual fit directory in a series of fits or the singular fit directory.
+        save (bool(optional)): True to save the plot, Flase to not save. Default=True.
+
     Returns:
         None
     """

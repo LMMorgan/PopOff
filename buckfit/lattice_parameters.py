@@ -12,12 +12,14 @@ import seaborn as sns
 def get_lattice(fit_data, values, args):
     """
     Returns relaxed structures with the parameters from the fitted potential implemented.
+
     Args:
-        fit_data (obj(FitModel)): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS. 
+        fit_data (:obj:'FitModel'): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS. 
         values (list(float)): Values relating to the fitting arguments passes in.
         args (list(str)): Keys relating to the fitting parameters for the system, such as charge, springs, and buckingham parameters.
+
     Returns:
-        lmp (obj): Lammps object with structure and specified commands implemented, after MD minimisation and relaxation.
+        :obj:'lmp': Lammps object with structure and specified commands implemented, after MD minimisation and relaxation.
     """
     fit_data.init_potential(values, args)
     lmp = fit_data.get_lattice_params()
@@ -26,11 +28,13 @@ def get_lattice(fit_data, values, args):
 def differences(lattice_params, ref):
     """
     Returns relaxed structures with the parameters from the fitted potential implemented.
+
     Args:
         lattice_params (np.array): lattice parameters (a,b,c) and volume of fitted MD parameters.
         ref (np.array): lattice parameters (a,b,c) and volume of DFT reference values.
+
     Returns:
-        (np.array): Percentage differences between MD (lattice_params) and DFT (ref) lattice parameters.
+        np.array: Percentage differences between MD (lattice_params) and DFT (ref) lattice parameters.
     """
     return ((lattice_params-ref)/ref)*100
 
@@ -38,6 +42,7 @@ def differences(lattice_params, ref):
 def run_relaxation(structures, directory, output_directory, params, labels, ref_DFT, supercell=None):
     """
     For each potential in the subdirectories of the working directory, the potential is taken and used to relax every structure in the training set (independently), returning the resulting lattice parameters for each. The output in saved in datafiles in the 'lattice_parameters' subdirectory.
+
     Args:
         structures (int): Total number of structures in the training set.
         directory (str): Name of the main results directory.
@@ -45,9 +50,10 @@ def run_relaxation(structures, directory, output_directory, params, labels, ref_
         params (dict(dict)): Setup dictionary containing the inputs for coreshell, charges, masses, potentials, and core-shell springs.
         labels (list(str)): lattice parameter labels and units.
         ref_DFT (np.array): 1D array of reference lattice parameter values in same order as labels.
-        supercell (optional:list(int) or list(list(int))): 3 integers defining the cell increase in x, y, and z for all structures, or a list of lists where each list is 3 integers defining the cell increase in x, y, z, for each individual structure in the fitting process. i.e. all increase by the same amount, or each structure increased but different amounts. Default=None.
+        supercell (list(int) or list(list(int)) (optional)): 3 integers defining the cell increase in x, y, and z for all structures, or a list of lists where each list is 3 integers defining the cell increase in x, y, z, for each individual structure in the fitting process. i.e. all increase by the same amount, or each structure increased but different amounts. Default=None.
+
     Returns:
-        percent_difference (np.array): percentage difference for each lattice parameter in each strucutre of the training set, from the reference lattice parameters.
+        np.array: percentage difference for each lattice parameter in each strucutre of the training set, from the reference lattice parameters.
     """    
     for potential_file in sorted(glob.glob('{}/*/potentials.json'.format(directory))):
         with open(potential_file, 'r') as f:
@@ -72,13 +78,15 @@ def run_relaxation(structures, directory, output_directory, params, labels, ref_
 def plot_lattice_params(labels, calculated_parameters, ref_DFT, output_directory, pot_structures, save=True):
     """
     Plots the lattice parameters for each structure in the trainning set with the given potential along with the reference lattice parameters.
+
     Args:
         labels (list(str)): lattice parameter labels and units.
         calculated_parameters (np.array): lattice parameters for each strucutre of the training set using the given potential.
         ref_DFT (np.array): 1D array of reference lattice parameter values in same order as labels.
         output_directory (str): Name of the main output directory for the lattice_parameters.
         pot_structures (str): The structures in the fitted potential separated by a dash, i.e. '1-2-5'
-        save (optional: bool): True to save the plot, Flase to not save. Default=True.
+        save (bool(optional)): True to save the plot, Flase to not save. Default=True.
+
     Returns:
         None
     """
@@ -98,14 +106,16 @@ def plot_lattice_params(labels, calculated_parameters, ref_DFT, output_directory
 def _scatter_plot(x, y, ref_DFT, label, gs):
     """
     Sets the conditions and plots the scatter plot.
+
     Args:
         x (np.array): random values between 0 and 1 up to len(calculated_parameters) to give a spread, making each point easier to see.
         y (np.array): lattice parameters for each strucutre of the training set using the given potential.
         ref_DFT (np.array): 1D array of reference lattice parameter values in same order as labels.
         labels (list(str)): lattice parameter labels and units.
-        gs (gridspec.GridSpec): 1 by 2 gridspec for formatting of plot.
+        gs (:obj:'gridspec.GridSpec'): 1 by 2 gridspec for formatting of plot.
+
     Returns:
-        axs (np.array): array of matplotlib subplots (AxesSubplot) objects.
+        np.array: matplotlib subplots (:obj:'AxesSubplot') objects.
     """    
     axs = plt.subplot(gs)
     axs.scatter(x, y)
@@ -119,11 +129,13 @@ def _scatter_plot(x, y, ref_DFT, label, gs):
 def _distribution_plot(y, gs):
     """
     Sets the conditions and plots the distribution plot (kdeplot).
+
     Args:
         y (np.array): lattice parameters for each strucutre of the training set using the given potential.
-        gs (gridspec.GridSpec): 1 by 2 gridspec for formatting of plot.
+        gs (:obj:'gridspec.GridSpec'): 1 by 2 gridspec for formatting of plot.
+
     Returns:
-        axs (np.array): array of matplotlib subplots (AxesSubplot) objects.
+        np.array: matplotlib subplots (:obj:'AxesSubplot') objects.
     """ 
     axs = plt.subplot(gs)
     axs.axis('off')
@@ -133,11 +145,13 @@ def _distribution_plot(y, gs):
 def _y_limits(ref_DFT, y):
     """
     Sets the y_limits of each plot to encompass both the data points and reference data, making sure the distributions are to the same scale.
+
     Args:
         ref_DFT (np.array): 1D array of reference lattice parameter values in same order as labels.
         y (np.array): lattice parameters for each strucutre of the training set using the given potential.
+
     Returns:
-        ylims (tuple): Contains the minimum and maximum limits for the y-axis.
+        tuple: Minimum and maximum limits for the y-axis.
     """ 
     if ref_DFT <= y.min():
         ylims = (ref_DFT-(ref_DFT*0.002), y.max()+(y.max()*0.002))
@@ -151,13 +165,15 @@ def _y_limits(ref_DFT, y):
 def plot_lattice_params_with_distributions(labels, calculated_parameters, ref_DFT, output_directory, pot_structures, save=True):
     """
     Plots the lattice parameters for each structure in the trainning set with the given potential along with the reference lattice parameters. This also has the distribution plotted along the y-axis.
+
     Args:
         labels (list(str)): lattice parameter labels and units.
         calculated_parameters (np.array): lattice parameters for each strucutre of the training set using the given potential.
         ref_DFT (np.array): 1D array of reference lattice parameter values in same order as labels.
         output_directory (str): Name of the main output directory for the lattice_parameters.
         pot_structures (str): The structures in the fitted potential separated by a dash, i.e. '1-2-5'
-        save (optional: bool): True to save the plot, Flase to not save. Default=True.
+        save (bool(optional)): True to save the plot, Flase to not save. Default=True.
+
     Returns:
         None
     """
