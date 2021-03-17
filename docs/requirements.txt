@@ -2,3 +2,5 @@ Sphinx>=1.6.3
 sphinx-rtd-theme
 nbsphinx
 numpy
+pymatgen
+matplotlib
