@@ -1,3 +1,10 @@
+
+BuckFit is a Python module that fits Coulomb-Buckingham type interatomic potentials for classical potential-based molecular dynamics (MD). This is a modular fitting code, allowing increased control over several important aspects of the potenial. You can choose between fitting a formal charge, partial charge, or fitting a charge scaling factor. You can choose to fit a rigid ion model or a core-shell model. If choosing to fit a core-shell model, you are able to fix or fit the charge separation over the core and shell components and the spring constant. You can also selectively fix, fit, or set to zero the individual buckingham parameters.
+
+BuckFit currently fits to first principles derived forces and stress tensors obtained from a VASP training set. Details on how to build a VASP training set can be found in the `training set guide`_.
+
+.. _training set guide: https://
+
 Dependencies
 ============
 
