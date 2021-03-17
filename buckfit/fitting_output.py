@@ -25,7 +25,7 @@ def extract_stresses_and_forces(fit_data, values, args):
     Returns the extracted forces and stress tensors for the dft training structures and then runs a shell relaxation (if core-shell) and single point canculation to get the forces and stress tensors using the fitted potential.
 
     Args:
-        fit_data (:obj:'FitModel'): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS. 
+        fit_data (:obj:`FitModel`): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS. 
         args (list(str)): Keys relating to the fitting parameters for the system, such as charge, springs, and buckingham parameter
         values (list(float)): Values relating to the fitting arguments passes in.
 
@@ -45,7 +45,7 @@ def save_data(struct_directory, labels, fit_output, dft_forces, ip_forces, dft_s
     Args:
         struct_directory (str): directory pathway to local output directory.
         labels (list(str)): List of parameters to be fitted.
-        fit_output (:obj:'OptimizeResult'): resulting values and fitting data from scipy. Full type is scipy.optimize.optimize.OptimizeResult.
+        fit_output (:obj:`OptimizeResult`): resulting values and fitting data from scipy. Full type is scipy.optimize.optimize.OptimizeResult.
         dft_forces (np.array): 3D array of dft forces in x,y,z for each atom in each structure.
         ip_forces (np.array): 3D array of fitted interatomic potential forces in x,y,z for each atom in each structure.
         dft_stresses (np.array): 3D array of dft stress tensors in each structure.

@@ -12,7 +12,7 @@ def collate_structural_data(params, structs, supercell=None):
         supercell (list(int)): 3 integers defining the cell increase in x, y, and z. Default=None if called directly.
         
     Returns:
-        list(:obj:`LammpsData`):  LammpsData objects containing atom_types (list(:obj:'AtomType')), bond_types (list(:obj:'BonType')), atoms (list(:obj:'Atom')), bonds (list(:obj:'Bond')), cell_lengths (list(float)), tilt_factor (list(float)), file_name (str), and expected_stress_tensors (np.array).
+        list(:obj:`LammpsData`):  LammpsData objects containing atom_types (list(:obj:`AtomType`)), bond_types (list(:obj:`BonType`)), atoms (list(:obj:`Atom`)), bonds (list(:obj:`Bond`)), cell_lengths (list(float)), tilt_factor (list(float)), file_name (str), and expected_stress_tensors (np.array).
         """
     vaspruns = [f'vaspruns/vasprun{i}.xml' for i in structs]
     lammps_data = [data_from_vasprun(params, v, i, supercell) for i, v in enumerate(vaspruns)]
@@ -30,7 +30,7 @@ def data_from_vasprun(params, filename, i, supercell):
         supercell (list(int)): 3 integers defining the cell increase in x, y, and z. Default=None if called directly.
         
     Returns:
-        :obj:'LammpsData':  LammpsData objects containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factor (list(float)), file_name (str), and expected_stress_tensors (np.array).
+        :obj:`LammpsData`:  LammpsData objects containing atom_types (list(:obj:`AtomType`)), bond_types (list(:obj:`BondType`)), atoms (list(:obj:`Atom`)), bonds (list(:obj:`Bond`)), cell_lengths (list(float)), tilt_factor (list(float)), file_name (str), and expected_stress_tensors (np.array).
         """
     vasprun = Vasprun(filename)
     structure = vasprun.ionic_steps[0]['structure']

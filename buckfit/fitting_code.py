@@ -13,8 +13,8 @@ class FitModel():
         Initialise an instance for all information relating to the pysical and electronic structure needed for the Lammps input.
         
         Args:
-            potentials (list(:obj:'BuckinghamPotential')): BuckinghamPotential objects including labels (list(str)), atom_type_index (list(int)), a (obj), rho (obj), and c (obj). Each object is a BuckinghamParameter object.
-            lammps_data (list(:obj:'LammpsData')):  LammpsData objects containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factor (list(float)), file_name (str), and expected_stress_tensors (np.array).
+            potentials (list(:obj:`BuckinghamPotential`)): BuckinghamPotential objects including labels (list(str)), atom_type_index (list(int)), a (obj), rho (obj), and c (obj). Each object is a BuckinghamParameter object.
+            lammps_data (list(:obj:`LammpsData`)):  LammpsData objects containing atom_types (list(:obj:`AtomType`)), bond_types (list(:obj:`BondType`)), atoms (list(:obj:`Atom`)), bonds (list(:obj:`Bond`)), cell_lengths (list(float)), tilt_factor (list(float)), file_name (str), and expected_stress_tensors (np.array).
             cs_springs (dict): The key is the atom label (str) and the value the spring values (list(float)).
             
         Returns:
@@ -35,7 +35,7 @@ class FitModel():
             supercell (list(int) (optional)): 3 integers defining the cell increase in x, y, and z for all structures. Default=None.
             
         Returns:
-            :obj:'FitModel':  FitModel object containing potentials (list(:obj:'BuckinghamPotential')), lammps_data (:obj:'LammpsData'), and cs_spring (dict).      
+            :obj:`FitModel`: FitModel object containing potentials (list(:obj:`BuckinghamPotential`)), lammps_data (:obj:`LammpsData`), and cs_spring (dict).      
         """  
         lammps_data = collate_structural_data(params, structs, supercell)
         parameters = pot.buckingham_parameters(params['potentials'])
@@ -88,7 +88,7 @@ class FitModel():
         Sets the charge on each atom in the structure by type for the specified Lammps system (changes for each iteration of the potential fit).
         
         Args:
-            lmp (:obj:'lmp'): Lammps object with structure and specified commands implemented.
+            lmp (:obj:`lmp`): Lammps object with structure and specified commands implemented.
             
         Returns:
             None
@@ -102,7 +102,7 @@ class FitModel():
         Sets the spring constant for the core-shell bonds for the specified Lammps system (changes for each iteration of the potential fit).
         
         Args:
-            lmp (:obj:'lmp'): Lammps object with structure and specified commands implemented.
+            lmp (:obj:`lmp`): Lammps object with structure and specified commands implemented.
             
         Returns:
             None
@@ -116,7 +116,7 @@ class FitModel():
         Sets the potential for the specified Lammps system (changes for each iteration of the potential fit).
         
         Args:
-            lmp (:obj:'lmp'): Lammps object with structure and specified commands implemented.
+            lmp (:obj:`lmp`): Lammps object with structure and specified commands implemented.
             
         Returns:
             None
@@ -158,7 +158,7 @@ class FitModel():
         Extracts the stress tensors from the lammps object after MD has been run and converts them from bar to kBar, then swaps the last two columns to be in the same format as vasp stress tensors (XX YY ZZ XY YZ XZ).
         
         Args:
-            instance (:obj:'lmp'): Lammps object after minimisation (if core-shell) and a zero step run.  
+            instance (:obj:`lmp`): Lammps object after minimisation (if core-shell) and a zero step run.  
             
         Returns:
             np.array: stress tenosrs for the lammps instance (single structure).
@@ -294,7 +294,7 @@ class FitModel():
             None
             
         Returns:
-            :obj:'lmp': Lammps object with structure and specified commands implemented.
+            :obj:`lmp`: Lammps object with structure and specified commands implemented.
         """  
         instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]
         for ld, instance in zip(self.lammps_data, instances):

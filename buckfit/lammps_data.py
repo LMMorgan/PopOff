@@ -13,10 +13,10 @@ class LammpsData():
         Initialise an instance for all information relating to the pysical and electronic structure needed for the Lammps input.
 
         Args:
-            atom_types (list(:obj:'AtomType')): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), formal_charge (float), and core_shell (str).
-            bond_types (list(:obj:'BondType')): BondType objects including bond_type_index (int) and label (str).
-            atoms (list(:obj:'Atom')): Atom objects including atom_index (int), molecule_index (int), coords (np.array), forces (np.array), and atom_type (obj:AtomType).
-            bonds (list(:obj:'Bond')): Bond objects including bond_index (int), atom_indices (list(int)), and bond_type (obj:BondType).
+            atom_types (list(:obj:`AtomType`)): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), formal_charge (float), and core_shell (str).
+            bond_types (list(:obj:`BondType`)): BondType objects including bond_type_index (int) and label (str).
+            atoms (list(:obj:`Atom`)): Atom objects including atom_index (int), molecule_index (int), coords (np.array), forces (np.array), and atom_type (obj:AtomType).
+            bonds (list(:obj:`Bond`)): Bond objects including bond_index (int), atom_indices (list(int)), and bond_type (obj:BondType).
             cell_lengths (list(float)): Lengths of each cell direction.
             tilt_factors (list(float)): Tilt factors of the cell.
             file_name (str): Name of lammps formatted file to be written.
@@ -41,13 +41,13 @@ class LammpsData():
         Collects information from initial structure, params, and an index.
 
         Args:
-            structure (:obj:'Structure'): A pymatgen structural object created from a POSCAR, with forces from an OUTCAR included as site properties.
+            structure (:obj:`Structure`): A pymatgen structural object created from a POSCAR, with forces from an OUTCAR included as site properties.
             params (dict(dict)): Contains core_shell (bool), charges (float), masses (float), and cs_springs (list(float)) dictionaries where the keys are atom label (str). Also contains potentials dict(list) where the keys are atom label pairs (str), example: 'Li-O'.
             i (int): index identifier of the vasprun.xml files.
             stresses (np.array): Stress tensors of the structure.
             
         Returns:
-            :obj:'LammpsData':  LammpsData object containing atom_types (list(:obj:'AtomType')), bond_types (list(:obj:'BondType')), atoms (list(:obj:'Atom')), bonds (list(:obj:'Bond')), cell_lengths (list(float)), tilt_factors (list(float)), file_name (str), and expected_stress_tensors (np.array).          
+            :obj:`LammpsData`:  LammpsData object containing atom_types (list(:obj:`AtomType`)), bond_types (list(:obj:`BondType`)), atoms (list(:obj:`Atom`)), bonds (list(:obj:`Bond`)), cell_lengths (list(float)), tilt_factors (list(float)), file_name (str), and expected_stress_tensors (np.array).          
         """
         cell_lengths, tilt_factors, structure = lammps_lattice(structure)
         if 'cs_springs' in params.keys():
@@ -162,7 +162,7 @@ class LammpsData():
             title (str(optional)): Title for lammps file, default = 'title'.
             
         Returns:
-            str: All information for the lammps input file as defined by the :obj:'LammpsData" class methods.
+            str: All information for the lammps input file as defined by the :obj:`LammpsData` class methods.
         """
         return_str = ''
         return_str += self._header_string(title)
@@ -242,7 +242,7 @@ class LammpsData():
             cs_springs (dict): The key is the atom label (str) and the value the spring values (list(float)).
                 
         Returns:
-            :obj:'lmp': Lammps system object with structure and specified commands implemented.
+            :obj:`lmp`: Lammps system object with structure and specified commands implemented.
         """
         lmp = lammps.Lammps(units='metal', style = 'full', args=['-log', 'none', '-screen', 'none'])
         lmp.command('read_data {}'.format(self.file_name))
@@ -323,10 +323,10 @@ def lammps_lattice(structure):
     Imposes transformation for non-orthorobic cell for LAMMPS to read cell_lengths and tilt_factors, creates a new pymatgen structure object with the new transformation and associated forces.
     
     Args:
-        structure (:obj:'Structure'): A pymatgen structural object created from a vasprun.xml file with forces included as site properties.
+        structure (:obj:`Structure`): A pymatgen structural object created from a vasprun.xml file with forces included as site properties.
     
     Returns:
-        np.array, np.array, :obj:'Structure': Lengths of each cell direction; Tilt factors of the cell; A pymatgen structural object created from the transformed matrix structure, with forces included as site properties.
+        np.array, np.array, :obj:`Structure`: Lengths of each cell direction; Tilt factors of the cell; A pymatgen structural object created from the transformed matrix structure, with forces included as site properties.
     """
     a, b, c = structure.lattice.matrix
     if np.cross(a, b).dot(c) < 0:

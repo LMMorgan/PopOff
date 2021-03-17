@@ -11,7 +11,7 @@ def types_from_structure( structure, core_shell, charges, masses, cs_spring=None
     Defines the atom types and bond types from the structure and given information from params.
     
     Args:
-        structure (:obj:'Structure'): A pymatgen structural object created from the transformed matrix structure, with forces included as site properties.
+        structure (:obj:`Structure`): A pymatgen structural object created from the transformed matrix structure, with forces included as site properties.
         core_shell (dict): A dictionary of booleans stating if any atoms should be made core-shell.
         charges (dict): A dictionary of charges for each atom type. Key = atom label (str), value = charge(float)/sub_dict(dict). If atom is core-shell a sub dictionary will be the value, where sub_key = 'core' or 'shell' (str) and sub_value = charge (float).
         masses (dict): A dictionary of masses for each atom type. Key = atom label (str), value = mass(float)/sub_dict(dict). If atom is core-shell a sub dictionary will be the value, where sub_key = 'core' or 'shell' and sub_value = mass (float).
@@ -19,7 +19,7 @@ def types_from_structure( structure, core_shell, charges, masses, cs_spring=None
         verbose (bool(optional)): Print verbose output. Default = True.
 
     Returns:
-        list(:obj:'AtomType')), list(:obj:'BondType'): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), and core_shell (str); BondType objects including bond_type_index (int) and label (str).
+        list(:obj:`AtomType`)), list(:obj:`BondType`): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), and core_shell (str); BondType objects including bond_type_index (int) and label (str).
     """
     atom_types = []
     bond_types = []
@@ -70,12 +70,12 @@ def atoms_and_bonds_from_structure( structure, atom_types, bond_types ):
     Defines the atoms and bonds from the structure and given information from params.
     
     Args:
-        structure (:obj:'Structure'): A pymatgen structural object created from the transformed matrix structure, with forces included as site properties.
-        atom_types (list(:obj:'AtomType')): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), and core_shell (str).
-        bond_types (list(:obj:'BondType')): BondType objects including bond_type_index (int) and label (str).
+        structure (:obj:`Structure`): A pymatgen structural object created from the transformed matrix structure, with forces included as site properties.
+        atom_types (list(:obj:`AtomType`)): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), and core_shell (str).
+        bond_types (list(:obj:`BondType`)): BondType objects including bond_type_index (int) and label (str).
 
     Returns:
-        list(:obj:'Atom'), list(:obj:'Bond'): Atom objects including atom_index (int), molecule_index (int), coords (np.array), forces (np.array), and atom_type ('obj:'AtomType'); Bond objects including bond_index (int), atom_indices (list(int)), and bond_type (:obj:'BondType)'.
+        list(:obj:`Atom`), list(:obj:`Bond`): Atom objects including atom_index (int), molecule_index (int), coords (np.array), forces (np.array), and atom_type (:obj:`AtomType`); Bond objects including bond_index (int), atom_indices (list(int)), and bond_type (:obj:`BondType`).
     """
     atoms = []
     bonds = []

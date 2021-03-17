@@ -40,7 +40,7 @@ def buckingham_parameters(potentials):
         potentials(dict): Contains buckingham potentials list(float), where the potentials keys are atom label pairs (str), example: 'Li-O'.
     
     Returns:
-        list(:obj:'BuckinghamParameter')): BuckinghamParameter objects including label_string (str), param_type (str), and value (float).
+        list(:obj:`BuckinghamParameter`)): BuckinghamParameter objects including label_string (str), param_type (str), and value (float).
         
     """
     if not isinstance(potentials, dict):

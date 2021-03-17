@@ -7,7 +7,7 @@ def check_coreshell(label, bounds, fit_data):
      Args:
         label (str): dQ parameter key, relating to the dQ to be applied to the stated element.
         bounds (tuple(float)): Lower and upper bounds associated with the dQ parameter.
-        fit_data (:obj:'FitModel'): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS.
+        fit_data (:obj:`FitModel`): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS.
 
     Returns:
         None
@@ -102,7 +102,7 @@ def setup_error_checks(include_labels, bounds_list, fit_data, params):
     Args:
         include_labels (list(str)): List of parameters to be fitted.
         bounds_list (list(tuple(float))): List of lower and upper bound tuples associated with each parameter.
-        fit_data (:obj:'FitModel'): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS. 
+        fit_data (:obj:`FitModel`): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS. 
         params (dict(dict)): Setup dictionary containing the inputs for coreshell, charges, masses, potentials, and core-shell springs.
 
     Returns:

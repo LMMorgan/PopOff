@@ -14,7 +14,7 @@ def get_lattice(fit_data, values, args):
     Returns relaxed structures with the parameters from the fitted potential implemented.
 
     Args:
-        fit_data (:obj:'FitModel'): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS. 
+        fit_data (:obj:`FitModel`): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS. 
         values (list(float)): Values relating to the fitting arguments passes in.
         args (list(str)): Keys relating to the fitting parameters for the system, such as charge, springs, and buckingham parameters.
 
@@ -112,10 +112,10 @@ def _scatter_plot(x, y, ref_DFT, label, gs):
         y (np.array): lattice parameters for each strucutre of the training set using the given potential.
         ref_DFT (np.array): 1D array of reference lattice parameter values in same order as labels.
         labels (list(str)): lattice parameter labels and units.
-        gs (:obj:'gridspec.GridSpec'): 1 by 2 gridspec for formatting of plot.
+        gs (:obj:`gridspec.GridSpec`): 1 by 2 gridspec for formatting of plot.
 
     Returns:
-        np.array: matplotlib subplots (:obj:'AxesSubplot') objects.
+        np.array: matplotlib subplots (:obj:`AxesSubplot`) objects.
     """    
     axs = plt.subplot(gs)
     axs.scatter(x, y)
@@ -132,10 +132,10 @@ def _distribution_plot(y, gs):
 
     Args:
         y (np.array): lattice parameters for each strucutre of the training set using the given potential.
-        gs (:obj:'gridspec.GridSpec'): 1 by 2 gridspec for formatting of plot.
+        gs (:obj:`gridspec.GridSpec`): 1 by 2 gridspec for formatting of plot.
 
     Returns:
-        np.array: matplotlib subplots (:obj:'AxesSubplot') objects.
+        np.array: matplotlib subplots (:obj:`AxesSubplot`) objects.
     """ 
     axs = plt.subplot(gs)
     axs.axis('off')

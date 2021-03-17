@@ -13,9 +13,9 @@ class BuckinghamPotential():
         Args:
             labels (list(str)): List of the atoms in the potential i.e. ['O','O'] for O-O potential.
             atom_type_index (list(int)): List of the atom type index for the atoms in the potential.
-            a (:obj:'BuckinghamParameter'): BuckinghamParameter objects including label_string (str), param_type (str), value (float), and sd (float).
-            rho (:obj:'BuckinghamParameter'): BuckinghamParameter objects including label_string (str), param_type (str), value (float), and sd (float).
-            c (:obj:'BuckinghamParameter'): BuckinghamParameter objects including label_string (str), param_type (str), value (float), and sd (float).
+            a (:obj:'`BuckinghamParameter`): BuckinghamParameter objects including label_string (str), param_type (str), value (float), and sd (float).
+            rho (:obj:`BuckinghamParameter`): BuckinghamParameter objects including label_string (str), param_type (str), value (float), and sd (float).
+            c (:obj:`BuckinghamParameter`): BuckinghamParameter objects including label_string (str), param_type (str), value (float), and sd (float).
                 
         Returns:
             None
@@ -62,11 +62,11 @@ def buckingham_potentials(potentials_dict, atom_types, parameters):
     
     Args:
         potentials(dict): Contains buckingham potentials (list(float)), where the potentials keys are atom label pairs (str), example: 'Li-O'.
-        atom_types (list(obj)): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), and core_shell (str).                  
-        parameters (list(obj)): BuckinghamParameter objects including parameter_type (str), label_string (str), and value (float).
+        atom_types (list(:obj:`AtomType`)): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), and core_shell (str).                  
+        parameters (list(:obj:`BuckinghamParameter`)): BuckinghamParameter objects including parameter_type (str), label_string (str), and value (float).
         
     Returns:
-        potentials (list(obj)): BuckinghamPotential objects including labels (list(str)), atom_type_index (list(int)), a (obj), rho (obj), and c (obj). Each object is a BuckinghamParameter object.
+        potentials (list(:obj:`BuckinghamPotential`)): BuckinghamPotential objects including labels (list(str)), atom_type_index (list(int)), a (:obj:`BuckinghamParameter`), rho (:obj:`BuckinghamParameter`), and c (:obj:`BuckinghamParameter`).
     """
     
     if not isinstance(potentials_dict, dict):
