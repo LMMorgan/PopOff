@@ -30,7 +30,7 @@ def data_from_vasprun(params, filename, i, supercell):
         supercell (list(int)): 3 integers defining the cell increase in x, y, and z. Default=None if called directly.
         
     Returns:
-        struct_data (obj:LammpsData):  LammpsData objects containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factor (list(float)), file_name (str), and expected_stress_tensors (np.array).
+        struct_data (LammpsData obj):  LammpsData objects containing atom_types (list(obj:AtomType)), bond_types (list(obj:BonType)), atoms (list(obj:Atom)), bonds (list(obj:Bond)), cell_lengths (list(float)), tilt_factor (list(float)), file_name (str), and expected_stress_tensors (np.array).
         """
     vasprun = Vasprun(filename)
     structure = vasprun.ionic_steps[0]['structure']

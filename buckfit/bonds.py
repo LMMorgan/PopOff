@@ -33,13 +33,13 @@ class Bond():
         
     def input_string(self):
         """
-        Defines the a string in a lammps input file format for the bond data.
+        Defines the string in a LAMMPS input file format for the bond data.
 
         Args:
             None
                 
         Returns:
-            (str): Containing bond_index (int), bond_type.bond_type_index (int), and
+            input_string (str): Containing bond_index (int), bond_type.bond_type_index (int), and
                    atom_indices (list(int)) for lammps file.
         """       
         return '{:<4} {:<4} {:<4} {:<4}'.format( self.bond_index, self.bond_type.bond_type_index, *self.atom_indices )

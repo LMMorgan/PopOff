@@ -34,6 +34,16 @@ class BondType():
         self.spring_coeff_2 = spring_coeff_2
         
     def bond_string(self):
+        """ 
+        Defines the string input for the bond coefficient for LAMMPS.
+
+        Args:
+            None
+                
+        Returns:
+            return_str (str): Bond coefficient command for LAMMPS input.
+        """  
+
         return_str = 'bond_coeff {} {:6.2f} {:6.2}'.format(self.bond_type_index,
                                                            self.spring_coeff_1,
                                                            self.spring_coeff_2)

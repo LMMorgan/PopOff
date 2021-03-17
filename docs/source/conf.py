@@ -11,10 +11,11 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 # import sphinx_rtd_theme
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../'))
 
+import buckfit
 
 # -- Project information -----------------------------------------------------
 
@@ -22,8 +23,10 @@ project = 'BuckFit'
 copyright = '2021, Lucy M. Morgan, Matt J. Clarke, M. Saiful Islam, Benjamin J. Morgan'
 author = 'Lucy M. Morgan, Matt J. Clarke, M. Saiful Islam, Benjamin J. Morgan'
 
+# The short X.Y version
+version = '.'.join( buckfit.__version__.split('.')[:2] )
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+release = buckfit.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -32,7 +35,11 @@ release = '0.0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinx_rtd_theme",
+    'sphinx.ext.autodoc',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.mathjax',
+    'nbsphinx'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
