@@ -4,16 +4,19 @@ BuckFit: The buckingham potential fitting software
 
 .. include:: readme.rst
 
+API documentation
+^^^^^^^^^^^^^^^^^
 .. toctree::
-	:caption: API documentation
    :maxdepth: 3
 
    modules
 
+Other
+^^^^^
 .. toctree::
-	:caption: Other
    :maxdepth: 3
 
+   installation
    license
    help
 
