@@ -19,7 +19,7 @@ def types_from_structure( structure, core_shell, charges, masses, cs_spring=None
         verbose (bool(optional)): Print verbose output. Default = True.
 
     Returns:
-        list(:obj:`AtomType`)), list(:obj:`BondType`): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), and core_shell (str); BondType objects including bond_type_index (int) and label (str).
+        list(:obj:`AtomType`), list(:obj:`BondType`): AtomType objects including atom_type_index (int), label (str), mass (float), charge (float), and core_shell (str); BondType objects including bond_type_index (int) and label (str).
     """
     atom_types = []
     bond_types = []

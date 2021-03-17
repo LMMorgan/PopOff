@@ -62,9 +62,9 @@ def save_cv_data(output_directory, structs, error, dft_forces, ip_forces, dft_st
         dft_stresses (np.array): 3D array of dft stress tensors in each structure.
         ip_stresses (np.array): 3D array of fitted interatomic potential stress tensors in each structure.
 
-     Returns:
-         None
-     """
+    Returns:
+        None
+    """
     np.savetxt('{}/s{}_dft_forces.dat'.format(output_directory, '-'.join([str(num) for num in structs])), dft_forces, fmt='%.10e', delimiter=' ')
     np.savetxt('{}/s{}_ip_forces.dat'.format(output_directory, '-'.join([str(num) for num in structs])), ip_forces, fmt='%.10e', delimiter=' ')
     np.savetxt('{}/s{}_dft_stresses.dat'.format(output_directory, '-'.join([str(num) for num in structs])), dft_stresses, fmt='%.10e', delimiter=' ')
