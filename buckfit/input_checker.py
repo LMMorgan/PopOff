@@ -4,7 +4,7 @@ def check_coreshell(label, bounds, fit_data):
     """
     Checks core-shell inputs into the fitting fuctions are correct. This includes checking the charge ratio between the core and shell is applied to a core-shell atom, that the atoms exist within the system, the upper bound doesn't exceed 2*formal charge, neither bound is <=0, and the lower bound is smaller than the upper bound.
 
-     Args:
+    Args:
         label (str): dQ parameter key, relating to the dQ to be applied to the stated element.
         bounds (tuple(float)): Lower and upper bounds associated with the dQ parameter.
         fit_data (:obj:`FitModel`): all structural data and associated properties defined, with methods for implementing the fitting process using LAMMPS.

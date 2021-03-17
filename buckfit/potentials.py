@@ -66,7 +66,7 @@ def buckingham_potentials(potentials_dict, atom_types, parameters):
         parameters (list(:obj:`BuckinghamParameter`)): BuckinghamParameter objects including parameter_type (str), label_string (str), and value (float).
         
     Returns:
-        potentials (list(:obj:`BuckinghamPotential`)): BuckinghamPotential objects including labels (list(str)), atom_type_index (list(int)), a (:obj:`BuckinghamParameter`), rho (:obj:`BuckinghamParameter`), and c (:obj:`BuckinghamParameter`).
+        list(:obj:`BuckinghamPotential`): BuckinghamPotential objects including labels (list(str)), atom_type_index (list(int)), a (:obj:`BuckinghamParameter`), rho (:obj:`BuckinghamParameter`), and c (:obj:`BuckinghamParameter`).
     """
     
     if not isinstance(potentials_dict, dict):

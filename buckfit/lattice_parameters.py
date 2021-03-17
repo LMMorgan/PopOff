@@ -19,7 +19,7 @@ def get_lattice(fit_data, values, args):
         args (list(str)): Keys relating to the fitting parameters for the system, such as charge, springs, and buckingham parameters.
 
     Returns:
-        :obj:'lmp': Lammps object with structure and specified commands implemented, after MD minimisation and relaxation.
+        :obj:`lmp`: Lammps object with structure and specified commands implemented, after MD minimisation and relaxation.
     """
     fit_data.init_potential(values, args)
     lmp = fit_data.get_lattice_params()

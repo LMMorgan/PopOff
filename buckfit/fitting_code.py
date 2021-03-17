@@ -69,7 +69,7 @@ class FitModel():
     
     def expected_stresses(self):
         """
-        Collates the expected stress tensors for each structure to a flattened 2D array, where each row contains the XX YY ZZ XY YZ XZ. Note this is vasp format which is different from lammps format. Lammps format will be converted to vasp format with self.convert_stresses_to_vasp().
+        Collates the expected stress tensors for each structure to a flattened 2D array, where each row contains the XX YY ZZ XY YZ XZ. Note this is vasp format which is different from lammps format. Lammps format will be converted to vasp format with :obj:`convert_stresses_to_vasp`.
         
         Args:
             None

@@ -42,8 +42,8 @@ def chi_squared_error(dft_forces, ip_forces, dft_stresses, ip_stresses):
         dft_stresses (np.array): 3D array of dft stress tensors in each structure.
         ip_stresses (np.array): 3D array of fitted interatomic potential stress tensors in each structure.
 
-     Returns:
-         float: The chi squared error calculated between dft forces and the MD forces under the given potential and the DFT and MD stress tensors.
+    Returns:
+        float: The chi squared error calculated between dft forces and the MD forces under the given potential and the DFT and MD stress tensors.
      """
     force_diff = np.sum((dft_forces - ip_forces)**2)/ dft_forces.size
     stess_diff = np.sum((dft_stresses - ip_stresses)**2)/6
