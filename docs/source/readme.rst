@@ -8,7 +8,7 @@ BuckFit currently fits to first principles derived forces and stress tensors obt
 Installation
 ============
 
-Installation of this module requires use of the LAMMPS molecular dynamics code to run and the `lammps-cython` interface. Instructions on how to install these can be found `here <>`_.
+Installation of this module requires use of the LAMMPS molecular dynamics code to run and the `lammps-cython` interface. Instructions on how to install these can be found `here <https://buckfit.readthedocs.io/en/latest/installation.html>`_.
 
 The simplest way to install ``BuckFit`` is to use ``pip`` to install from `PyPI <https://pypi.org/project/BuckFit/>`_::
 
@@ -30,4 +30,20 @@ and install the same way::
     cd buckfit
     pip install -e .
 
+Tests
+=====
 
+Tests for each module are conducted using `pytest <https://docs.pytest.org/en/stable/usage.html>` and can be found in::
+
+	buckfit/tests/
+
+The tests can be run using::
+
+	pytest
+
+The input for the test calculations is stored in the ``test_files`` directory.
+
+Documentation
+=============
+
+Once the `dependencies <https://buckfit.readthedocs.io/en/latest/installation.html>`_ and ``BuckFit`` is installed ....
