@@ -11,6 +11,7 @@ Guide:
 .. toctree::
    :maxdepth: 3
 
+   installation
    license
    help
 
