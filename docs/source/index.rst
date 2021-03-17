@@ -2,15 +2,7 @@
 BuckFit: The buckingham potential fitting software
 ==================================================
 
-Introduction
-============
-
-Some introduction text.::
-
-	print'hello'
-	>> hello
-
-Testing.
+.. include:: readme.rst
 
 
 Guide:
@@ -22,7 +14,13 @@ Guide:
    license
    help
 
+API documentation:
+^^^^^^^^^^^^^^^^^^
 
+.. toctree::
+   :maxdepth: 3
+
+   modules
 
 Indices and tables
 ==================
