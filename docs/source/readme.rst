@@ -8,7 +8,7 @@ BuckFit currently fits to first principles derived forces and stress tensors obt
 Installation
 ============
 
-Installation of this module requires use of the LAMMPS molecular dynamics code to run and the ``lammps-cython`` interface. Instructions on how to install these can be found `here <https://buckfit.readthedocs.io/en/latest/installation.html>`_.
+Installation of this module requires use of the LAMMPS molecular dynamics code to run and the ``lammps-cython`` interface. Instructions on how to install these can be found on the `installing dependencies <https://buckfit.readthedocs.io/en/latest/installation.html>`_ page.
 
 The simplest way to install ``BuckFit`` is to use ``pip`` to install from `PyPI <https://pypi.org/project/BuckFit/>`_::
 
@@ -21,7 +21,7 @@ Alternatively, you can download the latest release from `GitHub <https://github.
 
 which installs an editable (-e) version of pyscses in your userspace.
 
-Or clone the latest version from `GitHub <https://github.com/LMMorgan/BuckFit>_` with::
+Or clone the latest version from `GitHub <https://github.com/LMMorgan/BuckFit>`_ with::
 
     git clone git@github.com:LMMorgan/BuckFit.git
 
@@ -33,7 +33,7 @@ and install the same way::
 Tests
 =====
 
-Tests for each module are conducted using `pytest <https://docs.pytest.org/en/stable/usage.html>_` and can be found in::
+Tests for each module are conducted using `pytest <https://docs.pytest.org/en/stable/usage.html>`_ and can be found in::
 
 	buckfit/tests/
 
@@ -43,7 +43,30 @@ The tests can be run using::
 
 The input for the test calculations is stored in the ``test_files`` directory.
 
-Documentation
-=============
+User Guides
+===========
 
 Once the `dependencies <https://buckfit.readthedocs.io/en/latest/installation.html>`_ and ``BuckFit`` is installed ....
+
+
+
+Citing BuckFit
+==============
+
+This code can be cited as:
+
+Morgan, Lucy M., Clarke, Matt J., Islam, M. Saiful, & Morgan, Benjamin J. (2020). *BuckFit* Zenodo. http://doi.org/10.5281/zenodo.4311103
+
+### BibTeX::
+
+    @misc{wellock_georgina_l_2019_2536901,
+      author       = {Morgan, Lucy M. and
+							 Clarke, Matt J. and
+                      Islam, M. Saiful and
+                      Morgan, Benjamin J.},
+      title        = {{BuckFit}},
+      month        = dec,
+      year         = 2020,
+      doi          = {10.5281/zenodo.4311103},
+      url          = {10.5281/zenodo.4311103}
+    }
