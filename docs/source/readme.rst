@@ -43,20 +43,8 @@ The tests can be run using::
 
 The input for the test calculations is stored in the ``test_files`` directory.
 
-Userguides
----------- 
 
-Once the `dependencies <https://buckfit.readthedocs.io/en/latest/installation.html>`_ and ``BuckFit`` has been installed, the code can be run either through a python script or using a `Jupyter notebook <http://jupyter-notebook.readthedocs.io/en/latest/#>`_. An overview of the capabilities of ``BuckFit``, with example code for running the code and varying the fitting parameters ca be found in::
-
-	buckfit/userguides/fitting.ipynb
-
-or the Jupyter notebook can be found on GitHub here
-
-Notebooks
-^^^^^^^^^
-
-add notebooks here
-
+.. include:: userguide.rst
 
 Citing BuckFit
 --------------

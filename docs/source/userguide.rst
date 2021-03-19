@@ -1,5 +1,5 @@
 Userguides
-==========
+---------- 
 
 These userguides cover building a training set and going through setting up the inputs for the fit and the different parameters which can be set. Following this, there are notebooks which show how to plot the forces, stress tensors, and errors for multiple fits, run a cross-validation, and check the lattice parameters against a reference.
 
@@ -8,7 +8,7 @@ An overview of the capabilities of ``BuckFit``, with example inputs for running 
     buckfit/userguides/README.md
 
 Notebooks
----------
+^^^^^^^^^
 
 Interactive versions of each notebook can be viewed using a `Jupyter notebook <http://jupyter-notebook.readthedocs.io/en/latest/#>`_, or viewed using `nbviewer <https://nbviewer.jupyter.org>`_ by following each `nbviewer <>`_ link.
 
@@ -17,3 +17,16 @@ Interactive versions of each notebook can be viewed using a `Jupyter notebook <h
 #. `plotting <https://github.com/LMMorgan/BuckFit/blob/master/userguides/plotting.ipynb>`_ (`[nbviewer] <https://nbviewer.jupyter.org/github/LMMorgan/BuckFit/blob/master/userguides/plotting.ipynb>`_)
 #. `lattice_parameters <https://github.com/LMMorgan/BuckFit/blob/master/userguides/lattice_parameters.ipynb>`_ (`[nbviewer] <https://nbviewer.jupyter.org/github/LMMorgan/BuckFit/blob/master/userguides/lattice_parameters.ipynb>`_)
 #. `cross-validation <https://github.com/LMMorgan/BuckFit/blob/master/userguides/cross-validation.ipynb>`_ (`[nbviewer] <https://nbviewer.jupyter.org/github/LMMorgan/BuckFit/blob/master/userguides/cross-validation.ipynb>`_)
+
+
+Setup
+----- 
+
+Once the `dependencies <https://buckfit.readthedocs.io/en/latest/installation.html>`_ and ``BuckFit`` has been installed, the code can be run either through a python script or using a `Jupyter notebook <http://jupyter-notebook.readthedocs.io/en/latest/#>`_. An overview of the capabilities of ``BuckFit``, with example code for running the code and varying the fitting parameters ca be found in::
+
+   buckfit/userguides/fitting.ipynb
+   buckfit/userguides/fitting.py
+
+or the Jupyter notebook and python scripy can be found on GitHub `here <https://github.com/LMMorgan/BuckFit/tree/master/userguides>`_.
+
+The notebook or python script must be executed from the main directory and the training set must be located in ``vaspruns`` and formatted as ``vasprunX.xml`` where ``X`` increasese sequentially from 0, i.e. ``vasprun0.xml``, ``vasprun1.xml``, ``vasprun2.xml``, etc.
