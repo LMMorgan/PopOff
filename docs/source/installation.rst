@@ -8,7 +8,7 @@ Here I am going to go through how to install this using ``make`` and ``pip``, wi
 `This link <https://costrouc.gitlab.io/lammps-cython/installation.html#id3>`_ contains the instructions which most of this guide is based on. 
 
 Installing dependencies
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------
 
 As with all great bits of code, you need to install some packages to get things working properly. ``lammps-cython`` is no exception. You will need make sure you have openblas, openmpi, and fftw. These can be installed in the following ways.
 
@@ -27,7 +27,7 @@ For Mac/OSX systems (using `homebrew <https://brew.sh>`_) use::
 **NOTE**: It should also be noted that there are certain libraries that are needed for lamps-python/lammps-cython to run properly. Lammps many still install properly but it will throw up errors later. Common ones to make sure you include are libpng and zlib. Mpich can also be used in place of open-mpi however this is not something I have tested so things may break.
 
 Compiling LAMMPS
-^^^^^^^^^^^^^^^^
+----------------
 
 Download the version of LAMMPS you want, making sure it is a release from March 23rd 2018. Before this date some of the libraries weren't properly supported. You can either ``git clone`` the latest stable version using:: 
 
@@ -60,7 +60,7 @@ When LAMMPS has finished compiling you will need to copy the ``.so`` file to a l
 Following this you may wish to include the python package to allow a lammps-python environment without installing lammps-cython. To do this, in the ``src`` directory, do ``make install-python``. This will only take a second or so to run. If you are installing lammps-cython this step is unnecessary.
 
 Installing lammps-cython
-^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------
 
 Okay, so if LAMMPS compiled properly, then this should be fairly simple. In practice, this is likely the fiddly bit where everything breaks. Lammps-cython also has some prerequisites. These can easily be installed using:: 
 
@@ -101,7 +101,7 @@ Now is a good time to check that your ``LD_LIBRARY_PATH`` is pointing to the cor
 NOTE: This may not stay permanent on workstations or hpcs. To save having to redo this command each time you login add it to your ``.bash_profile``.
 
 Testing
-^^^^^^^
+-------
 
 If this works you should be able to run::
  
@@ -111,7 +111,7 @@ If this works you should be able to run::
 There are example/test notebooks (basic.ipynb and benchmark.ipynb) located `here <https://github.com/costrouc/lammps-cython>`_ under ``Binder Notebooks``, which you can use to test everything is running correctly and also give you an idea of how to use lammps-cython.
 
 Debugging a failed compile
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------
 
 LAMMPS itself should compile fine. If this isn't the case, there are suggestions in the LAMMPS manual you can read through. The most likely part of the process that will fail is the installation of lammps-cython. There are a few possible reasons for this, the most likely being clashes in python environments and MPI clashes.
 

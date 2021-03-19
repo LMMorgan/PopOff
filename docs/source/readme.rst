@@ -6,7 +6,7 @@ BuckFit currently fits to first principles derived forces and stress tensors obt
 .. _training set guide: https://github.com/LMMorgan/BuckFit/blob/master/userguides/trainingsetguide.md
 
 Installation
-============
+------------
 
 Installation of this module requires use of the LAMMPS molecular dynamics code to run and the ``lammps-cython`` interface. Instructions on how to install these can be found on the `installing dependencies <https://buckfit.readthedocs.io/en/latest/installation.html>`_ page.
 
@@ -31,7 +31,7 @@ and install the same way::
     pip install -e .
 
 Tests
-=====
+-----
 
 Tests for each module are conducted using `pytest <https://docs.pytest.org/en/stable/usage.html>`_ and can be found in::
 
@@ -43,15 +43,23 @@ The tests can be run using::
 
 The input for the test calculations is stored in the ``test_files`` directory.
 
-User Guides
-===========
+Userguides
+---------- 
 
-Once the `dependencies <https://buckfit.readthedocs.io/en/latest/installation.html>`_ and ``BuckFit`` is installed ....
+Once the `dependencies <https://buckfit.readthedocs.io/en/latest/installation.html>`_ and ``BuckFit`` has been installed, the code can be run either through a python script or using a `Jupyter notebook <http://jupyter-notebook.readthedocs.io/en/latest/#>`_. An overview of the capabilities of ``BuckFit``, with example code for running the code and varying the fitting parameters ca be found in::
 
+	buckfit/userguides/fitting.ipynb
+
+or the Jupyter notebook can be found on GitHub here
+
+Notebooks
+^^^^^^^^^
+
+add notebooks here
 
 
 Citing BuckFit
-==============
+--------------
 
 This code can be cited as:
 
@@ -59,7 +67,7 @@ Morgan, Lucy M., Clarke, Matt J., Islam, M. Saiful, & Morgan, Benjamin J. (2020)
 
 ### BibTeX::
 
-    @misc{wellock_georgina_l_2019_2536901,
+    @misc{morgan_2020_buckfit,
       author       = {Morgan, Lucy M. and
                       Clarke, Matt J. and
                       Islam, M. Saiful and
