@@ -9,11 +9,8 @@ These userguides cover building a training set and going through setting up the 
 
 ## Notebooks
 
-Each notebook can be viewed using [nbviewer](https://nbviewer.jupyter.org) by following each [nbviewer]() link.
-
-
 Interactive versions of each notebook can be viewed using a [Jupyter notebook](http://jupyter-notebook.readthedocs.io/en/latest/#), or viewed using [nbviewer](https://nbviewer.jupyter.org) by following each [nbviewer]() link.
-- [training_set](https://github.com/LMMorgan/BuckFit/blob/master/userguides/training_set.ipynb)([nbviewer](https://nbviewer.jupyter.org/github/LMMorgan/BuckFit/blob/master/userguides/training_set.ipynb))
+- [training_set](https://github.com/LMMorgan/BuckFit/blob/master/userguides/training_set.ipynb) ([nbviewer](https://nbviewer.jupyter.org/github/LMMorgan/BuckFit/blob/master/userguides/training_set.ipynb))
 - [fitting](https://github.com/LMMorgan/BuckFit/blob/master/userguides/fitting.ipynb) ([nbviewer](https://nbviewer.jupyter.org/github/LMMorgan/BuckFit/blob/master/userguides/fitting.ipynb))
 - [plotting](https://github.com/LMMorgan/BuckFit/blob/master/userguides/plotting.ipynb) ([nbviewer](https://nbviewer.jupyter.org/github/LMMorgan/BuckFit/blob/master/userguides/plotting.ipynb))
 - [lattice_parameters](https://github.com/LMMorgan/BuckFit/blob/master/userguides/lattice_parameters.ipynb) ([nbviewer](https://nbviewer.jupyter.org/github/LMMorgan/BuckFit/blob/master/userguides/lattice_parameters.ipynb))
