@@ -19,7 +19,7 @@ import buckfit
 
 # -- Project information -----------------------------------------------------
 
-project = 'BuckFit'
+project = 'PopOff'
 copyright = '2021, Lucy M. Morgan, Matt J. Clarke, M. Saiful Islam, Benjamin J. Morgan'
 author = 'Lucy M. Morgan, Matt J. Clarke, M. Saiful Islam, Benjamin J. Morgan'
 

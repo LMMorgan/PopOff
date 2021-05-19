@@ -1,4 +1,4 @@
 Need Help
 =========
 
-If you're having trouble please email l.m.morgan@bath.ac.uk
+If you're having trouble please email b.j.morgan@bath.ac.uk

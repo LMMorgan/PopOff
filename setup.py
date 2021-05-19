@@ -1,5 +1,5 @@
 from setuptools import setup
-from buckfit import __version__ as VERSION
+from popoff import __version__ as VERSION
 import re
 
 def remove_img_tags(data):
@@ -9,14 +9,14 @@ def remove_img_tags(data):
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-config = {"description": "Modular potential fitting code for classical MD buckingham potentials",
+config = {"description": "POPOFF: POtential Parameter Optimisation for Force-Fields",
           "long_description": long_description,
           "long_description_content_type": "text/markdown",
-          "name": "BuckFit",
+          "name": "PopOff",
           "author": "Lucy M. Morgan",
           "author_email": "l.m.morgan@bath.ac.uk",
-          "packages": ["buckfit"],    #setuptools.find_packages()
-          "url": "https://github.com/LMMorgan/BuckFit",
+          "packages": ["popoff"],    #setuptools.find_packages()
+          "url": "https://github.com/LMMorgan/PopOff",
           "version": VERSION,
           "install_requires": open( "requirements.txt" ).read(),
           "license": "MIT"}

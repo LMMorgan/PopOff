@@ -3,9 +3,9 @@ import pytest
 import numpy as np
 from pymatgen.io.vasp.outputs import Vasprun
 from mock import Mock, patch
-from buckfit.lammps_data import LammpsData
-from buckfit.atom_types import AtomType
-from buckfit.collate_structures import (collate_structural_data, data_from_vasprun)
+from popoff.lammps_data import LammpsData
+from popoff.atom_types import AtomType
+from popoff.collate_structures import (collate_structural_data, data_from_vasprun)
 
 @pytest.mark.parametrize('supercell', [(['test_string', 2,2]),(1.0),(10),
                                        (np.array([1.0,1.0,1.0])), ([1.0,2,2]),
@@ -14,7 +14,7 @@ def test_typeerror_for_supercell_in_data_from_vasprun(supercell, structure, para
     with pytest.raises(TypeError):
         data_from_vasprun(params, 'test_files/vasprun_small.xml', 0, supercell)
 
-@patch('buckfit.lammps_data.LammpsData.write_lammps_files')
+@patch('popoff.lammps_data.LammpsData.write_lammps_files')
 def test_asserts_for_data_from_vasprun(mock_write, params):
     struct_data = data_from_vasprun(params, 'test_files/vasprun_small.xml', 0, supercell=None)
     assert type(struct_data) == LammpsData
@@ -27,7 +27,7 @@ def test_asserts_for_data_from_vasprun(mock_write, params):
     assert np.allclose(struct_data.atoms[0].forces, np.array([-0.00435576, -0.01932167,  0.01268978]))
     assert struct_data.bonds[0].atom_indices == [13,14]
 
-@patch('buckfit.collate_structures.data_from_vasprun', autospec=True)
+@patch('popoff.collate_structures.data_from_vasprun', autospec=True)
 def test_output_in_collate_structural_data(mock_data_from_vasprun, params, atom_types):
     mock_lammps_data = [Mock(spec=LammpsData), Mock(spec=LammpsData)]
     mock_lammps_data[0].atom_types = atom_types

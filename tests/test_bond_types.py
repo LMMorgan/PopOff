@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-from buckfit.bond_types import BondType
+from popoff.bond_types import BondType
 import pytest
 
 @pytest.fixture

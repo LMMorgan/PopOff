@@ -1,6 +1,6 @@
 
-BuckFit: The buckingham potential fitting software
-==================================================
+POPOFF: POtential Parameter Optimisation for Force-Fields
+=========================================================
 
 .. include:: readme.rst
 

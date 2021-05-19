@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
-from buckfit.atom_types import AtomType
-from buckfit.bond_types import BondType
-from buckfit.bonds import Bond
+from popoff.atom_types import AtomType
+from popoff.bond_types import BondType
+from popoff.bonds import Bond
 import pytest
 import numpy as np
 

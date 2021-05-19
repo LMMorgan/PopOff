@@ -2,12 +2,12 @@
 import pytest
 import numpy as np
 from mock import Mock, patch, call, mock_open
-from buckfit.lammps_data import (LammpsData, abc_matrix, new_basis,
-                                 apply_new_basis, lammps_lattice)
+from popoff.lammps_data import (LammpsData, abc_matrix, new_basis,
+                                apply_new_basis, lammps_lattice)
 from pymatgen.core.lattice import Lattice
 from pymatgen.core.structure import Structure
 
-@patch('buckfit.lammps_data.LammpsData.write_lammps_files')
+@patch('popoff.lammps_data.LammpsData.write_lammps_files')
 def test_init_in_LammpsData(mock_write, atom_types, mock_atoms, mock_bonds, mock_bt):
     cell_lengths = [10.1, 10.2, 10.3]
     tilt_factors = [0.0, 0.0, 0.0]
@@ -25,10 +25,10 @@ def test_init_in_LammpsData(mock_write, atom_types, mock_atoms, mock_bonds, mock
     assert np.allclose(lammps_data.expected_stress_tensors, expected_st)
 
 
-@patch('buckfit.lammps_data.lammps_lattice', autospec=True)    
-@patch('buckfit.lammps_data.types_from_structure', autospec=True)
-@patch('buckfit.lammps_data.atoms_and_bonds_from_structure', autospec=True)
-@patch('buckfit.lammps_data.LammpsData.write_lammps_files')
+@patch('popoff.lammps_data.lammps_lattice', autospec=True)    
+@patch('popoff.lammps_data.types_from_structure', autospec=True)
+@patch('popoff.lammps_data.atoms_and_bonds_from_structure', autospec=True)
+@patch('popoff.lammps_data.LammpsData.write_lammps_files')
 def test_from_structure_in_LammpsData(mock_write, mock_atoms_and_bonds, mock_types, mock_lattice,
                                       mock_lammps_data, params, atom_types, mock_atoms, mock_bonds,
                                       mock_bt): 
@@ -98,7 +98,7 @@ def test_write_lammps_files_in_LammpsData(mock_open, lammps_data):
                   call().__exit__(None, None, None)]
     mock_open.assert_has_calls(calls_open)
 
-@patch('buckfit.lammps_data.lammps.Lammps')
+@patch('popoff.lammps_data.lammps.Lammps')
 def test_initiate_lmp_in_LammpsData(mock_lammps, mock_bt, lammps_data, params):
     bonds_string = lammps_data._bonds_string()
     lammps_data.initiate_lmp(params['cs_springs'])
@@ -147,10 +147,10 @@ def test_apply_new_basis():
                                              [0.28544938, 0.58533677, 0.91332861]]))
     
 
-@patch('buckfit.lammps_data.Structure', return_value='foo')
-@patch('buckfit.lammps_data.apply_new_basis')    
-@patch('buckfit.lammps_data.new_basis')    
-@patch('buckfit.lammps_data.abc_matrix', return_value = np.array([[10, 0.1, 0.2],[0.1, 10, 0.2],[0.1, 0.2, 10]]))
+@patch('popoff.lammps_data.Structure', return_value='foo')
+@patch('popoff.lammps_data.apply_new_basis')    
+@patch('popoff.lammps_data.new_basis')    
+@patch('popoff.lammps_data.abc_matrix', return_value = np.array([[10, 0.1, 0.2],[0.1, 10, 0.2],[0.1, 0.2, 10]]))
 def test_lammps_lattice(mock_matrix, mock_basis, mock_apply, mock_struct):
     structure = Mock(spec=Structure)
     structure.lattice.matrix = np.array([[10, 0.1, 0.2],[0.1, 10, 0.2],[0.1, 0.2, 10]])

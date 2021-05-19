@@ -1,9 +1,9 @@
 #! /usr/bin/env python3
-from buckfit.from_structure import types_from_structure, atoms_and_bonds_from_structure
+from popoff.from_structure import types_from_structure, atoms_and_bonds_from_structure
 from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.core.composition import Composition
-from buckfit.atom_types import AtomType
-from buckfit.bond_types import BondType
+from popoff.atom_types import AtomType
+from popoff.bond_types import BondType
 import pytest
 import numpy as np
 

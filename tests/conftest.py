@@ -2,14 +2,14 @@
 import pytest
 import numpy as np
 from mock import Mock, patch
-from buckfit.potentials import BuckinghamPotential
-from buckfit.atom_types import AtomType
-from buckfit.bond_types import BondType
-from buckfit.atoms import Atom
-from buckfit.bonds import Bond
-from buckfit.potential_parameters import BuckinghamParameter
-from buckfit.lammps_data import LammpsData
-from buckfit.fitting_code import FitModel
+from popoff.potentials import BuckinghamPotential
+from popoff.atom_types import AtomType
+from popoff.bond_types import BondType
+from popoff.atoms import Atom
+from popoff.bonds import Bond
+from popoff.potential_parameters import BuckinghamParameter
+from popoff.lammps_data import LammpsData
+from popoff.fitting_code import FitModel
 from pymatgen.io.vasp.outputs import Vasprun
 
 @pytest.fixture
@@ -124,7 +124,7 @@ def mock_lammps_data(atom_types, mock_atoms, mock_bonds, mock_bt):
     return lammps_data
 
 @pytest.fixture
-@patch('buckfit.lammps_data.LammpsData.write_lammps_files')
+@patch('popoff.lammps_data.LammpsData.write_lammps_files')
 def lammps_data(mock_write, atom_types, mock_atoms, mock_bonds, mock_bt):
     cell_lengths = [10.1, 10.2, 10.3]
     tilt_factors = [0.0, 0.0, 0.0]

@@ -2,11 +2,11 @@
 import pytest
 import numpy as np
 from mock import patch, call, Mock, mock_open, MagicMock
-from buckfit.fitting_code import FitModel
-from buckfit.collate_structures import data_from_vasprun
-from buckfit.cross_validation import (validation_sets, chi_squared_error,
-                                      save_cv_data, run_cross_validation,
-                                      setup_error_dict, plot_cross_validation)
+from popoff.fitting_code import FitModel
+from popoff.collate_structures import data_from_vasprun
+from popoff.cross_validation import (validation_sets, chi_squared_error,
+                                     save_cv_data, run_cross_validation,
+                                     setup_error_dict, plot_cross_validation)
 
 def test_validation_sets_in_cross_validation():
     sets_of_structs = validation_sets(2, 15, 5, np.array([2,4,6,8,10]), seed=7)
@@ -17,7 +17,7 @@ def test_chi_squared_error_in_cross_validation(force_stress):
     np.testing.assert_almost_equal(chi, 0.00223222222)    
 
 @patch("builtins.open", new_callable=mock_open)
-@patch('buckfit.cross_validation.np.savetxt')
+@patch('popoff.cross_validation.np.savetxt')
 def test_save_cv_data_in_cross_validation(mock_savetxt, mock_open, force_stress):
     save_cv_data('test_files', np.array([1,2]), 0.00223222222,
                  force_stress[2],force_stress[0],force_stress[3],force_stress[1])
@@ -32,11 +32,11 @@ def test_save_cv_data_in_cross_validation(mock_savetxt, mock_open, force_stress)
                   call().__exit__(None, None, None)]
     mock_open.assert_has_calls(calls_open)
 
-@patch('buckfit.cross_validation.save_cv_data')
-@patch('buckfit.cross_validation.chi_squared_error', return_value = 0.01)
-@patch('buckfit.cross_validation.FitModel')
-@patch('buckfit.cross_validation.validation_sets')
-@patch('buckfit.cross_validation.fit_out')
+@patch('popoff.cross_validation.save_cv_data')
+@patch('popoff.cross_validation.chi_squared_error', return_value = 0.01)
+@patch('popoff.cross_validation.FitModel')
+@patch('popoff.cross_validation.validation_sets')
+@patch('popoff.cross_validation.fit_out')
 def test_run_cross_validation_in_cross_validation(fit_out, val_set, fitmodel, chi, save, buckingham_potential, params, fit_data):
     head_dir = 'test_files/test_outputs'
     head_out = 'test_files/test_outputs/outputs'
@@ -68,7 +68,7 @@ def test_setup_error_dict_in_cross_validation():
     error_dict = setup_error_dict(head_dir)
     assert error_dict == {'1': 0.1}    
 
-@patch("buckfit.cross_validation.plt")
+@patch("popoff.cross_validation.plt")
 def test_plot_cross_validation_in_cross_validation(mock_plt):
     error_dict = {'1': 0.1, '2': 0.2}
     plot_cross_validation(error_dict, 'test/p1', 'test', xlabel_rotation=50, title='default', save=True)

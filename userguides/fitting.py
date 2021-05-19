@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 
-from lammps_potenial_fitting.fitting_code import FitModel
-import lammps_potenial_fitting.fitting_output as output
-from lammps_potenial_fitting.input_checker import setup_error_checks
+from popoff.fitting_code import FitModel
+import popoff.fitting_output as output
+from popoff.input_checker import setup_error_checks
 from scipy import optimize
 import numpy as np
 

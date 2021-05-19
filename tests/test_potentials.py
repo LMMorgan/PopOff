@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
-from buckfit.potentials import BuckinghamPotential, buckingham_potentials
-from buckfit.atom_types import AtomType
-from buckfit.potential_parameters import BuckinghamParameter
+from popoff.potentials import BuckinghamPotential, buckingham_potentials
+from popoff.atom_types import AtomType
+from popoff.potential_parameters import BuckinghamParameter
 import pytest
 import numpy as np
 

@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-from buckfit.potential_parameters import BuckinghamParameter, buckingham_parameters
+from popoff.potential_parameters import BuckinghamParameter, buckingham_parameters
 import pytest
 import numpy as np
 
