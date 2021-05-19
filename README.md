@@ -1,7 +1,7 @@
 # PopOff: POtential Parameter Optimisation for Force-Fields
 [![PyPI version](https://badge.fury.io/py/PopOff.svg)](https://badge.fury.io/py/PopOff)
 [![DOI](https://zenodo.org/badge/189393218.svg)](https://zenodo.org/badge/latestdoi/189393218)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4311103.svg)](https://doi.org/10.5281/zenodo.4311103)
+%[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4311103.svg)](https://doi.org/10.5281/zenodo.4311103)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ## Prelude
 
