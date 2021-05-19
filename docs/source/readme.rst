@@ -10,7 +10,7 @@ Installation
 
 Installation of this module requires use of the LAMMPS molecular dynamics code to run and the ``lammps-cython`` interface. Instructions on how to install these can be found on the `installing dependencies <https://popoff.readthedocs.io/en/latest/installation.html>`_ page.
 
-The simplest way to install ``BuckFit`` is to use ``pip`` to install from `PyPI <https://pypi.org/project/PopOff/>`_::
+The simplest way to install ``PopOff`` is to use ``pip`` to install from `PyPI <https://pypi.org/project/PopOff/>`_::
 
     pip install PopOff
 
@@ -46,7 +46,7 @@ The input for the test calculations is stored in the ``test_files`` directory.
 
 .. include:: userguide.rst
 
-Citing BuckFit
+Citing PopOff
 --------------
 
 This code can be cited as:
