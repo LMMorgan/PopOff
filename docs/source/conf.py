@@ -24,9 +24,9 @@ copyright = '2021, Lucy M. Morgan, Matt J. Clarke, M. Saiful Islam, Benjamin J. 
 author = 'Lucy M. Morgan, Matt J. Clarke, M. Saiful Islam, Benjamin J. Morgan'
 
 # The short X.Y version
-version = '.'.join( buckfit.__version__.split('.')[:2] )
+version = '.'.join( popoff.__version__.split('.')[:2] )
 # The full version, including alpha/beta/rc tags
-release = buckfit.__version__
+release = popoff.__version__
 
 
 # -- General configuration ---------------------------------------------------
