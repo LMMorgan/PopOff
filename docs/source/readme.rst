@@ -51,18 +51,18 @@ Citing PopOff
 
 This code can be cited as:
 
-Morgan, Lucy M., Clarke, Matt J., Islam, M. Saiful, & Morgan, Benjamin J. (2020). *PopOff* Zenodo. http://doi.org/10.5281/zenodo.4773795
+Morgan, Lucy M., Clarke, Matt J., Islam, M. Saiful, & Morgan, Benjamin J. (2021). *PopOff* Zenodo. http://doi.org/10.5281/zenodo.4773795
 
 ### BibTeX::
 
-    @misc{morgan_2020_popoff,
+    @misc{morgan_2021_popoff,
       author       = {Morgan, Lucy M. and
                       Clarke, Matt J. and
                       Islam, M. Saiful and
                       Morgan, Benjamin J.},
       title        = {{POPOFF: POtential Parameter Optimisation for Force-Fields}},
-      month        = dec,
-      year         = 2020,
+      month        = may,
+      year         = 2021,
       doi          = {10.5281/zenodo.4773795},
       url          = {10.5281/zenodo.4773795}
     }
