@@ -68,4 +68,5 @@ Differential evolution is a stochastic population-based method, where at each pa
 
 # Acknowledgements
 L. M. M. acknowledges support from the Faraday Institution (faraday.ac.uk; EP/S003053/1: Grant No. FIRG003). Additional support was received from the Royal Society (UF130329, URF``\``R``\``191006). 
+
 # References
