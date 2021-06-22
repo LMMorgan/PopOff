@@ -153,6 +153,25 @@ class LammpsData():
             return_str += '{}\n'.format(bond.input_string())
         return_str += '\n'
         return return_str
+    
+    def _check_large_tilt(self):
+        """
+        Checks if `box tilt large` is requied.
+
+        Args:
+            None
+
+        Returns:
+            bool: True if tilt factor is larger than lammps threshold.
+        """
+        large_tilt = []
+        xy, xz, yz = self.tilt_factors
+        x,y,_ = self.cell_lengths
+
+        large_tilt.append(-x/2<xy<x/2)
+        large_tilt.append(-x/2<xz<y/2)
+        large_tilt.append(-x/2<yz<y/2)
+        return not all(large_tilt)
         
     def input_string(self, title='title'):
         """
@@ -245,8 +264,13 @@ class LammpsData():
             :obj:`lmp`: Lammps system object with structure and specified commands implemented.
         """
         lmp = lammps.Lammps(units='metal', style = 'full', args=['-log', 'none', '-screen', 'none'])
-        lmp.command('read_data {}'.format(self.file_name))
+        
+        large_tilt = self._check_large_tilt()
+        if large_tilt:
+            lmp.command('box tilt large')
 
+        lmp.command('read_data {}'.format(self.file_name))
+        
         lmp.command('group cores type {}'.format(self.type_core()))
         if len(self.bond_types) != 0:
             lmp.command('group shells type {}'.format(self.type_shell()))
