@@ -147,7 +147,11 @@ class FitModel():
                 instance.command('minimize 1e-25 1e-3 3000 10000')
                 instance.command('unfix 1')
             instance.command('run 0')
-            structure_forces.append(instance.system.forces[ld.core_mask()])
+            nlocal = instance.extract_global("nlocal", 0)
+            f = instance.extract_atom("f",3)
+            forces = np.array([np.array([f[i][0], f[i][1], f[i][2]]) for i in range(nlocal)])
+            structure_forces.append(forces[ld.core_mask()])
+            #structure_forces.append(instance.system.forces[ld.core_mask()])
             structure_stresses.append(self.convert_stresses_to_vasp(instance))
         ip_forces = np.concatenate(structure_forces, axis=0)
         ip_stresses = np.concatenate(structure_stresses, axis=0)
@@ -163,7 +167,7 @@ class FitModel():
         Returns:
             np.array: stress tenosrs for the lammps instance (single structure).
         """
-        thermo_press = lmp.extract_compute("thermo_press", 0, 1)
+        thermo_press = instance.extract_compute("thermo_press", 0, 1)
         ip_stresses = np.array([thermo_press[i]/1000 for i in range(0,6,1)])
         ip_stresses[5], ip_stresses[4] = ip_stresses[4], ip_stresses[5]
         return ip_stresses

@@ -36,11 +36,8 @@ def test_run_relaxation_in_lattice_parameters(fitmodel, get_lattice, diffs, save
     ref = np.array([10.1, 10.0, 10.2, 1030.2])
     fitmodel.collect_info = MagicMock(return_value=fit_data)
     lmp = Mock(lammps())
-    lmp.extract_box = MagicMock(return_value = ([0.0,0.0,0.0], [10.0, 10.0, 10.0], 0.0, 0.0, 0.0, [1,1,1], 0)
-    lmp.get_thermo("vol") = MagicMock(return_value= 1000.0)
-
-
-    
+    lmp.extract_box = MagicMock(return_value = ([0.0,0.0,0.0], [10.0, 10.0, 10.0], 0.0, 0.0, 0.0, [1,1,1], 0))
+    lmp.get_thermo = MagicMock(return_value= 1000.0)
     savetxt.return_value = None
     get_lattice.return_value = [lmp]
     diffs.return_value = np.zeros((4))

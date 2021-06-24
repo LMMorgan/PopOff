@@ -53,7 +53,7 @@ def test_expected_stresses_in_FitModel(fit_data):
     expected_stresses = fit_data.expected_stresses()
     assert np.allclose(expected_stresses, np.array([1,2,3,4,5,6]))
     
-@patch('popoff.lammps_data.lammps.Lammps')
+@patch('popoff.lammps_data.lammps')
 def test_set_charges_in_FitModel(mock_lammps, fit_data):
     fit_data._set_charges(mock_lammps)
     calls_command = [call.command('set type 1 charge 1.000000'),
@@ -62,22 +62,24 @@ def test_set_charges_in_FitModel(mock_lammps, fit_data):
                      call.command('set type 3 charge -2.000000')]
     mock_lammps.assert_has_calls(calls_command)
                      
-@patch('popoff.lammps_data.lammps.Lammps')
+@patch('popoff.lammps_data.lammps')
 def test_set_springs_in_FitModel(mock_lammps, fit_data):
     fit_data._set_springs(mock_lammps)
     calls_command = [call.command('bond_coeff foo')]
     mock_lammps.assert_has_calls(calls_command)
     
-@patch('popoff.lammps_data.lammps.Lammps')
+@patch('popoff.lammps_data.lammps')
 def test_set_potentials_in_FitModel(mock_lammps, fit_data):
     fit_data._set_potentials(mock_lammps)
     calls_command = [call.command('pair_coeff 1 3 1.0000 0.1000 0.0000')]
     mock_lammps.assert_has_calls(calls_command)
     
-@patch('popoff.lammps_data.lammps.Lammps')
+@patch('popoff.lammps_data.lammps')
 def test_calls_for_get_forces_and_stresses_in_FitModel(mock_lammps, fit_data):
     fit_data.get_forces_and_stresses()
-    calls_command = [call(units='metal',style='full',args=['-log','none','-screen','none']),
+    calls_command = [call(),
+                     call().command('units metal'),
+                     call().command('atom_style full'),
                      call().command('read_data test_files/test_coords.lmp'),
                      call().command('group cores type 1 2 3'),
                      call().command('group shells type 3'),
@@ -90,16 +92,18 @@ def test_calls_for_get_forces_and_stresses_in_FitModel(mock_lammps, fit_data):
                      call().command('set type 2 charge 3.000000'),
                      call().command('set type 3 charge -0.000000'),
                      call().command('set type 3 charge -2.000000'),
-                     call().run(0),]
+                     call().command('run 0'),]
 #                      call().system.forces.__getitem__([True, True, True, False]),
 #                      call().thermo.computes.__getitem__('thermo_press')]
     mock_lammps.assert_has_calls(calls_command)
 
-@patch('popoff.lammps_data.lammps.Lammps')
+@patch('popoff.lammps_data.lammps')
 def test_calls_for_convert_stresses_to_vasp_in_FitModel(mock_lammps, fit_data):
     instances = [lmp.initiate_lmp(fit_data.cs_springs) for lmp in fit_data.lammps_data]
     ip_stresses = fit_data.convert_stresses_to_vasp(instances[0])
-    calls_command = [call(units='metal',style='full',args=['-log','none','-screen','none']),
+    calls_command = [call(),
+                     call().command('units metal'),
+                     call().command('atom_style full'),
                      call().command('read_data test_files/test_coords.lmp'),
                      call().command('group cores type 1 2 3'),
                      call().command('group shells type 3'),
@@ -228,11 +232,23 @@ def test_chi_squared_error(init_pot, get_fs, expect_f, expect_s,fit_data, labels
      
 @patch('popoff.fitting_code.FitModel._set_charges') 
 @patch('popoff.fitting_code.FitModel._set_potentials')          
-@patch('popoff.lammps_data.lammps.Lammps')
+@patch('popoff.lammps_data.lammps')
 def test_get_lattice_params_in_FitModel(mock_lammps, set_pot, set_q, fit_data):
     instances = [lmp.initiate_lmp(fit_data.cs_springs) for lmp in fit_data.lammps_data]
     fit_data.get_lattice_params()
-    calls_command = [call(units='metal', style='full', args=['-log', 'none', '-screen', 'none']),
+    calls_command = [call(),
+                     call().command('units metal'),
+                     call().command('atom_style full'),
+                     call().command('read_data test_files/test_coords.lmp'),
+                     call().command('group cores type 1 2 3'),
+                     call().command('group shells type 3'),
+                     call().command('pair_style buck/coul/long 10.0'),
+                     call().command('pair_coeff * * 0 1 0'),
+                     call().command('kspace_style ewald 1e-6'),
+                     call().command('min_style cg'),
+                     call(),
+                     call().command('units metal'),
+                     call().command('atom_style full'),
                      call().command('read_data test_files/test_coords.lmp'),
                      call().command('group cores type 1 2 3'),
                      call().command('group shells type 3'),
