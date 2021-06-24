@@ -1,6 +1,6 @@
 import numpy as np
 from popoff.from_structure import types_from_structure, atoms_and_bonds_from_structure
-import lammps
+from lammps import lammps
 from pymatgen.core.lattice import Lattice
 from pymatgen.core.structure import Structure
 
@@ -244,7 +244,9 @@ class LammpsData():
         Returns:
             :obj:`lmp`: Lammps system object with structure and specified commands implemented.
         """
-        lmp = lammps.Lammps(units='metal', style = 'full', args=['-log', 'none', '-screen', 'none'])
+        lmp = lammps() 
+        lmp.command('units metal')
+        lmp.command('atom_style full')
         lmp.command('read_data {}'.format(self.file_name))
 
         lmp.command('group cores type {}'.format(self.type_core()))

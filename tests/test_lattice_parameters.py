@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 import pytest
 import numpy as np
-import lammps
+from lammps import lammps
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib import gridspec
@@ -35,9 +35,12 @@ def test_run_relaxation_in_lattice_parameters(fitmodel, get_lattice, diffs, save
     head_out = 'test_files/test_outputs/outputs'   
     ref = np.array([10.1, 10.0, 10.2, 1030.2])
     fitmodel.collect_info = MagicMock(return_value=fit_data)
-    lmp = Mock(lammps.Lammps)
-    lmp.box.lengths = MagicMock(return_value = [10.0, 10.0, 10.0])
-    lmp.box.volume = MagicMock(return_value= 1000.0)
+    lmp = Mock(lammps())
+    lmp.extract_box = MagicMock(return_value = ([0.0,0.0,0.0], [10.0, 10.0, 10.0], 0.0, 0.0, 0.0, [1,1,1], 0)
+    lmp.get_thermo("vol") = MagicMock(return_value= 1000.0)
+
+
+    
     savetxt.return_value = None
     get_lattice.return_value = [lmp]
     diffs.return_value = np.zeros((4))
