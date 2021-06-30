@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 import pytest
 import numpy as np
+from lammps import lammps
 from mock import Mock, patch, call, mock_open, MagicMock
 from popoff.fitting_code import FitModel
 from popoff.lammps_data import LammpsData
@@ -74,28 +75,23 @@ def test_set_potentials_in_FitModel(mock_lammps, fit_data):
     calls_command = [call.command('pair_coeff 1 3 1.0000 0.1000 0.0000')]
     mock_lammps.assert_has_calls(calls_command)
     
-@patch('popoff.lammps_data.lammps')
-def test_calls_for_get_forces_and_stresses_in_FitModel(mock_lammps, fit_data):
+def test_calls_for_get_forces_and_stresses_in_FitModel(fit_data):
+    mock_instance = Mock(spec=lammps())
+    mock_instance.extract_global = Mock(return_value = 4)
+    mock_instance.extract_atom = Mock(return_value = np.array([[1,1,1],[2,2,2],[3,3,3],[4,4,4]]))
+    for ld in fit_data.lammps_data:
+        ld.initiate_lmp = Mock(return_value=mock_instance)
+    fit_data.convert_stresses_to_vasp = Mock(return_value = np.array([1,2,3,4,5,6]))
     fit_data.get_forces_and_stresses()
-    calls_command = [call(),
-                     call().command('units metal'),
-                     call().command('atom_style full'),
-                     call().command('read_data test_files/test_coords.lmp'),
-                     call().command('group cores type 1 2 3'),
-                     call().command('group shells type 3'),
-                     call().command('pair_style buck/coul/long 10.0'),
-                     call().command('pair_coeff * * 0 1 0'),
-                     call().command('kspace_style ewald 1e-6'),
-                     call().command('min_style cg'),
-                     call().command('pair_coeff 1 3 1.0000 0.1000 0.0000'),
-                     call().command('set type 1 charge 1.000000'),
-                     call().command('set type 2 charge 3.000000'),
-                     call().command('set type 3 charge -0.000000'),
-                     call().command('set type 3 charge -2.000000'),
-                     call().command('run 0'),]
-#                      call().system.forces.__getitem__([True, True, True, False]),
-#                      call().thermo.computes.__getitem__('thermo_press')]
-    mock_lammps.assert_has_calls(calls_command)
+    calls_command = [call.command('pair_coeff 1 3 1.0000 0.1000 0.0000'),
+                     call.command('set type 1 charge 1.000000'),
+                     call.command('set type 2 charge 3.000000'),
+                     call.command('set type 3 charge -0.000000'),
+                     call.command('set type 3 charge -2.000000'),
+                     call.command('run 0'),
+                     call.extract_global('nlocal', 0),
+                     call.extract_atom('f', 3),]
+    mock_instance.assert_has_calls(calls_command)
 
 @patch('popoff.lammps_data.lammps')
 def test_calls_for_convert_stresses_to_vasp_in_FitModel(mock_lammps, fit_data):
@@ -111,8 +107,6 @@ def test_calls_for_convert_stresses_to_vasp_in_FitModel(mock_lammps, fit_data):
                      call().command('pair_coeff * * 0 1 0'),
                      call().command('kspace_style ewald 1e-6'),
                      call().command('min_style cg'),]
-#                      call().thermo.computes.__getitem__('thermo_press'),
-#                      call().thermo.computes.__getitem__().vector.__truediv__(1000)]
     mock_lammps.assert_has_calls(calls_command)
     
 def test_charge_reset_in_FitModel(fit_data):
