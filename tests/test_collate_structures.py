@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 import pytest
 import numpy as np
-from pymatgen.io.vasp.outputs import Vasprun
 from mock import Mock, patch
 from popoff.lammps_data import LammpsData
 from popoff.atom_types import AtomType

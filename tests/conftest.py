@@ -51,7 +51,7 @@ def potentials():
 
 @pytest.fixture
 def structure():
-    vasprun = Vasprun('test_files/test_vasprun.xml')
+    vasprun = Vasprun('test_files/test_vasprun.xml', parse_potcar_file=False)
     structure = vasprun.ionic_steps[0]['structure']
     structure.add_site_property('forces', np.array(vasprun.ionic_steps[0]['forces']))
     return structure
