@@ -32,7 +32,7 @@ def data_from_vasprun(params, filename, i, supercell):
     Returns:
         :obj:`LammpsData`:  LammpsData objects containing atom_types (list(:obj:`AtomType`)), bond_types (list(:obj:`BondType`)), atoms (list(:obj:`Atom`)), bonds (list(:obj:`Bond`)), cell_lengths (list(float)), tilt_factor (list(float)), file_name (str), and expected_stress_tensors (np.array).
         """
-    vasprun = Vasprun(filename)
+    vasprun = Vasprun(filename, parse_potcar_file=False)
     structure = vasprun.ionic_steps[0]['structure']
     structure.add_site_property('forces', np.array(vasprun.ionic_steps[0]['forces']))
     stressT = vasprun.ionic_steps[0]['stress']

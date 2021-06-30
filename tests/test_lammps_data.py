@@ -98,11 +98,13 @@ def test_write_lammps_files_in_LammpsData(mock_open, lammps_data):
                   call().__exit__(None, None, None)]
     mock_open.assert_has_calls(calls_open)
 
-@patch('popoff.lammps_data.lammps.Lammps')
+@patch('popoff.lammps_data.lammps')
 def test_initiate_lmp_in_LammpsData(mock_lammps, mock_bt, lammps_data, params):
     bonds_string = lammps_data._bonds_string()
     lammps_data.initiate_lmp(params['cs_springs'])
-    calls_command = [call(units='metal', style='full', args=['-log', 'none', '-screen', 'none']),
+    calls_command = [call(),
+                     call().command('units metal'),
+                     call().command('atom_style full'),
                      call().command(f'read_data {lammps_data.file_name}'),
                      call().command(f'group cores type {lammps_data.type_core()}'),
                      call().command(f'group shells type {lammps_data.type_shell()}'),

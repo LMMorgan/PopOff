@@ -1,6 +1,6 @@
 import numpy as np
 import os
-import lammps
+from lammps import lammps
 from popoff.collate_structures import collate_structural_data
 import popoff.potentials as pot
 
@@ -132,7 +132,7 @@ class FitModel():
             None
             
         Returns:
-				np.array, np.array: x,y,z forces on each atom for each instance; stress tenosrs for each instance (each structure).
+            np.array, np.array: x,y,z forces on each atom for each instance; stress tenosrs for each instance (each structure).
         """    
         instances = [lmp.initiate_lmp(self.cs_springs) for lmp in self.lammps_data]
         ip_forces = np.zeros(self.expected_forces().shape)
@@ -146,8 +146,12 @@ class FitModel():
                 instance.command('fix 1 cores setforce 0.0 0.0 0.0')
                 instance.command('minimize 1e-25 1e-3 3000 10000')
                 instance.command('unfix 1')
-            instance.run(0)
-            structure_forces.append(instance.system.forces[ld.core_mask()])
+            instance.command('run 0')
+            nlocal = instance.extract_global("nlocal", 0)
+            f = instance.extract_atom("f",3)
+            forces = np.array([np.array([f[i][0], f[i][1], f[i][2]]) for i in range(nlocal)])
+            structure_forces.append(forces[ld.core_mask()])
+            #structure_forces.append(instance.system.forces[ld.core_mask()])
             structure_stresses.append(self.convert_stresses_to_vasp(instance))
         ip_forces = np.concatenate(structure_forces, axis=0)
         ip_stresses = np.concatenate(structure_stresses, axis=0)
@@ -163,7 +167,8 @@ class FitModel():
         Returns:
             np.array: stress tenosrs for the lammps instance (single structure).
         """
-        ip_stresses = instance.thermo.computes['thermo_press'].vector / 1000
+        thermo_press = instance.extract_compute("thermo_press", 0, 1)
+        ip_stresses = np.array([thermo_press[i]/1000 for i in range(0,6,1)])
         ip_stresses[5], ip_stresses[4] = ip_stresses[4], ip_stresses[5]
         return ip_stresses
     

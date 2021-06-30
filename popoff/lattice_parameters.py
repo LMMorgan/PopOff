@@ -1,10 +1,10 @@
 from popoff.fitting_code import FitModel
+import popoff.fitting_output as fit_out
 import numpy as np
 import os
 import json
 import glob
-import lammps
-import popoff.fitting_output as fit_out
+from lammps import lammps
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import seaborn as sns
@@ -65,7 +65,9 @@ def run_relaxation(structures, directory, output_directory, params, labels, ref_
             fit_data = FitModel.collect_info(params, [structure], supercell=supercell)
             lmp = get_lattice(fit_data, potentials.values(), potentials.keys())
             lammps = lmp[0]
-            lattice_params = np.array([lammps.box.lengths[0], lammps.box.lengths[1], lammps.box.lengths[2], lammps.box.volume])
+            boxlo,boxhi,xy,yz,xz,periodicity,box_change = lammps.extract_box()
+            lengths = np.array(boxhi)-np.array(boxlo)
+            lattice_params = np.array([lengths[0], lengths[1], lengths[2], lammps.get_thermo("vol")])
             calculated_parameters.append(lattice_params)
             diffs = differences(lattice_params, ref_DFT)
             percent_difference.append(diffs)
