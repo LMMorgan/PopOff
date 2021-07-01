@@ -8,7 +8,7 @@ PopOff currently fits to first principles derived forces and stress tensors obta
 Installation
 ------------
 
-Installation of this module requires use of the LAMMPS molecular dynamics code to run and the ``lammps-cython`` interface. Instructions on how to install these can be found on the `installing dependencies <https://popoff.readthedocs.io/en/latest/installation.html>`_ page.
+Installation of this module requires use of the LAMMPS molecular dynamics code to run. Instructions on how to install these can be found on the `LAMMPS installation documentation <https://docs.lammps.org/Python_install.html>`_ page.
 
 The simplest way to install ``PopOff`` is to use ``pip`` to install from `PyPI <https://pypi.org/project/PopOff/>`_::
 
@@ -19,7 +19,7 @@ Alternatively, you can download the latest release from `GitHub <https://github.
     cd popoff
     pip install -e .
 
-which installs an editable (-e) version of pyscses in your userspace.
+which installs an editable (-e) version of PopOff in your userspace.
 
 Or clone the latest version from `GitHub <https://github.com/LMMorgan/PopOff>`_ with::
 
@@ -41,7 +41,7 @@ The tests can be run using::
 
 	pytest
 
-The input for the test calculations is stored in the ``test_files`` directory.
+The input for the test calculations is stored in the ``test_files`` directory. Please make sure to unzip the vasprun.xml files for the tests to run correctly. This can be done using ``gzip <file>``.
 
 
 .. include:: userguide.rst
