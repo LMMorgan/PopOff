@@ -36,7 +36,7 @@ This is done using a `make` command. Here you can also chose which mode to use, 
 make mode=shlib mpi -j4 LMP_INC="-DLAMMPS_EXCEPTIONS -DLAMMPS_GZIP -DLAMMPS_MEMALIGN=64 -DBUILD_SHARED_LIBS=on"
 ```
 
-If you only want to install the python interface package, you can do this using:
+To install the python interface package, you can do this using:
 
 ```
 make install-python
