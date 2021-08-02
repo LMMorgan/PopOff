@@ -1,6 +1,5 @@
 import numpy as np
 from popoff.from_structure import types_from_structure, atoms_and_bonds_from_structure
-from mpi4py import MPI
 from lammps import lammps
 from pymatgen.core.lattice import Lattice
 from pymatgen.core.structure import Structure
@@ -264,7 +263,7 @@ class LammpsData():
         Returns:
             :obj:`lmp`: Lammps system object with structure and specified commands implemented.
         """
-        lmp = lammps(name='mpi')
+        lmp = lammps()
         
         lmp.command('units metal')
         lmp.command('atom_style full')
