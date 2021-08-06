@@ -102,7 +102,7 @@ conda install -n <yourenvname> -c conda-forge pymatgen
 LAMMPS with the python interface can then be [installed through conda](https://anaconda.org/conda-forge/lammps) using:
 
 ```
-conda install -c conda-forge/label/gcc7 lammps
+conda install -n <yourenvname> -c conda-forge/label/gcc7 lammps
 ```
 
 NOTE: On the current Archer2 system, the conda init may not pass into the submission script correctly. If when submitting you get a location error, then add the conda init to your submission script.
