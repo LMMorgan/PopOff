@@ -60,7 +60,7 @@ Morgan, Lucy M., Clarke, Matt J., Islam, M. Saiful, & Morgan, Benjamin J. (2021)
                       Clarke, Matt J. and
                       Islam, M. Saiful and
                       Morgan, Benjamin J.},
-      title        = {{POPOFF: POtential Parameter Optimisation for Force-Fields}},
+      title        = {{PopOff: POtential Parameter Optimisation for Force-Fields}},
       month        = may,
       year         = 2021,
       doi          = {10.5281/zenodo.4773795},

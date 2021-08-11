@@ -61,9 +61,6 @@ NOTE: This may not stay permanent on workstations or hpcs. To save having to red
 
 
 
-
-
-
 ## Compiling LAMMPS and the code in a conda environment (for Archer2)
 Download the relivant version of Anaconda from [here](https://docs.anaconda.com/anaconda/install/index.html). For Archer2, this will be the [Linux installer](https://docs.anaconda.com/anaconda/install/linux/). Upload the installer to the HPC to a working directory that has access to the compute nodes. For Archer2 this will be in the `/work/<project-code>/<project-code>/<username/` directory. Once in the correct place run:
 
@@ -104,6 +101,9 @@ LAMMPS with the python interface can then be [installed through conda](https://a
 ```
 conda install -n <yourenvname> -c conda-forge/label/gcc7 lammps
 ```
+
+
+
 
 NOTE: On the current Archer2 system, the conda init may not pass into the submission script correctly. If when submitting you get a location error, then add the conda init to your submission script.
 
