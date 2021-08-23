@@ -57,7 +57,7 @@ def run_fit(sets_of_structures, params, labels, bounds, supercell=None, seed=Non
         setup_error_checks(labels, bounds, fit_data, params)
 
         fit_output = optimize.differential_evolution(fit_data.chi_squared_error, bounds=bounds, popsize=25,
-                                           args=([labels]), maxiter=5, updating='deferred',
+                                           args=([labels]), maxiter=1000, updating='deferred',
                                            disp=True, init='latinhypercube', workers=-1, seed=seed)
         dft_forces, ip_forces, dft_stresses, ip_stresses = output.extract_stresses_and_forces(fit_data, fit_output.x, labels)
         local_struct_dir = '-'.join([ '{}'.format(struct+1) for struct in structs])
@@ -68,28 +68,46 @@ def run_fit(sets_of_structures, params, labels, bounds, supercell=None, seed=Non
 if __name__ == '__main__':
 
     params = {}
-    params['core_shell'] = { 'Li': False, 'Ni': False, 'O': True }
-    params['charges'] = {'Li': +1.0,
-                         'Ni': +3.0,
-                         'O': {'core':  -2.0,
-                               'shell': 0.0}} 
-    params['masses'] = {'Li': 6.941,
-                        'Ni': 58.6934,
-                        'O': {'core': 14.3991,
-                              'shell': 1.5999} }
-    params['potentials'] = {'Li-O': [663.111, 0.119, 0.0],
-                            'Ni-O': [1393.540, 0.218, 0.000],
-                            'O-O': [25804.807, 0.284, 0.0]}
-    params['cs_springs'] = {'O-O' : [20.0, 0.0]}
+    params['core_shell'] = { 'Na': False, 'O': True, 'Cl': True }
+    params['charges'] = {'Na': +1.0,
+                         'O': {'core':  -2.0, 'shell': 0.0},
+                         'Cl': {'core':  -1.0, 'shell': 0.0}}
+    params['masses'] = {'Na': 22.9898,
+                        'O': {'core': 14.3991, 'shell': 1.5999},
+                        'Cl': {'core': 31.905, 'shell': 3.545}}
+    params['potentials'] = {'Na-Na': [1788.19, 0.159, 0.0],
+                            'Na-Cl': [1170.41, 0.315, 0.0],
+                            'Na-O': [588.38, 0.338, 0.0],
+                            'Cl-Cl': [1227.20, 0.3210, 14.53],
+                            'Cl-O': [8286.91, 0.2590, 62.20],
+                            'O-O': [22764.30, 0.1490, 13.19]}
+    params['cs_springs'] = {'Cl-Cl' : [593.716, 0.0],
+                            'O-O': [29.38, 0.0]}
 
-    labels = ['dq_O', 'q_scaling', 'O-O spring', 'Li_O_a', 'Li_O_rho', 'Ni_O_a', 'Ni_O_rho', 'O_O_a', 'O_O_rho']
-    bounds = [(0.01, 4), (0.3,1.0), (10.0,150.0), (100.0,50000.0), (0.01,1.0), (100.0,50000.0), (0.01,1.0), (150.0,50000.0), (0.01,1.0)]
+    labels = ['q_scaling',
+              'dq_Cl', 'dq_O',
+              'Cl-Cl spring', 'O-O spring',
+              'Na_Na_a', 'Na_Na_rho',
+              'Na_Cl_a', 'Na_Cl_rho',
+              'Na_O_a', 'Na_O_rho',
+              'Cl_Cl_a', 'Cl_Cl_rho',
+              'Cl_O_a', 'Cl_O_rho',
+              'O_O_a', 'O_O_rho']
+    bounds = [(0.3,1.0),
+              (0.01, 2), (0.01,4),
+              (10.0,100.0), (10.0,100.0),
+              (100.0,50000.0), (0.01,1.0),
+              (100.0,50000.0), (0.01,1.0),
+              (100.0,50000.0), (0.01,1.0),
+              (100.0,50000.0), (0.01,1.0),
+              (100.0,50000.0), (0.01,1.0),
+              (100.0,50000.0), (0.01,1.0)]
 
     structures = 7 #Total number of structures in the training set
-    structures_to_fit = 1 #Number of structures you wish to fit to
+    structures_to_fit = 7 #Number of structures you wish to fit to
     fits = 1 #Number of fits to run
-    head_directory_name = 'results/test_fit'
+    head_directory_name = 'results/Na3OCl/'.format(structures_to_fit)
 
     sets_of_structures = random_set_of_structures(fits, structures, structures_to_fit, seed=7)
 
-    run_fit(sets_of_structures, params, labels, bounds)#, supercell=[2,2,2], seed=7)
+    run_fit(sets_of_structures, params, labels, bounds)
