@@ -2,6 +2,7 @@
 [![PyPI version](https://badge.fury.io/py/PopOff.svg)](https://badge.fury.io/py/PopOff)
 [![DOI](https://zenodo.org/badge/189393218.svg)](https://zenodo.org/badge/latestdoi/189393218)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+![Documentation Status](https://readthedocs.org/projects/popoff/badge/?version=latest)](https://popoff.readthedocs.io/en/latest//?badge=latest)
 
 ## Overview
 PopOff currently fits Coulomb-Buckingham type interatomic potentials for classical potential-based molecular dynamics (MD). This is a modular fitting code, allowing increased control over several important aspects of the potenial. You can choose between fitting a formal charge, partial charge, or fitting a charge scaling factor. You can choose to fit a rigid ion model or a core-shell model. If choosing to fit a core-shell model, you are able to fix or fit the charge separation over the core and shell components and the spring constant. You can also selectively fix, fit, or set to zero the individual buckingham parameters.
